@@ -10,4 +10,14 @@ export class AppController {
   getData() {
     return this.appService.getData();
   }
+
+  @Get('health')
+  getHealth() {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      service: 'fcc-backend',
+      message: 'Service is UPPPP',
+    };
+  }
 }
