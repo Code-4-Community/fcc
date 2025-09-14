@@ -17,7 +17,9 @@ export class AppController {
       status: 'ok',
       timestamp: new Date().toISOString(),
       service: 'fcc-backend',
-      message: 'Service is UPPPP',
+      message: 'Real-time hot reload test!',
+      version: '3.0',
+      test: 'live-update',
     };
   }
 }

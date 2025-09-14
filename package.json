@@ -17,7 +17,7 @@
     "migration:create": "npm run typeorm -- migration:create apps/backend/src/migrations/$npm_config_name",
     "test": "jest",
     "start:dev": "npx nx serve backend",
-    "start:dev:docker": "npx nodemon --watch apps/backend/src --ext ts --exec \"ts-node --project apps/backend/tsconfig.app.json -r tsconfig-paths/register apps/backend/src/main.ts\"",
+    "start:dev:docker": "npx nodemon --watch apps/backend/src --ext ts --legacy-watch --poll-interval 1000 --exec \"ts-node --project apps/backend/tsconfig.app.json -r tsconfig-paths/register apps/backend/src/main.ts\"",
     "docker:build": "docker-compose -f docker-compose.dev.yml build",
     "docker:up": "docker-compose -f docker-compose.dev.yml up -d",
     "docker:up:dev": "docker-compose -f docker-compose.dev.yml up -d postgres adminer backend-dev",
