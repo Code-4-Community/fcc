@@ -180,9 +180,6 @@ yarn docker:migrate:dev
 
 # Alternative: Run migrations on production backend (not recommended for dev)
 yarn docker:migrate
-
-# Run migrations in isolated container (advanced)
-yarn docker:migrate:oneoff
 ```
 
 ### Why One-off Migrations Are Powerful
@@ -228,9 +225,6 @@ yarn docker:build
 
 # Clean up everything (containers, volumes, networks)
 yarn docker:clean
-
-# Validate Docker setup
-yarn docker:validate
 ```
 
 ### Getting Inside Containers
@@ -292,9 +286,6 @@ yarn docker:clean
 **If regular migrations fail, try:**
 
 ```bash
-# Use isolated one-off container (most reliable)
-yarn docker:migrate:oneoff
-
 # Or restart services and try again
 yarn docker:restart
 yarn docker:migrate:dev
