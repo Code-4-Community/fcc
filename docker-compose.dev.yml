@@ -1,0 +1,135 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fcc_dev
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - fcc-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fcc_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # NestJS Backend
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      target: runtime
+    restart: unless-stopped
+    environment:
+      NX_DB_HOST: postgres
+      NX_DB_PORT: 5432
+      NX_DB_USERNAME: postgres
+      NX_DB_PASSWORD: postgres
+      NX_DB_DATABASE: fcc_dev
+      
+      NODE_ENV: development
+      PORT: 3000
+      
+      # JWT and Auth (add secrets in prod)
+      JWT_SECRET: dev-secret-change-in-prod
+      
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - fcc-network
+    volumes:
+      # For development: mount source code for hot reload (optional)
+      # - ../../apps/backend/src:/app/src:ro
+      # - ../../apps/backend/dist:/app/dist
+      - backend_logs:/app/logs
+    # health check without wget dependency
+    # healthcheck:
+    #   test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api || exit 1"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 60s
+
+  # NestJS Backend - Development
+  backend-dev:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      target: build
+    restart: unless-stopped
+    environment:
+      NX_DB_HOST: postgres
+      NX_DB_PORT: 5432
+      NX_DB_USERNAME: postgres
+      NX_DB_PASSWORD: postgres
+      NX_DB_DATABASE: fcc_dev
+      
+      NODE_ENV: development
+      PORT: 3001
+      
+      # JWT and Auth (add secrets in prod)
+      JWT_SECRET: dev-secret-change-in-prod
+      
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - fcc-network
+    volumes:
+      - ./apps:/app/apps
+      - ./nx.json:/app/nx.json
+      - ./tsconfig.base.json:/app/tsconfig.base.json
+      - ./package.json:/app/package.json
+      - backend_logs:/app/logs
+    command: sh -c "cd /app && npm run start:dev:docker"
+
+  # Adminer - Database Admin Tool
+  adminer:
+    image: adminer:4-standalone
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - fcc-network
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: lucas
+
+volumes:
+  postgres_data:
+    driver: local
+  backend_logs:
+    driver: local
+
+networks:
+  fcc-network:
+    driver: bridge
+
+  # E2E Testing (soon)
+  # e2e:
+  #   build:
+  #     context: .
+  #     dockerfile: apps/frontend-e2e/Dockerfile
+  #   depends_on:
+  #     - backend
+  #     - frontend
+  #   networks:
+  #     - fcc-network
+  #   volumes:
+  #     - ./apps/frontend-e2e/cypress/videos:/app/cypress/videos
+  #     - ./apps/frontend-e2e/cypress/screenshots:/app/cypress/screenshots
