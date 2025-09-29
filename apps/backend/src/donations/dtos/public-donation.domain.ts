@@ -1,4 +1,4 @@
-import { DonationType } from './create-donation.domain';
+import { DonationType } from '../../util/donations/donations.util';
 
 export class PublicDonationDTO {
   id: number;
@@ -14,17 +14,4 @@ export class PublicDonationDTO {
   donorName?: string | null;
 
   createdAt: string;
-
-  private static normalizeDonorName(
-    input: string | null,
-    anonymous: boolean,
-  ): string | null {
-    return anonymous ? null : input;
-  }
-
-  private static normalizeDonationAmount(amount: string | number): number {
-    const num = Number(amount);
-
-    return isFinite(num) ? num : 0;
-  }
 }
