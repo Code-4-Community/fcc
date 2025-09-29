@@ -15,7 +15,16 @@ export class PublicDonationDTO {
 
   createdAt: string;
 
-  private normalizeDonorName(input: string | null): string | null {
-    return this.isAnonymous ? null : input;
+  private static normalizeDonorName(
+    input: string | null,
+    anonymous: boolean,
+  ): string | null {
+    return anonymous ? null : input;
+  }
+
+  private static normalizeDonationAmount(amount: string | number): number {
+    const num = Number(amount);
+
+    return isFinite(num) ? num : 0;
   }
 }

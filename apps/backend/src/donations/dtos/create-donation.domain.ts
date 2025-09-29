@@ -28,7 +28,9 @@ export class CreateDonationDTO {
 
   showDedicationPublicly?: boolean = false;
 
-  private normalizeInterval(input: string | null): NormalizedInterval | null {
+  private static normalizeInterval(
+    input: string | null,
+  ): NormalizedInterval | null {
     if (!input) {
       return null;
     }
