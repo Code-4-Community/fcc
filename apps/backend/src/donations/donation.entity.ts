@@ -6,11 +6,11 @@ export enum donationType {
 }
 
 export enum recurringInterval {
-  'monthly',
-  'yearly',
   'weekly',
+  'monthly',
   'bimonthly',
-  'biweekly',
+  'quarterly',
+  'annually',
 }
 
 @Entity()
