@@ -6,11 +6,11 @@ export enum donationType {
 }
 
 export enum recurringInterval {
-  'monthly',
-  'yearly',
   'weekly',
+  'monthly',
   'bimonthly',
-  'biweekly',
+  'quarterly',
+  'annually',
 }
 
 @Entity()
@@ -43,6 +43,9 @@ export class Donation {
 
   @Column({ nullable: true })
   dedicationMessage: string;
+
+  @Column({ default: false })
+  showDedicationPublicly: boolean;
 
   @Column()
   createdAt: Date;
