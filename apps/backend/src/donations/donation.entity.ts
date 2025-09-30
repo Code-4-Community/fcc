@@ -44,6 +44,9 @@ export class Donation {
   @Column({ nullable: true })
   dedicationMessage: string;
 
+  @Column({ default: false })
+  showDedicationPublicly: boolean;
+
   @Column()
   createdAt: Date;
 

@@ -5,9 +5,9 @@ import { DonationStatus } from './donation-response-dto';
 export class PublicDonationDto {
   @ApiProperty({
     description: 'unique donation identifier',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    example: 123,
   })
-  id: string;
+  id: number;
 
   @ApiProperty({
     description: 'donor name, hidden if anonymous',

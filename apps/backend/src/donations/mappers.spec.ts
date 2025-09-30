@@ -10,7 +10,7 @@ import { DonationMappers, Donation } from './mappers';
 
 describe('DonationMappers', () => {
   const mockDonation: Donation = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
+    id: 123,
     firstName: 'John',
     lastName: 'Smith',
     email: 'john.smith@example.com',
@@ -37,7 +37,7 @@ describe('DonationMappers', () => {
   };
 
   const mockPublicDonation: PublicDonationDto = {
-    id: '123e4567-e89b-12d3-a456-426614174000',
+    id: 123,
     donorName: 'John Smith',
     amount: 100.0,
     isAnonymous: false,
@@ -188,18 +188,18 @@ describe('DonationMappers', () => {
 
   describe('array mapping methods', () => {
     it('should map array of donations to response DTOs', () => {
-      const donations = [mockDonation, { ...mockDonation, id: 'different-id' }];
+      const donations = [mockDonation, { ...mockDonation, id: 456 }];
       const result = DonationMappers.toDonationResponseDtos(donations);
 
       expect(result).toHaveLength(2);
       expect(result[0].id).toBe(mockDonation.id);
-      expect(result[1].id).toBe('different-id');
+      expect(result[1].id).toBe(456);
     });
 
     it('should map array of donations to public DTOs', () => {
       const donations = [
         mockDonation,
-        { ...mockDonation, id: 'different-id', isAnonymous: true },
+        { ...mockDonation, id: 456, isAnonymous: true },
       ];
       const result = DonationMappers.toPublicDonationDtos(donations);
 

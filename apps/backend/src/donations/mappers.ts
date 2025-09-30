@@ -27,7 +27,7 @@ export interface CreateDonationRequest {
 }
 
 export interface Donation {
-  id: string;
+  id: number;
   firstName: string;
   lastName: string;
   email: string;
