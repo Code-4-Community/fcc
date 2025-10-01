@@ -29,3 +29,9 @@ export function normalizeDonorName(
 ): string | null {
   return anonymous ? null : input;
 }
+
+export function normalizeDonationAmount(amount: string | number): number {
+  const num = Number(amount);
+
+  return isFinite(num) ? num : 0;
+}
