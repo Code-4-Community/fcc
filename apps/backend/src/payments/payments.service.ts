@@ -1,6 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { RecurringInterval } from '../donations/dtos/create-donation-dto';
+import { Injectable, Inject, Logger } from '@nestjs/common';
+import Stripe from 'stripe';
 import { DonationStatus } from '../donations/dtos/donation-response-dto';
+import { RecurringInterval } from '../donations/dtos/create-donation-dto';
 
 /**
  * Flexible definition for metadata, may want to change to be stricter later
@@ -11,10 +12,7 @@ export type PaymentIntentMetadata = Record<string, string>;
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
 
-  constructor() {
-    // Optionally inject a provider client (e.g. Stripe) here in a real implementation.
-    // Keep constructor minimal for the stub.
-  }
+  constructor(@Inject('STRIPE_CLIENT') private stripe: Stripe) {}
 
   /**
    * Validates the parameters for createPaymentIntent
@@ -82,20 +80,27 @@ export class PaymentsService {
       throw new Error('Invalid currency');
     }
 
-    // TODO: Integrate with Stripe (or another provider) here.
-    // Return a mocked response for now so callers can be wired up and tested.
-    const mockResponse = {
-      id: `pi_mock_${Date.now()}`,
-      clientSecret: `cs_mock_${Math.random().toString(36).slice(2, 12)}`,
-      amount,
-      currency: currency.toLowerCase(),
-      status: DonationStatus.PENDING,
-      metadata: metadata ?? {},
-      transactionId: undefined,
-    };
+    // Convert to lowercase for consistency
+    currency = currency.toLowerCase();
+    
+    // Implement actual Stripe call here
+    const paymentIntent = await this.stripe.paymentIntents.create({
+      amount: Math.round(amount * 100), // Convert to cents
+      currency,
+      metadata,
+      automatic_payment_methods: { enabled: true }
+    });
 
-    this.logger.debug(`createPaymentIntent (stub) -> ${mockResponse.id}`);
-    return mockResponse;
+    this.logger.debug(`createPaymentIntent (stub) -> ${paymentIntent.id}`);
+
+    return {
+      id: paymentIntent.id,
+      clientSecret: paymentIntent.client_secret,
+      amount,
+      currency,
+      status: DonationStatus.PENDING,
+      metadata
+    };
   }
 
   /**

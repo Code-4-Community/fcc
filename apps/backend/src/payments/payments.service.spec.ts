@@ -1,33 +1,50 @@
 import { PaymentsService } from './payments.service';
 import { DonationStatus } from '../donations/dtos/donation-response-dto';
 import { RecurringInterval } from '../donations/dtos/create-donation-dto';
+import Stripe from 'stripe';
 
-// Demonstration/mock of the `stripe` package so future integration tests can
-// rely on a consistent mocked SDK. The current PaymentsService stubs do not
-// call Stripe directly, but having this mock in place shows how to wire
-// a provider and prevents accidental network calls in tests that import stripe.
+// Create a shared mock object
+const stripeMock = {
+  paymentIntents: {
+    create: jest.fn(),
+    retrieve: jest.fn(),
+    update: jest.fn(),
+    cancel: jest.fn(),
+  },
+  subscriptions: {
+    create: jest.fn(),
+    retrieve: jest.fn(),
+    update: jest.fn(),
+    cancel: jest.fn(),
+  },
+  // Add other Stripe resources as needed
+};
+
+// Mock the entire Stripe package
 jest.mock('stripe', () => {
-  return jest.fn().mockImplementation(() => ({
-    paymentIntents: {
-      create: jest.fn().mockResolvedValue({
-        id: 'pi_stripe_mock',
-        client_secret: 'cs_stripe_mock',
-        amount: 100,
-        currency: 'usd',
-        status: 'requires_payment_method',
-      }),
-    },
-    subscriptions: {
-      create: jest.fn().mockResolvedValue({ id: 'sub_stripe_mock', status: 'active' }),
-    },
-  }));
+  return jest.fn().mockImplementation(() => stripeMock);
 });
 
 describe('PaymentsService (stubs)', () => {
   let svc: PaymentsService;
 
   beforeEach(() => {
-    svc = new PaymentsService();
+    svc = new PaymentsService(stripeMock as unknown as Stripe);
+    jest.clearAllMocks(); // Clear call counts and mock implementations
+
+    // Set default mock implementations for this test
+    stripeMock.paymentIntents.create.mockResolvedValue({
+      id: 'pi_stripe_mock',
+      client_secret: 'cs_stripe_mock',
+      amount: 100,
+      currency: 'usd',
+      status: 'requires_payment_method',
+    });
+
+    stripeMock.subscriptions.create.mockResolvedValue({
+      id: 'sub_stripe_mock',
+      status: 'active',
+    });
   });
 
   describe('createPaymentIntent', () => {
@@ -51,6 +68,17 @@ describe('PaymentsService (stubs)', () => {
       expect(pi.currency).toBe('usd');
       expect(pi.status).toBe(DonationStatus.PENDING);
       expect(pi.metadata).toEqual({ orderId: '123' });
+    });
+
+    it('handles Stripe API errors correctly', async () => {
+      // Make the mock throw an error for this test
+      stripeMock.paymentIntents.create.mockRejectedValue({
+        type: 'StripeCardError',
+        message: 'Your card was declined',
+        code: 'card_declined'
+      });
+      
+      await expect(svc.createPaymentIntent(25.5, 'USD')).rejects.toThrow(/card was declined/i);
     });
   });
 
