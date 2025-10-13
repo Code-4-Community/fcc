@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { DonationsRepository, PaginationFilters } from './donations.repository';
-import { Donation, donationType, recurringInterval } from './donation.entity';
+import { Donation, donationType } from './donation.entity';
 
 describe('DonationsRepository', () => {
   let repository: DonationsRepository;
@@ -39,7 +39,7 @@ describe('DonationsRepository', () => {
       getManyAndCount: jest.fn(),
       getMany: jest.fn(),
       getRawOne: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<SelectQueryBuilder<Donation>>;
 
     // Create mock TypeORM repository
     mockTypeOrmRepo = {
@@ -49,7 +49,7 @@ describe('DonationsRepository', () => {
       save: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<Repository<Donation>>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -304,9 +304,16 @@ describe('DonationsRepository', () => {
       expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('donation.createdAt', 'DESC');
       expect(mockQueryBuilder.limit).toHaveBeenCalledWith(10);
       expect(result).toHaveLength(2);
+      
+      // Check that public DTO format is returned
       expect(result[0]).toHaveProperty('id');
       expect(result[0]).toHaveProperty('amount');
-      expect(result[0]).not.toHaveProperty('email');
+      expect(result[0]).toHaveProperty('donorName'); // Should include for non-anonymous
+      expect(result[0]).not.toHaveProperty('email'); // Should not include sensitive data
+      expect(result[0]).not.toHaveProperty('firstName'); // Should not include sensitive data
+      
+      // Check anonymous donor doesn't have name
+      expect(result[1]).not.toHaveProperty('donorName');
     });
 
     it('should respect limit parameter', async () => {
@@ -328,7 +335,10 @@ describe('DonationsRepository', () => {
 
   describe('deleteById', () => {
     it('should delete donation by id', async () => {
-      mockTypeOrmRepo.delete.mockResolvedValue({ affected: 1, raw: {} } as any);
+      mockTypeOrmRepo.delete.mockResolvedValue({ 
+        affected: 1, 
+        raw: {} 
+      } as never);
 
       await repository.deleteById(1);
 
@@ -336,7 +346,10 @@ describe('DonationsRepository', () => {
     });
 
     it('should throw error when donation not found', async () => {
-      mockTypeOrmRepo.delete.mockResolvedValue({ affected: 0, raw: {} } as any);
+      mockTypeOrmRepo.delete.mockResolvedValue({ 
+        affected: 0, 
+        raw: {} 
+      } as never);
 
       await expect(repository.deleteById(999)).rejects.toThrow(
         'Donation with ID 999 not found',
