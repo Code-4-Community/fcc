@@ -41,6 +41,12 @@ describe('PaymentsService (stubs)', () => {
       status: 'requires_payment_method',
     });
 
+    stripeMock.paymentIntents.retrieve.mockResolvedValue({
+      id: 'pi_local_mock_1',
+      status: 'succeeded',
+      amount: 500,
+    });
+
     stripeMock.subscriptions.create.mockResolvedValue({
       id: 'sub_stripe_mock',
       status: 'active',
@@ -48,23 +54,41 @@ describe('PaymentsService (stubs)', () => {
   });
 
   describe('createPaymentIntent', () => {
-    it('throws for invalid (too small) amount', async () => {
+    it('throws for invalid (too small for any currency) amount', async () => {
       await expect(svc.createPaymentIntent(0, 'usd')).rejects.toThrow(
         /Invalid amount/i,
       );
     });
 
-    it('throws for invalid currency', async () => {
-      await expect(svc.createPaymentIntent(10, (undefined as unknown) as string)).rejects.toThrow(
+    it('throws for invalid (currency that has decimals) amount', async () => {
+      await expect(svc.createPaymentIntent(50.01, 'usd')).rejects.toThrow(
+        /Invalid amount/i,
+      );
+    })
+
+    it('throws for invalid usd of amount < 50 cents', async () => {
+      await expect(svc.createPaymentIntent(24, 'usd')).rejects.toThrow(
+        /Invalid amount/i,
+      );
+    })
+
+    it('throws for currency length < 3', async () => {
+      await expect(svc.createPaymentIntent(10, 'a')).rejects.toThrow(
         /Invalid currency/i,
       );
     });
 
+    it('throws for currency length > 3', async () => {
+      await expect(svc.createPaymentIntent(10, 'aaaa')).rejects.toThrow(
+        /Invalid currency/i,
+      );
+    });
+    
     it('returns a well-formed payment intent for valid input', async () => {
-      const pi = await svc.createPaymentIntent(25.5, 'USD', { orderId: '123' });
+      const pi = await svc.createPaymentIntent(2550, 'USD', { orderId: '123' });
       expect(pi).toHaveProperty('id');
       expect(pi).toHaveProperty('clientSecret');
-      expect(pi.amount).toBe(25.5);
+      expect(pi.amount).toBe(2550);
       expect(pi.currency).toBe('usd');
       expect(pi.status).toBe(DonationStatus.PENDING);
       expect(pi.metadata).toEqual({ orderId: '123' });
@@ -78,7 +102,7 @@ describe('PaymentsService (stubs)', () => {
         code: 'card_declined'
       });
       
-      await expect(svc.createPaymentIntent(25.5, 'USD')).rejects.toThrow(/card was declined/i);
+      await expect(svc.createPaymentIntent(2550, 'USD')).rejects.toThrow(/card was declined/i);
     });
   });
 
@@ -105,13 +129,25 @@ describe('PaymentsService (stubs)', () => {
       await expect(svc.retrievePaymentIntent((undefined as unknown) as string)).rejects.toThrow(/Invalid paymentIntentId/i);
     });
 
-    it('returns a mock payment intent when given a valid id', async () => {
-      const id = 'pi_local_mock_1';
-      const pi = await svc.retrievePaymentIntent(id);
+    it('returns payment intent details when given a valid id', async () => {
+      const paymentIntentId = 'pi_local_mock_1';
+      const pi = await svc.retrievePaymentIntent(paymentIntentId);
       expect(pi).not.toBeNull();
-      expect(pi?.id).toBe(id);
-      expect(typeof pi?.transactionId).toBe('string');
-      expect(pi?.status).toBe(DonationStatus.COMPLETED);
+      expect(pi?.paymentIntentId).toBe(paymentIntentId);
+      expect(pi?.status).toBe('succeeded');
+      expect(pi?.amount).toBe(500);
+    });
+
+    it('handles Stripe API errors correctly', async () => {
+      // Make the mock throw an error for this test
+      stripeMock.paymentIntents.retrieve.mockRejectedValue({
+        type: 'StripeInvalidRequestError',
+        message: 'No such payment intent',
+        code: 'resource_missing'
+      });
+      
+      const result = await svc.retrievePaymentIntent('pi_nonexistent');
+      expect(result).toHaveProperty('message', 'No such payment intent');
     });
   });
 });
