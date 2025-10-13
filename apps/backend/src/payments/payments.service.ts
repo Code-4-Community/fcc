@@ -83,7 +83,7 @@ export class PaymentsService {
     metadata?: PaymentIntentMetadata,
   ): Promise<{
     id: string;
-    clientSecret?: string;
+    clientSecret: string;
     amount: number;
     currency: string;
     status: DonationStatus;
@@ -96,7 +96,7 @@ export class PaymentsService {
       throw new Error(errorMsg);
     }
 
-
+    try {
     const paymentIntent: Stripe.PaymentIntent = await this.stripe.paymentIntents.create({
       amount,
       currency,
@@ -115,6 +115,10 @@ export class PaymentsService {
       status: DonationStatus.PENDING,
       metadata
     };
+  } catch (error) {
+      this.logger.error(`Error retrieving payment intent: ${error.message}`);
+      return error;
+    }
   }
 
   /**
@@ -202,30 +206,28 @@ export class PaymentsService {
    * @returns Promise resolving to a PaymentIntent-like object
    */
   async retrievePaymentIntent(paymentIntentId: string): Promise<{
-    id: string;
-    amount: number;
-    currency: string;
-    status: DonationStatus;
-    metadata?: PaymentIntentMetadata;
-    transactionId?: string;
+    paymentIntentId: string;
+    status: string;
+    amount?: number;
   } | null> {
     if (!paymentIntentId || typeof paymentIntentId !== 'string') {
       this.logger.warn('retrievePaymentIntent called with invalid id');
       throw new Error('Invalid paymentIntentId');
     }
 
-    // TODO: Replace with real provider retrieval.
-    // Return a mock matching the DonationResponseDto expectations (amount in dollars, optional transactionId, DonationStatus)
-    const mock = {
-      id: paymentIntentId,
-      amount: 0,
-      currency: 'usd',
-      status: DonationStatus.COMPLETED,
-      metadata: {},
-      transactionId: `txn_mock_${Math.random().toString(36).slice(2, 12)}`,
-    };
-
-    this.logger.debug(`retrievePaymentIntent (stub) -> ${paymentIntentId}`);
-    return mock;
+    try {
+      const paymentIntent: Stripe.PaymentIntent = await this.stripe.paymentIntents.retrieve(
+        paymentIntentId
+      );
+      
+      return {
+        paymentIntentId: paymentIntent.id,
+        status: paymentIntent.status,
+        amount: paymentIntent.amount,
+      };
+    } catch (err) {
+      this.logger.error(`Error retrieving payment intent: ${err.message}`);
+      return err;
+    }
   }
 }
