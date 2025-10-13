@@ -1,10 +1,10 @@
 import { validate } from 'class-validator';
+import { CreateDonationDto } from './dtos/create-donation-dto';
 import {
-  CreateDonationDto,
   DonationType,
   RecurringInterval,
-} from './dtos/create-donation-dto';
-import { DonationStatus } from './dtos/donation-response-dto';
+  DonationStatus,
+} from './donation.entity';
 import { PublicDonationDto } from './dtos/public-donation-dto';
 import { DonationMappers, Donation } from './mappers';
 

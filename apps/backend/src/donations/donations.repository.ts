@@ -1,18 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Brackets } from 'typeorm';
-import { Donation } from './donation.entity';
+import {
+  Donation,
+  DonationType,
+  RecurringInterval,
+  DonationStatus,
+} from './donation.entity';
 import { DonationMappers, Donation as DomainDonation } from './mappers';
 import { PublicDonationDto } from './dtos/public-donation-dto';
 
 export interface PaginationFilters {
-  donationType?: 'one_time' | 'recurring';
+  donationType?: DonationType;
   isAnonymous?: boolean;
-  recurringInterval?: 'weekly' | 'monthly' | 'bimonthly' | 'quarterly' | 'annually';
+  recurringInterval?: RecurringInterval;
   minAmount?: number;
   maxAmount?: number;
   startDate?: Date;
   endDate?: Date;
+  status?: DonationStatus;
 }
 
 export interface PaginatedResult<T> {
@@ -55,9 +61,12 @@ export class DonationsRepository {
       }
 
       if (filters.recurringInterval) {
-        queryBuilder.andWhere('donation.recurringInterval = :recurringInterval', {
-          recurringInterval: filters.recurringInterval,
-        });
+        queryBuilder.andWhere(
+          'donation.recurringInterval = :recurringInterval',
+          {
+            recurringInterval: filters.recurringInterval,
+          },
+        );
       }
 
       if (filters.minAmount !== undefined) {
@@ -81,6 +90,12 @@ export class DonationsRepository {
       if (filters.endDate) {
         queryBuilder.andWhere('donation.createdAt <= :endDate', {
           endDate: filters.endDate,
+        });
+      }
+
+      if (filters.status) {
+        queryBuilder.andWhere('donation.status = :status', {
+          status: filters.status,
         });
       }
     }
@@ -119,7 +134,9 @@ export class DonationsRepository {
       .where(
         new Brackets((qb) => {
           qb.where('LOWER(donation.firstName) LIKE :searchTerm', { searchTerm })
-            .orWhere('LOWER(donation.lastName) LIKE :searchTerm', { searchTerm })
+            .orWhere('LOWER(donation.lastName) LIKE :searchTerm', {
+              searchTerm,
+            })
             .orWhere('LOWER(donation.email) LIKE :searchTerm', { searchTerm })
             .orWhere(
               "LOWER(CONCAT(donation.firstName, ' ', donation.lastName)) LIKE :searchTerm",
@@ -183,7 +200,7 @@ export class DonationsRepository {
   }
 
   /**
-   * Map entity to domain model (adds status and transactionId if needed)
+   * Map entity to domain model
    * This bridges the gap between the entity and the domain model used in mappers
    */
   private mapEntityToDomain(entity: Donation): DomainDonation {
@@ -194,14 +211,20 @@ export class DonationsRepository {
       email: entity.email,
       amount: entity.amount,
       isAnonymous: entity.isAnonymous,
-      donationType: entity.donationType as unknown as 'one_time' | 'recurring',
-      recurringInterval: entity.recurringInterval as unknown as 'weekly' | 'monthly' | 'bimonthly' | 'quarterly' | 'annually' | undefined,
-      dedicationMessage: entity.dedicationMessage,
+      donationType: entity.donationType as 'one_time' | 'recurring',
+      recurringInterval: entity.recurringInterval as
+        | 'weekly'
+        | 'monthly'
+        | 'bimonthly'
+        | 'quarterly'
+        | 'annually'
+        | undefined,
+      dedicationMessage: entity.dedicationMessage ?? undefined,
       showDedicationPublicly: entity.showDedicationPublicly,
-      status: 'completed', // Default status - will be enhanced in future
+      status: entity.status as 'pending' | 'completed' | 'failed' | 'cancelled',
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      transactionId: undefined, // Will be added when payment integration is implemented
+      transactionId: entity.transactionId ?? undefined,
     };
   }
 }

@@ -2,7 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { DonationsRepository, PaginationFilters } from './donations.repository';
-import { Donation, donationType } from './donation.entity';
+import {
+  Donation,
+  DonationType,
+  DonationStatus,
+  RecurringInterval,
+} from './donation.entity';
 
 describe('DonationsRepository', () => {
   let repository: DonationsRepository;
@@ -16,10 +21,12 @@ describe('DonationsRepository', () => {
     email: 'john.doe@example.com',
     amount: 100.0,
     isAnonymous: false,
-    donationType: donationType.one_time,
+    donationType: DonationType.ONE_TIME,
     recurringInterval: null,
     dedicationMessage: 'In memory of Jane',
     showDedicationPublicly: true,
+    status: DonationStatus.COMPLETED,
+    transactionId: 'txn_123456',
     createdAt: new Date('2024-01-15T10:00:00Z'),
     updatedAt: new Date('2024-01-15T10:00:00Z'),
   };
@@ -75,8 +82,13 @@ describe('DonationsRepository', () => {
 
       const result = await repository.findPaginated(1, 10);
 
-      expect(mockTypeOrmRepo.createQueryBuilder).toHaveBeenCalledWith('donation');
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('donation.createdAt', 'DESC');
+      expect(mockTypeOrmRepo.createQueryBuilder).toHaveBeenCalledWith(
+        'donation',
+      );
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'donation.createdAt',
+        'DESC',
+      );
       expect(mockQueryBuilder.skip).toHaveBeenCalledWith(0);
       expect(mockQueryBuilder.take).toHaveBeenCalledWith(10);
       expect(result).toEqual({
@@ -106,14 +118,16 @@ describe('DonationsRepository', () => {
     });
 
     it('should filter by donationType', async () => {
-      const filters: PaginationFilters = { donationType: 'recurring' };
+      const filters: PaginationFilters = {
+        donationType: DonationType.RECURRING,
+      };
       mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
 
       await repository.findPaginated(1, 10, filters);
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'donation.donationType = :donationType',
-        { donationType: 'recurring' },
+        { donationType: DonationType.RECURRING },
       );
     });
 
@@ -130,14 +144,16 @@ describe('DonationsRepository', () => {
     });
 
     it('should filter by recurringInterval', async () => {
-      const filters: PaginationFilters = { recurringInterval: 'monthly' };
+      const filters: PaginationFilters = {
+        recurringInterval: RecurringInterval.MONTHLY,
+      };
       mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
 
       await repository.findPaginated(1, 10, filters);
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'donation.recurringInterval = :recurringInterval',
-        { recurringInterval: 'monthly' },
+        { recurringInterval: RecurringInterval.MONTHLY },
       );
     });
 
@@ -177,7 +193,7 @@ describe('DonationsRepository', () => {
 
     it('should apply multiple filters together', async () => {
       const filters: PaginationFilters = {
-        donationType: 'recurring',
+        donationType: DonationType.RECURRING,
         isAnonymous: false,
         minAmount: 100,
       };
@@ -186,6 +202,18 @@ describe('DonationsRepository', () => {
       await repository.findPaginated(1, 10, filters);
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledTimes(3);
+    });
+
+    it('should filter by status', async () => {
+      const filters: PaginationFilters = { status: DonationStatus.COMPLETED };
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+
+      await repository.findPaginated(1, 10, filters);
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'donation.status = :status',
+        { status: DonationStatus.COMPLETED },
+      );
     });
   });
 
@@ -196,9 +224,14 @@ describe('DonationsRepository', () => {
 
       const result = await repository.searchByDonorNameOrEmail('john');
 
-      expect(mockTypeOrmRepo.createQueryBuilder).toHaveBeenCalledWith('donation');
+      expect(mockTypeOrmRepo.createQueryBuilder).toHaveBeenCalledWith(
+        'donation',
+      );
       expect(mockQueryBuilder.where).toHaveBeenCalled();
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('donation.createdAt', 'DESC');
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'donation.createdAt',
+        'DESC',
+      );
       expect(mockQueryBuilder.limit).toHaveBeenCalledWith(50);
       expect(result).toEqual(mockResults);
     });
@@ -240,9 +273,17 @@ describe('DonationsRepository', () => {
 
       const result = await repository.getTotalsByDateRange(startDate, endDate);
 
-      expect(mockTypeOrmRepo.createQueryBuilder).toHaveBeenCalledWith('donation');
-      expect(mockQueryBuilder.select).toHaveBeenCalledWith('SUM(donation.amount)', 'total');
-      expect(mockQueryBuilder.addSelect).toHaveBeenCalledWith('COUNT(donation.id)', 'count');
+      expect(mockTypeOrmRepo.createQueryBuilder).toHaveBeenCalledWith(
+        'donation',
+      );
+      expect(mockQueryBuilder.select).toHaveBeenCalledWith(
+        'SUM(donation.amount)',
+        'total',
+      );
+      expect(mockQueryBuilder.addSelect).toHaveBeenCalledWith(
+        'COUNT(donation.id)',
+        'count',
+      );
       expect(mockQueryBuilder.where).toHaveBeenCalledWith(
         'donation.createdAt >= :startDate',
         { startDate },
@@ -300,18 +341,23 @@ describe('DonationsRepository', () => {
 
       const result = await repository.findRecentPublic(10);
 
-      expect(mockTypeOrmRepo.createQueryBuilder).toHaveBeenCalledWith('donation');
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('donation.createdAt', 'DESC');
+      expect(mockTypeOrmRepo.createQueryBuilder).toHaveBeenCalledWith(
+        'donation',
+      );
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'donation.createdAt',
+        'DESC',
+      );
       expect(mockQueryBuilder.limit).toHaveBeenCalledWith(10);
       expect(result).toHaveLength(2);
-      
+
       // Check that public DTO format is returned
       expect(result[0]).toHaveProperty('id');
       expect(result[0]).toHaveProperty('amount');
       expect(result[0]).toHaveProperty('donorName'); // Should include for non-anonymous
       expect(result[0]).not.toHaveProperty('email'); // Should not include sensitive data
       expect(result[0]).not.toHaveProperty('firstName'); // Should not include sensitive data
-      
+
       // Check anonymous donor doesn't have name
       expect(result[1]).not.toHaveProperty('donorName');
     });
@@ -335,9 +381,9 @@ describe('DonationsRepository', () => {
 
   describe('deleteById', () => {
     it('should delete donation by id', async () => {
-      mockTypeOrmRepo.delete.mockResolvedValue({ 
-        affected: 1, 
-        raw: {} 
+      mockTypeOrmRepo.delete.mockResolvedValue({
+        affected: 1,
+        raw: {},
       } as never);
 
       await repository.deleteById(1);
@@ -346,9 +392,9 @@ describe('DonationsRepository', () => {
     });
 
     it('should throw error when donation not found', async () => {
-      mockTypeOrmRepo.delete.mockResolvedValue({ 
-        affected: 0, 
-        raw: {} 
+      mockTypeOrmRepo.delete.mockResolvedValue({
+        affected: 0,
+        raw: {},
       } as never);
 
       await expect(repository.deleteById(999)).rejects.toThrow(
@@ -356,6 +402,4 @@ describe('DonationsRepository', () => {
       );
     });
   });
-
-
 });
