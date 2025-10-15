@@ -40,7 +40,7 @@ export interface Donation {
     | 'annually';
   dedicationMessage?: string;
   showDedicationPublicly: boolean;
-  status: 'pending' | 'completed' | 'failed' | 'cancelled';
+  status: 'pending' | 'succeeded' | 'failed' | 'cancelled';
   createdAt: Date;
   updatedAt: Date;
   transactionId?: string;

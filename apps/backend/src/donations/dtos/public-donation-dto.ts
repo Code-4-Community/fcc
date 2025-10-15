@@ -57,7 +57,7 @@ export class PublicDonationDto {
   @ApiProperty({
     description: 'the current donation status',
     enum: DonationStatus,
-    example: DonationStatus.COMPLETED,
+    example: DonationStatus.SUCCEEDED,
   })
   status: DonationStatus;
 

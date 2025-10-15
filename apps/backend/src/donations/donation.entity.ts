@@ -15,7 +15,7 @@ export enum RecurringInterval {
 
 export enum DonationStatus {
   PENDING = 'pending',
-  COMPLETED = 'completed',
+  SUCCEEDED = 'succeeded',
   FAILED = 'failed',
   CANCELLED = 'cancelled',
 }

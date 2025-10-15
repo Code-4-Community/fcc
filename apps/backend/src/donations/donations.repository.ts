@@ -221,7 +221,7 @@ export class DonationsRepository {
         | undefined,
       dedicationMessage: entity.dedicationMessage ?? undefined,
       showDedicationPublicly: entity.showDedicationPublicly,
-      status: entity.status as 'pending' | 'completed' | 'failed' | 'cancelled',
+      status: entity.status as 'pending' | 'succeeded' | 'failed' | 'cancelled',
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       transactionId: entity.transactionId ?? undefined,

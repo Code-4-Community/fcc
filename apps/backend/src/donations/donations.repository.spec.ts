@@ -25,7 +25,7 @@ describe('DonationsRepository', () => {
     recurringInterval: null,
     dedicationMessage: 'In memory of Jane',
     showDedicationPublicly: true,
-    status: DonationStatus.COMPLETED,
+    status: DonationStatus.SUCCEEDED,
     transactionId: 'txn_123456',
     createdAt: new Date('2024-01-15T10:00:00Z'),
     updatedAt: new Date('2024-01-15T10:00:00Z'),
@@ -205,14 +205,14 @@ describe('DonationsRepository', () => {
     });
 
     it('should filter by status', async () => {
-      const filters: PaginationFilters = { status: DonationStatus.COMPLETED };
+      const filters: PaginationFilters = { status: DonationStatus.SUCCEEDED };
       mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
 
       await repository.findPaginated(1, 10, filters);
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'donation.status = :status',
-        { status: DonationStatus.COMPLETED },
+        { status: DonationStatus.SUCCEEDED },
       );
     });
   });
