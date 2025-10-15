@@ -1,13 +1,11 @@
+import { CreateDonationDto } from './dtos/create-donation-dto';
+import { DonationResponseDto } from './dtos/donation-response-dto';
+import { PublicDonationDto } from './dtos/public-donation-dto';
 import {
-  CreateDonationDto,
   DonationType,
   RecurringInterval,
-} from './dtos/create-donation-dto';
-import {
-  DonationResponseDto,
   DonationStatus,
-} from './dtos/donation-response-dto';
-import { PublicDonationDto } from './dtos/public-donation-dto';
+} from './donation.entity';
 
 export interface CreateDonationRequest {
   firstName: string;
@@ -42,7 +40,7 @@ export interface Donation {
     | 'annually';
   dedicationMessage?: string;
   showDedicationPublicly: boolean;
-  status: 'pending' | 'completed' | 'failed' | 'cancelled';
+  status: 'pending' | 'succeeded' | 'failed' | 'cancelled';
   createdAt: Date;
   updatedAt: Date;
   transactionId?: string;

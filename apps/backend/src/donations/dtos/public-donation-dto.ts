@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { DonationType, RecurringInterval } from './create-donation-dto';
-import { DonationStatus } from './donation-response-dto';
+import {
+  DonationType,
+  RecurringInterval,
+  DonationStatus,
+} from '../donation.entity';
 
 export class PublicDonationDto {
   @ApiProperty({
@@ -54,7 +57,7 @@ export class PublicDonationDto {
   @ApiProperty({
     description: 'the current donation status',
     enum: DonationStatus,
-    example: DonationStatus.COMPLETED,
+    example: DonationStatus.SUCCEEDED,
   })
   status: DonationStatus;
 

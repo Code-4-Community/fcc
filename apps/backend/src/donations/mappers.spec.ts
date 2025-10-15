@@ -1,10 +1,10 @@
 import { validate } from 'class-validator';
+import { CreateDonationDto } from './dtos/create-donation-dto';
 import {
-  CreateDonationDto,
   DonationType,
   RecurringInterval,
-} from './dtos/create-donation-dto';
-import { DonationStatus } from './dtos/donation-response-dto';
+  DonationStatus,
+} from './donation.entity';
 import { PublicDonationDto } from './dtos/public-donation-dto';
 import { DonationMappers, Donation } from './mappers';
 
@@ -19,7 +19,7 @@ describe('DonationMappers', () => {
     donationType: 'one_time',
     dedicationMessage: 'for the Fenway community',
     showDedicationPublicly: true,
-    status: 'completed',
+    status: 'succeeded',
     createdAt: new Date('2024-01-15T10:30:00Z'),
     updatedAt: new Date('2024-01-15T10:35:00Z'),
     transactionId: 'txn_1234567890',
@@ -44,7 +44,7 @@ describe('DonationMappers', () => {
     donationType: DonationType.ONE_TIME,
     recurringInterval: undefined,
     dedicationMessage: 'for the Fenway community',
-    status: DonationStatus.COMPLETED,
+    status: DonationStatus.SUCCEEDED,
     createdAt: new Date('2024-01-15T10:30:00Z'),
   };
 

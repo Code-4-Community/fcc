@@ -9,19 +9,7 @@ import {
   Min,
   IsNotEmpty,
 } from 'class-validator';
-
-export enum DonationType {
-  ONE_TIME = 'one_time',
-  RECURRING = 'recurring',
-}
-
-export enum RecurringInterval {
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
-  BIMONTHLY = 'bimonthly',
-  QUARTERLY = 'quarterly',
-  ANNUALLY = 'annually',
-}
+import { DonationType, RecurringInterval } from '../donation.entity';
 
 export class CreateDonationDto {
   @ApiProperty({
