@@ -141,13 +141,26 @@ export class PaymentsService {
     customerId: string,
     priceId: string,
   ): string {
+
+    const customerIdPattern = /^cus_[a-zA-Z0-9]{14,}$/;
+    const priceIdPattern = /^price_[a-zA-Z0-9]{14,}$/;
+
     if (!customerId || typeof customerId !== 'string') {
       this.logger.warn('createSubscription called with invalid customerId');
       return 'Invalid customerId';
     }
+
     if (!priceId || typeof priceId !== 'string') {
       this.logger.warn('createSubscription called with invalid priceId');
       return 'Invalid priceId';
+    }
+
+    if (!customerIdPattern.test(customerId)) {
+      return 'Invalid customerId format';
+    }
+
+    if (!priceIdPattern.test(priceId)) {
+      return 'Invalid priceId format';
     }
 
     return '';
@@ -174,8 +187,11 @@ export class PaymentsService {
     status: string;
   }> {
     try {
-      this.validateCreateSubscriptionParams(customerId, priceId)
-      const subscription: Stripe.Subscription = await this.stripe.subscriptions.create({
+    const errorMsg = this.validateCreateSubscriptionParams(customerId, priceId);
+    if (errorMsg !== '') {
+      throw new Error(errorMsg);
+    }      
+    const subscription: Stripe.Subscription = await this.stripe.subscriptions.create({
         customer: customerId,
         items: [
           {
@@ -189,7 +205,7 @@ export class PaymentsService {
         id: subscription.id,
         customerId: subscription.customer as string,
         priceId: subscription.items.data[0].price.id,
-        interval: subscription.items.data[0].plan.interval as RecurringInterval,
+        interval: subscription.items.data[0].price.recurring.interval as RecurringInterval,
         status: subscription.status
       };
     } catch (error) {

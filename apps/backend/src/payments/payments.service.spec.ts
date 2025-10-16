@@ -50,25 +50,175 @@ describe('PaymentsService', () => {
     // Create a new instance with our mock
     svc = new PaymentsService(stripeMock as unknown as Stripe);
     
-    // Set up default mock implementations
+    // Set up default mock implementations with more realistic Stripe responses
     stripeMock.paymentIntents.create.mockResolvedValue({
-      id: 'pi_test_123',
-      client_secret: 'cs_test_secret',
-      status: 'requires_payment_method',
+      id: 'pi_1234567890abcdefghijklmn',
+      object: 'payment_intent',
       amount: 1000,
+      amount_capturable: 0,
+      amount_received: 0,
+      application: null,
+      application_fee_amount: null,
+      automatic_payment_methods: { enabled: true },
+      canceled_at: null,
+      cancellation_reason: null,
+      capture_method: 'automatic',
+      client_secret: 'pi_1234567890abcdef_secret_1234567890abcdef',
+      confirmation_method: 'automatic',
+      created: Math.floor(Date.now() / 1000),
       currency: 'usd',
-      // Include other properties your service expects
+      customer: null,
+      description: null,
+      invoice: null,
+      last_payment_error: null,
+      latest_charge: null,
+      livemode: false,
+      metadata: {},
+      next_action: null,
+      on_behalf_of: null,
+      payment_method: null,
+      payment_method_options: {
+        card: { request_three_d_secure: 'automatic' }
+      },
+      payment_method_types: ['card'],
+      processing: null,
+      receipt_email: null,
+      review: null,
+      setup_future_usage: null,
+      shipping: null,
+      statement_descriptor: null,
+      statement_descriptor_suffix: null,
+      status: 'requires_payment_method',
+      transfer_data: null,
+      transfer_group: null
     });
     
     stripeMock.paymentIntents.retrieve.mockResolvedValue({
-      id: 'pi_local_mock_1',
-      status: 'succeeded',
+      id: 'pi_1234567890abcdefghijklmn',
+      object: 'payment_intent',
       amount: 500,
+      amount_capturable: 0,
+      amount_received: 500,
+      application: null,
+      application_fee_amount: null,
+      automatic_payment_methods: { enabled: true },
+      canceled_at: null,
+      cancellation_reason: null,
+      capture_method: 'automatic',
+      client_secret: 'pi_1234567890abcdefghijklmn_secret_1234567890abcdef',
+      confirmation_method: 'automatic',
+      created: Math.floor(Date.now() / 1000),
+      currency: 'usd',
+      customer: null,
+      description: null,
+      invoice: null,
+      last_payment_error: null,
+      latest_charge: 'ch_1234567890abcdef',
+      livemode: false,
+      metadata: {},
+      next_action: null,
+      on_behalf_of: null,
+      payment_method: 'pm_1234567890abcdef',
+      payment_method_options: {
+        card: { request_three_d_secure: 'automatic' }
+      },
+      payment_method_types: ['card'],
+      processing: null,
+      receipt_email: null,
+      review: null,
+      setup_future_usage: null,
+      shipping: null,
+      statement_descriptor: null,
+      statement_descriptor_suffix: null,
+      status: 'succeeded',
+      transfer_data: null,
+      transfer_group: null
     });
 
     stripeMock.subscriptions.create.mockResolvedValue({
-      id: 'sub_stripe_mock',
+      id: 'sub_1234567890abcdef',
+      object: 'subscription',
+      application: null,
+      application_fee_percent: null,
+      automatic_tax: { enabled: false },
+      billing_cycle_anchor: Math.floor(Date.now() / 1000),
+      billing_thresholds: null,
+      cancel_at: null,
+      cancel_at_period_end: false,
+      canceled_at: null,
+      collection_method: 'charge_automatically',
+      created: Math.floor(Date.now() / 1000),
+      current_period_end: Math.floor(Date.now() / 1000) + 30*24*60*60, // 30 days from now
+      current_period_start: Math.floor(Date.now() / 1000),
+      customer: 'cus_1234abcdefgh5678',
+      days_until_due: null,
+      default_payment_method: null,
+      default_source: null,
+      default_tax_rates: [],
+      discount: null,
+      ended_at: null,
+      items: {
+        object: 'list',
+        data: [
+          {
+            id: 'si_1234567890abcdef',
+            object: 'subscription_item',
+            billing_thresholds: null,
+            created: Math.floor(Date.now() / 1000),
+            metadata: {},
+            price: {
+              id: 'price_1234abcdefgh5678',
+              object: 'price',
+              active: true,
+              billing_scheme: 'per_unit',
+              created: Math.floor(Date.now() / 1000),
+              currency: 'usd',
+              livemode: false,
+              lookup_key: null,
+              metadata: {},
+              nickname: null,
+              product: 'prod_1234567890abcdef',
+              recurring: {
+                aggregate_usage: null,
+                interval: 'month', // Ensure interval is present
+                interval_count: 1,
+                usage_type: 'licensed'
+              },
+              tax_behavior: 'unspecified',
+              tiers_mode: null,
+              transform_quantity: null,
+              type: 'recurring',
+              unit_amount: 1000,
+              unit_amount_decimal: '1000'
+            },
+            quantity: 1,
+            subscription: 'sub_1234567890abcdef',
+            tax_rates: []
+          }
+        ],
+        has_more: false,
+        total_count: 1,
+        url: '/v1/subscription_items?subscription=sub_1234567890abcdef'
+      },
+      latest_invoice: 'in_1234567890abcdef',
+      livemode: false,
+      metadata: {},
+      next_pending_invoice_item_invoice: null,
+      pause_collection: null,
+      payment_settings: {
+        payment_method_options: null,
+        payment_method_types: null,
+        save_default_payment_method: 'off'
+      },
+      pending_invoice_item_interval: null,
+      pending_setup_intent: null,
+      pending_update: null,
+      schedule: null,
+      start_date: Math.floor(Date.now() / 1000),
       status: 'active',
+      transfer_data: null,
+      trial_end: null,
+      trial_start: null
     });
   });
 
@@ -173,29 +323,62 @@ describe('PaymentsService', () => {
   });
 
   describe('createSubscription', () => {
-    it('throws for invalid customerId', async () => {
-      // The current stub does not validate synchronously, but keep symmetry with validators
+    it('throws for undefined customerId', async () => {
       await expect(
-        svc.createSubscription((undefined as unknown) as string, 'price_123'),
-      ).rejects.toThrow(/Invalid customerId|Invalid/);
+        svc.createSubscription(undefined, 'price_1234abcdefgh5678'),
+      ).rejects.toThrow('Invalid customerId');
+    });
+
+    it('throws for null customerId', async () => {
+      await expect(
+        svc.createSubscription(null, 'price_1234abcdefgh5678'),
+      ).rejects.toThrow('Invalid customerId');
+    });
+
+    it('throws for undefined priceId', async () => {
+      await expect(
+        svc.createSubscription('cus_1234abcdefgh5678', undefined),
+      ).rejects.toThrow('Invalid priceId');
+    });
+
+    it('throws for null priceId', async () => {
+      await expect(
+        svc.createSubscription('cus_1234abcdefgh5678', null),
+      ).rejects.toThrow('Invalid priceId');
+    });
+
+    it('handles Stripe API errors correctly', async () => {
+      const paymentMethodNotSupportedError = createStripeError(
+        'StripeInvalidRequestError',
+        'payment_method_not_available',
+        'This payment method type is not supported for subscription payments',
+        { payment_method: { id: 'pm_1234567890abcdef' } }
+      );
+    
+      stripeMock.subscriptions.create.mockRejectedValueOnce(paymentMethodNotSupportedError);
+
+      await expect(
+        svc.createSubscription('cus_1234abcdefgh5678', 'price_1234abcdefgh5678'),
+      ).rejects.toMatchObject(paymentMethodNotSupportedError);
     });
 
     it('creates a mock subscription for valid inputs', async () => {
-      const sub = await svc.createSubscription('cus_123', 'price_abc');
+      const sub = await svc.createSubscription('cus_1234abcdefgh5678', 'price_1234abcdefgh5678');
       expect(sub).toHaveProperty('id');
-      expect(sub.customerId).toBe('cus_123');
-      expect(sub.priceId).toBe('price_abc');
+      expect(sub.customerId).toBe('cus_1234abcdefgh5678');
+      expect(sub.priceId).toBe('price_1234abcdefgh5678');
       expect(sub.status).toBe('active');
     });
   });
 
   describe('retrievePaymentIntent', () => {
     it('throws for invalid id', async () => {
-      await expect(svc.retrievePaymentIntent((undefined as unknown) as string)).rejects.toThrow(/Invalid paymentIntentId/i);
+      await expect(svc.retrievePaymentIntent(undefined))
+        .rejects.toThrow(/Invalid paymentIntentId/i);
     });
 
     it('returns payment intent details when given a valid id', async () => {
-      const paymentIntentId = 'pi_local_mock_1';
+      const paymentIntentId = 'pi_1234567890abcdefghijklmn';
       const pi = await svc.retrievePaymentIntent(paymentIntentId);
       expect(pi).not.toBeNull();
       expect(pi?.paymentIntentId).toBe(paymentIntentId);
@@ -205,7 +388,7 @@ describe('PaymentsService', () => {
 
     it('handles Stripe API errors correctly', async () => {
       // Make the mock throw an error for this test
-      const paymentIntentId = 'pi_local_mock_1';
+      const paymentIntentId = 'pi_1234567890abcdefghijklmn';
 
       const noSuchPaymentIntent = createStripeError(
         'StripeInvalidRequestError',
