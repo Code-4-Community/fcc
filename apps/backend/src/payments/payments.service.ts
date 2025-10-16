@@ -1,7 +1,6 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
-import { DonationStatus } from '../donations/dtos/donation-response-dto';
-import { RecurringInterval } from '../donations/dtos/create-donation-dto';
+import { DonationStatus, RecurringInterval } from '../donations/donation.entity';
 
 /**
  * Flexible definition for metadata, may want to change to be stricter later
@@ -102,7 +101,7 @@ export class PaymentsService {
       currency,
       metadata,
       // Does GiveLively accept other bank accounts and do we care? 
-      payment_method_types: ['card', 'us_bank_acounts']
+      payment_method_types: ['card', 'us_bank_accounts']
     });
 
     this.logger.debug(`createPaymentIntent (${amount}, ${currency}, ${metadata}) -> ${paymentIntent.id}`);
@@ -117,7 +116,7 @@ export class PaymentsService {
     };
   } catch (error) {
       this.logger.error(`Error retrieving payment intent: ${error.message}`);
-      return error;
+      throw error;
     }
   }
 
@@ -166,25 +165,29 @@ export class PaymentsService {
     interval: RecurringInterval;
     status: string;
   }> {
-    this.validateCreateSubscriptionParams(customerId, priceId)
-    const subscription: Stripe.Subscription = await this.stripe.subscriptions.create({
-      customer: customerId,
-      items: [
-        {
-          price: priceId,
-        },
-      ],
-    });
+    try {
+      this.validateCreateSubscriptionParams(customerId, priceId)
+      const subscription: Stripe.Subscription = await this.stripe.subscriptions.create({
+        customer: customerId,
+        items: [
+          {
+            price: priceId,
+          },
+        ],
+      });
 
-    this.logger.debug(`createSubscription (stub) -> ${subscription.id}`);
-
-    return {
-      id: subscription.id,
-      customerId: subscription.customer as string,
-      priceId: subscription.items.data[0].price.id,
-      interval: subscription.items.data[0].plan.interval as RecurringInterval,
-      status: subscription.status
-    };
+      this.logger.debug(`createSubscription (stub) -> ${subscription.id}`);
+      return {
+        id: subscription.id,
+        customerId: subscription.customer as string,
+        priceId: subscription.items.data[0].price.id,
+        interval: subscription.items.data[0].plan.interval as RecurringInterval,
+        status: subscription.status
+      };
+    } catch (error) {
+      this.logger.error(`Error creating subscription: ${error.message}`);
+      throw error;
+    }
   }
 
   /**
@@ -219,7 +222,55 @@ export class PaymentsService {
       };
     } catch (err) {
       this.logger.error(`Error retrieving payment intent: ${err.message}`);
-      return err;
+      throw err;
     }
   }
 }
+
+// Define a type-safe mock that matches Stripe's interface structure
+const stripeMock = {
+  paymentIntents: {
+    create: jest.fn(),
+    retrieve: jest.fn(),
+    update: jest.fn(),
+    cancel: jest.fn(),
+  },
+  subscriptions: {
+    create: jest.fn(),
+    retrieve: jest.fn(),
+    update: jest.fn(),
+    cancel: jest.fn(),
+  },
+  // Add other Stripe resources as needed
+};
+
+// Mock the Stripe constructor to return our mock
+jest.mock('stripe', () => {
+  return jest.fn().mockImplementation(() => stripeMock);
+});
+
+describe('PaymentsService', () => {
+  let svc: PaymentsService;
+
+  beforeEach(() => {
+    // Clear all mocks before each test
+    jest.clearAllMocks();
+    
+    // Create a new instance with our mock
+    svc = new PaymentsService(stripeMock as unknown as Stripe);
+    
+    // Set up default mock implementations
+    stripeMock.paymentIntents.create.mockResolvedValue({
+      id: 'pi_test_123',
+      client_secret: 'cs_test_secret',
+      status: 'requires_payment_method',
+      amount: 1000,
+      currency: 'usd',
+      // Include other properties your service expects
+    });
+    
+    // More default mock implementations...
+  });
+
+  // Test cases...
+});

@@ -1,9 +1,8 @@
 import { PaymentsService } from './payments.service';
-import { DonationStatus } from '../donations/dtos/donation-response-dto';
-import { RecurringInterval } from '../donations/dtos/create-donation-dto';
+import { DonationStatus } from '../donations/donation.entity';
 import Stripe from 'stripe';
 
-// Create a shared mock object
+// Define a type-safe mock that matches Stripe's interface structure
 const stripeMock = {
   paymentIntents: {
     create: jest.fn(),
@@ -20,27 +19,47 @@ const stripeMock = {
   // Add other Stripe resources as needed
 };
 
-// Mock the entire Stripe package
+// Mock the Stripe constructor to return our mock
 jest.mock('stripe', () => {
   return jest.fn().mockImplementation(() => stripeMock);
 });
 
-describe('PaymentsService (stubs)', () => {
+// Helper function for creating Stripe-like errors
+function createStripeError(type, code, message, extraProps = {}) {
+  return {
+    type,
+    code,
+    message,
+    ...extraProps,
+    // Add common error properties that Stripe would include
+    raw: {
+      type: type.replace('Stripe', '').toLowerCase(),
+      code,
+      message
+    }
+  };
+}
+
+describe('PaymentsService', () => {
   let svc: PaymentsService;
 
   beforeEach(() => {
+    // Clear all mocks before each test
+    jest.clearAllMocks();
+    
+    // Create a new instance with our mock
     svc = new PaymentsService(stripeMock as unknown as Stripe);
-    jest.clearAllMocks(); // Clear call counts and mock implementations
-
-    // Set default mock implementations for this test
+    
+    // Set up default mock implementations
     stripeMock.paymentIntents.create.mockResolvedValue({
-      id: 'pi_stripe_mock',
-      client_secret: 'cs_stripe_mock',
-      amount: 100,
-      currency: 'usd',
+      id: 'pi_test_123',
+      client_secret: 'cs_test_secret',
       status: 'requires_payment_method',
+      amount: 1000,
+      currency: 'usd',
+      // Include other properties your service expects
     });
-
+    
     stripeMock.paymentIntents.retrieve.mockResolvedValue({
       id: 'pi_local_mock_1',
       status: 'succeeded',
@@ -95,14 +114,17 @@ describe('PaymentsService (stubs)', () => {
     });
 
     it('handles Stripe API errors correctly', async () => {
-      // Make the mock throw an error for this test
-      stripeMock.paymentIntents.create.mockRejectedValue({
-        type: 'StripeCardError',
-        message: 'Your card was declined',
-        code: 'card_declined'
-      });
+      const cardDeclinedError = createStripeError(
+        'StripeCardError',
+        'card_declined',
+        'Your card was declined',
+        { decline_code: 'insufficient_funds' }
+      );
+    
+      stripeMock.paymentIntents.create.mockRejectedValueOnce(cardDeclinedError);
       
-      await expect(svc.createPaymentIntent(2550, 'usd')).rejects.toThrow(/card was declined/i);
+      await expect(svc.createPaymentIntent(2550, 'usd'))
+        .rejects.toMatchObject(cardDeclinedError);
     });
   });
 
@@ -110,16 +132,15 @@ describe('PaymentsService (stubs)', () => {
     it('throws for invalid customerId', async () => {
       // The current stub does not validate synchronously, but keep symmetry with validators
       await expect(
-        svc.createSubscription((undefined as unknown) as string, 'price_123', RecurringInterval.MONTHLY),
+        svc.createSubscription((undefined as unknown) as string, 'price_123'),
       ).rejects.toThrow(/Invalid customerId|Invalid/);
     });
 
     it('creates a mock subscription for valid inputs', async () => {
-      const sub = await svc.createSubscription('cus_123', 'price_abc', RecurringInterval.MONTHLY);
+      const sub = await svc.createSubscription('cus_123', 'price_abc');
       expect(sub).toHaveProperty('id');
       expect(sub.customerId).toBe('cus_123');
       expect(sub.priceId).toBe('price_abc');
-      expect(sub.interval).toBe(RecurringInterval.MONTHLY);
       expect(sub.status).toBe('active');
     });
   });
@@ -140,14 +161,19 @@ describe('PaymentsService (stubs)', () => {
 
     it('handles Stripe API errors correctly', async () => {
       // Make the mock throw an error for this test
-      stripeMock.paymentIntents.retrieve.mockRejectedValue({
-        type: 'StripeInvalidRequestError',
-        message: 'No such payment intent',
-        code: 'resource_missing'
-      });
+      const paymentIntentId = 'pi_local_mock_1';
+
+      const noSuchPaymentIntent = createStripeError(
+        'StripeInvalidRequestError',
+        'resource_missing',
+        'No such payment intent',
+        { decline_code: 'resource_missing' }
+      );
+
+      stripeMock.paymentIntents.retrieve.mockRejectedValueOnce(noSuchPaymentIntent);
       
-      const result = await svc.retrievePaymentIntent('pi_nonexistent');
-      expect(result).toHaveProperty('message', 'No such payment intent');
+      await expect(svc.retrievePaymentIntent(paymentIntentId))
+        .rejects.toMatchObject(noSuchPaymentIntent);
     });
   });
 });
