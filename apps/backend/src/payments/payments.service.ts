@@ -130,10 +130,9 @@ export class PaymentsService {
    *                ( 'weekly' | 'monthly' | 'bimonthly' | 'quarterly' | 'annually')
    * @returns string - either an empty string to signify good paramters, or an error message
    */
-  private validateSubscriptionParams(
+  private validateCreateSubscriptionParams(
     customerId: string,
     priceId: string,
-    interval: RecurringInterval,
   ): string {
     if (!customerId || typeof customerId !== 'string') {
       this.logger.warn('createSubscription called with invalid customerId');
@@ -142,18 +141,6 @@ export class PaymentsService {
     if (!priceId || typeof priceId !== 'string') {
       this.logger.warn('createSubscription called with invalid priceId');
       return 'Invalid priceId';
-    }
-    if (!interval || typeof interval !== 'string') {
-      this.logger.warn('createSubscription called with invalid interval');
-      return 'Invalid interval';
-    }
-
-    // Basic check that interval is one of the allowed values. We rely on the
-    // RecurringInterval type at compile-time, but validate at runtime too.
-    const allowed = ['weekly', 'monthly', 'bimonthly', 'quarterly', 'annually'];
-    if (!allowed.includes(interval as string)) {
-      this.logger.warn('createSubscription called with unsupported interval: ' + interval);
-      return 'Invalid interval value';
     }
 
     return '';
@@ -167,14 +154,11 @@ export class PaymentsService {
    *
    * @param customerId string - ID of the customer in the payment provider
    * @param priceId string - ID of the price/product to subscribe the customer to
-   * @param interval enum RecurringInterval - billing interval
-   *                ( 'weekly' | 'monthly' | 'bimonthly' | 'quarterly' | 'annually')
    * @returns Promise resolving to a Subscription-like object
    */
   async createSubscription(
     customerId: string,
     priceId: string,
-    interval: RecurringInterval,
   ): Promise<{
     id: string;
     customerId: string;
@@ -182,17 +166,25 @@ export class PaymentsService {
     interval: RecurringInterval;
     status: string;
   }> {
-    // TODO: Call provider SDK to create subscription, return provider response.
-    const mockSub = {
-      id: `sub_mock_${Date.now()}`,
-      customerId,
-      priceId,
-      interval,
-      status: 'active',
-    };
+    this.validateCreateSubscriptionParams(customerId, priceId)
+    const subscription: Stripe.Subscription = await this.stripe.subscriptions.create({
+      customer: customerId,
+      items: [
+        {
+          price: priceId,
+        },
+      ],
+    });
 
-    this.logger.debug(`createSubscription (stub) -> ${mockSub.id}`);
-    return mockSub;
+    this.logger.debug(`createSubscription (stub) -> ${subscription.id}`);
+
+    return {
+      id: subscription.id,
+      customerId: subscription.customer as string,
+      priceId: subscription.items.data[0].price.id,
+      interval: subscription.items.data[0].plan.interval as RecurringInterval,
+      status: subscription.status
+    };
   }
 
   /**

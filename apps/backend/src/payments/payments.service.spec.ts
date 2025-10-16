@@ -102,7 +102,7 @@ describe('PaymentsService (stubs)', () => {
         code: 'card_declined'
       });
       
-      await expect(svc.createPaymentIntent(2550, 'USD')).rejects.toThrow(/card was declined/i);
+      await expect(svc.createPaymentIntent(2550, 'usd')).rejects.toThrow(/card was declined/i);
     });
   });
 
