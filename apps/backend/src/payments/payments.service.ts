@@ -26,10 +26,16 @@ export class PaymentsService {
     currency: string,
     metadata?: PaymentIntentMetadata,
   ): string {
+
+    if (typeof amount === 'undefined') {
+      this.logger.warn('createPaymentIntent called with invalid amount: ' + amount);
+      return 'Invalid amount: amount needs to be defined';
+    }
+
     // amount is expected to already be in the smallest currency unit (e.g. cents)
     if (!Number.isFinite(amount) || amount < 0) {
       this.logger.warn('createPaymentIntent called with invalid amount: ' + amount);
-      return 'Invalid amount: must be a number > 0';
+      return 'Invalid amount: must be a number >= 0';
     }
 
     if (amount % 1 !== 0) {
@@ -37,16 +43,16 @@ export class PaymentsService {
       return 'Invalid amount: amount is already in lowest currency unit, so there should be no decimals'
     }
 
+    if (!currency || typeof currency !== 'string') {
+      this.logger.warn('createPaymentIntent called with invalid currency: ' + currency);
+      return 'Invalid currency';
+    }
+
     // Since most donations are going to be in USD just going to do this check here instead of
     //  waiting until Stripe rejects it:
     if (currency === 'usd' && amount < 50) {
       this.logger.warn('createPaymentIntent called with less than 50 cents (USD): was called with ' + amount)
       return 'Invalid amount, US currency donations must be at least 50 cents';
-    }
-
-    if (!currency || typeof currency !== 'string') {
-      this.logger.warn('createPaymentIntent called with invalid currency: ' + currency);
-      return 'Invalid currency';
     }
 
     // Basic ISO currency code check (3 letters)
@@ -89,7 +95,9 @@ export class PaymentsService {
     metadata?: PaymentIntentMetadata;
     transactionId?: string;
   }> {
-    currency = currency.toLowerCase();
+    if (currency) {
+      currency = currency.toLowerCase();
+    }
     const errorMsg = this.validateCreatePaymentIntentParams(amount, currency, metadata);
     if (errorMsg !== '') {
       throw new Error(errorMsg);
@@ -226,51 +234,3 @@ export class PaymentsService {
     }
   }
 }
-
-// Define a type-safe mock that matches Stripe's interface structure
-const stripeMock = {
-  paymentIntents: {
-    create: jest.fn(),
-    retrieve: jest.fn(),
-    update: jest.fn(),
-    cancel: jest.fn(),
-  },
-  subscriptions: {
-    create: jest.fn(),
-    retrieve: jest.fn(),
-    update: jest.fn(),
-    cancel: jest.fn(),
-  },
-  // Add other Stripe resources as needed
-};
-
-// Mock the Stripe constructor to return our mock
-jest.mock('stripe', () => {
-  return jest.fn().mockImplementation(() => stripeMock);
-});
-
-describe('PaymentsService', () => {
-  let svc: PaymentsService;
-
-  beforeEach(() => {
-    // Clear all mocks before each test
-    jest.clearAllMocks();
-    
-    // Create a new instance with our mock
-    svc = new PaymentsService(stripeMock as unknown as Stripe);
-    
-    // Set up default mock implementations
-    stripeMock.paymentIntents.create.mockResolvedValue({
-      id: 'pi_test_123',
-      client_secret: 'cs_test_secret',
-      status: 'requires_payment_method',
-      amount: 1000,
-      currency: 'usd',
-      // Include other properties your service expects
-    });
-    
-    // More default mock implementations...
-  });
-
-  // Test cases...
-});

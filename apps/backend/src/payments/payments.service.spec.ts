@@ -73,23 +73,67 @@ describe('PaymentsService', () => {
   });
 
   describe('createPaymentIntent', () => {
-    it('throws for invalid (too small for any currency) amount', async () => {
-      await expect(svc.createPaymentIntent(0, 'usd')).rejects.toThrow(
-        /Invalid amount/i,
+    it('throws for invalid (negative) amount', async () => {
+      await expect(svc.createPaymentIntent(-1, 'usd')).rejects.toThrow(
+        'Invalid amount: must be a number >= 0',
       );
+    });
+
+    it('throws for invalid amount (negative value) where currency is not usd', async () => {
+      await expect(svc.createPaymentIntent(-1, 'eur')).rejects.toThrow(
+        'Invalid amount: must be a number >= 0',
+      );
+    });
+
+    it('returns a well-formed payment intent for valid input (amount=0) where currency is not usd', async () => {
+      const pi = await svc.createPaymentIntent(0, 'eur', { orderId: '123' });
+      expect(pi).toHaveProperty('id');
+      expect(pi).toHaveProperty('clientSecret');
+      expect(pi.amount).toBe(0);
+      expect(pi.currency).toBe('eur');
+      expect(pi.status).toBe(DonationStatus.PENDING);
+      expect(pi.metadata).toEqual({ orderId: '123' });
     });
 
     it('throws for invalid (currency that has decimals) amount', async () => {
       await expect(svc.createPaymentIntent(50.01, 'usd')).rejects.toThrow(
-        /Invalid amount/i,
+        'Invalid amount: amount is already in lowest currency unit, so there should be no decimals',
       );
     })
 
     it('throws for invalid usd of amount < 50 cents', async () => {
       await expect(svc.createPaymentIntent(24, 'usd')).rejects.toThrow(
-        /Invalid amount/i,
+        'Invalid amount, US currency donations must be at least 50 cents',
       );
     })
+
+    it('returns a well-formed payment intent for valid input (amount=50) where currency is usd', async () => {
+      const pi = await svc.createPaymentIntent(50, 'usd', { orderId: '123' });
+      expect(pi).toHaveProperty('id');
+      expect(pi).toHaveProperty('clientSecret');
+      expect(pi.amount).toBe(50);
+      expect(pi.currency).toBe('usd');
+      expect(pi.status).toBe(DonationStatus.PENDING);
+      expect(pi.metadata).toEqual({ orderId: '123' });
+    });
+
+    it('throws for null currency', async () => {
+      await expect(svc.createPaymentIntent(10, null)).rejects.toThrow(
+        /Invalid currency/i,
+      );
+    });
+
+    it('throws for undefined currency', async () => {
+      await expect(svc.createPaymentIntent(10, null)).rejects.toThrow(
+        /Invalid currency/i,
+      );
+    });
+
+    it('throws for non-string currency', async () => {
+      await expect(svc.createPaymentIntent(10, 0 as unknown as string)).rejects.toThrow(
+        /Invalid currency/i,
+      );
+    });
 
     it('throws for currency length < 3', async () => {
       await expect(svc.createPaymentIntent(10, 'a')).rejects.toThrow(
@@ -102,7 +146,7 @@ describe('PaymentsService', () => {
         /Invalid currency/i,
       );
     });
-    
+
     it('returns a well-formed payment intent for valid input', async () => {
       const pi = await svc.createPaymentIntent(2550, 'USD', { orderId: '123' });
       expect(pi).toHaveProperty('id');
