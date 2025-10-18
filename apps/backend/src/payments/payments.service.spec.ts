@@ -372,8 +372,18 @@ describe('PaymentsService', () => {
   });
 
   describe('retrievePaymentIntent', () => {
-    it('throws for invalid id', async () => {
+    it('throws for undedined id', async () => {
       await expect(svc.retrievePaymentIntent(undefined))
+        .rejects.toThrow(/Invalid paymentIntentId/i);
+    });
+
+    it('throws for id of invalid type', async () => {
+      await expect(svc.retrievePaymentIntent(3 as unknown as string))
+        .rejects.toThrow(/Invalid paymentIntentId/i);
+    });
+
+    it('throws for an empty id', async () => {
+      await expect(svc.retrievePaymentIntent(''))
         .rejects.toThrow(/Invalid paymentIntentId/i);
     });
 

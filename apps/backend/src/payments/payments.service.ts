@@ -215,6 +215,20 @@ export class PaymentsService {
   }
 
   /**
+   * Validates the parameters for retrieve payment intent
+   * 
+   * @param paymentIntentId 
+   * @param status 
+   */
+  private validateRetrievePaymentIntentParams(paymentIntentId: string): string {
+    if (!paymentIntentId || typeof paymentIntentId !== 'string') {
+      this.logger.warn('retrievePaymentIntent called with invalid id');
+      return 'Invalid paymentIntentId';
+    }
+    return ''
+  }
+
+  /**
    * Retrieve a payment intent by id.
    *
    * Notes:
@@ -226,23 +240,18 @@ export class PaymentsService {
    */
   async retrievePaymentIntent(paymentIntentId: string): Promise<{
     paymentIntentId: string;
-    status: string;
-    amount?: number;
   } | null> {
-    if (!paymentIntentId || typeof paymentIntentId !== 'string') {
-      this.logger.warn('retrievePaymentIntent called with invalid id');
-      throw new Error('Invalid paymentIntentId');
-    }
-
     try {
+      const errorMsg = this.validateRetrievePaymentIntentParams(paymentIntentId);
+      if (errorMsg !== '') {
+        throw new Error(errorMsg);
+      }  
       const paymentIntent: Stripe.PaymentIntent = await this.stripe.paymentIntents.retrieve(
         paymentIntentId
       );
       
       return {
         paymentIntentId: paymentIntent.id,
-        status: paymentIntent.status,
-        amount: paymentIntent.amount,
       };
     } catch (err) {
       this.logger.error(`Error retrieving payment intent: ${err.message}`);
