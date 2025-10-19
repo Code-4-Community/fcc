@@ -41,5 +41,3 @@ Thumbs.db
 # Environment file
 *.env
 *.env.*
-!example.env.NM_TRASH_PENDING_DELETE/
-.NM_TRASH_PENDING_DELETE/
