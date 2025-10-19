@@ -1,15 +1,15 @@
 import { Test } from '@nestjs/testing';
-import { DonationsService } from '../donations.service';
+import { DonationsService } from './donations.service';
 import {
   Donation,
   DonationType,
   RecurringInterval,
   DonationStatus,
-} from '../donation.entity';
+} from './donation.entity';
 import { Repository } from 'typeorm/repository/Repository';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { CreateDonationDto } from '../dtos/create-donation-dto';
-import { DonationResponseDto } from '../dtos/donation-response-dto';
+import { CreateDonationDto } from './dtos/create-donation-dto';
+import { DonationResponseDto } from './dtos/donation-response-dto';
 import { BadRequestException } from '@nestjs/common';
 import { FindManyOptions, FindOneOptions, FindOptionsWhere } from 'typeorm';
 

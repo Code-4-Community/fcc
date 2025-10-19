@@ -1,18 +1,18 @@
-import { recurringInterval } from '../../donations/donation.entity';
+import { RecurringInterval } from '../../donations/donation.entity';
 
 export function normalizeInterval(
   input: string | null,
-): recurringInterval | null {
+): RecurringInterval | null {
   if (!input) {
     return null;
   }
 
   const normalized = input.toLowerCase().trim();
 
-  return Object.values(recurringInterval).includes(
-    normalized as recurringInterval,
+  return Object.values(RecurringInterval).includes(
+    normalized as RecurringInterval,
   )
-    ? (normalized as recurringInterval)
+    ? (normalized as RecurringInterval)
     : null;
 }
 

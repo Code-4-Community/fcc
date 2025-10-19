@@ -1,9 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateDonationDTO, DonationResponseDTO } from './dtos';
+import { CreateDonationDto } from './dtos/create-donation-dto';
+import { DonationResponseDto } from './dtos/donation-response-dto';
+import { PublicDonationDto } from './dtos/public-donation-dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Donation, donationType } from './donation.entity';
+import { Donation, DonationType } from './donation.entity';
 import { Repository } from 'typeorm';
-import { PublicDonationDTO } from './dtos';
 
 @Injectable()
 export class DonationsService {
@@ -13,14 +14,14 @@ export class DonationsService {
   ) {}
 
   async create(
-    createDonationDTO: CreateDonationDTO,
-  ): Promise<DonationResponseDTO> {
+    createDonationDTO: CreateDonationDto,
+  ): Promise<DonationResponseDto> {
     if (createDonationDTO.amount <= 0) {
       throw new BadRequestException('Donation amount must be positive.');
     }
 
     if (
-      createDonationDTO.donationType == donationType.Recurring &&
+      createDonationDTO.donationType == DonationType.RECURRING &&
       !createDonationDTO.recurringInterval
     ) {
       throw new BadRequestException(
@@ -29,7 +30,7 @@ export class DonationsService {
     }
 
     if (
-      createDonationDTO.donationType == donationType.OneTime &&
+      createDonationDTO.donationType == DonationType.ONE_TIME &&
       createDonationDTO.recurringInterval
     ) {
       throw new BadRequestException(
@@ -48,35 +49,42 @@ export class DonationsService {
 
     return {
       id: savedDonation.id,
-      stored: donation,
-      createdAt: savedDonation.createdAt.toISOString(),
-      updatedAt: savedDonation.updatedAt.toISOString(),
+      firstName: savedDonation.firstName,
+      lastName: savedDonation.lastName,
+      email: savedDonation.email,
+      amount: savedDonation.amount,
+      isAnonymous: savedDonation.isAnonymous,
+      donationType: savedDonation.donationType,
+      recurringInterval: savedDonation.recurringInterval,
+      dedicationMessage: savedDonation.dedicationMessage,
+      showDedicationPublicly: savedDonation.showDedicationPublicly,
+      status: savedDonation.status,
+      transactionId: savedDonation.transactionId,
+      createdAt: savedDonation.createdAt,
+      updatedAt: savedDonation.updatedAt,
     };
   }
 
-  async findAll(): Promise<DonationResponseDTO[]> {
+  async findAll(): Promise<DonationResponseDto[]> {
     const donations: Donation[] = await this.donationRepository.find();
 
-    const donationResponseDtos: DonationResponseDTO[] = donations.map(
+    const donationResponseDtos: DonationResponseDto[] = donations.map(
       (donation) => {
         return {
           id: donation.id,
-
-          stored: {
-            firstName: donation.firstName,
-            lastName: donation.lastName,
-            email: donation.email,
-            amount: donation.amount,
-            isAnonymous: donation.isAnonymous,
-            donationType: donation.donationType,
-            recurringInterval: donation.recurringInterval,
-            dedicationMessage: donation.dedicationMessage,
-            showDedicationPublicly: donation.showDedicationPublicly,
-          },
-
-          createdAt: donation.createdAt.toISOString(),
-
-          updatedAt: donation.updatedAt.toISOString(),
+          firstName: donation.firstName,
+          lastName: donation.lastName,
+          email: donation.email,
+          amount: donation.amount,
+          isAnonymous: donation.isAnonymous,
+          donationType: donation.donationType,
+          recurringInterval: donation.recurringInterval,
+          dedicationMessage: donation.dedicationMessage,
+          showDedicationPublicly: donation.showDedicationPublicly,
+          status: donation.status,
+          transactionId: donation.transactionId,
+          createdAt: donation.createdAt,
+          updatedAt: donation.updatedAt,
         };
       },
     );
@@ -84,7 +92,7 @@ export class DonationsService {
     return donationResponseDtos;
   }
 
-  async findPublic(): Promise<PublicDonationDTO[]> {
+  async findPublic(): Promise<PublicDonationDto[]> {
     const publicDonationDtos = this.donationRepository.find({
       where: { showDedicationPublicly: true },
     });
@@ -92,25 +100,21 @@ export class DonationsService {
     return (await publicDonationDtos).map((dto) => {
       return {
         id: dto.id,
-
         amount: dto.amount,
-
         donationType: dto.donationType,
-
+        recurringInterval: dto.recurringInterval,
         dedicationMessage: dto.dedicationMessage,
-
         isAnonymous: dto.isAnonymous,
-
         donorName: dto.isAnonymous
           ? 'Anonymous'
           : dto.firstName + ' ' + dto.lastName,
-
-        createdAt: dto.createdAt.toISOString(),
+        status: dto.status,
+        createdAt: dto.createdAt,
       };
     });
   }
 
-  async findOne(id: number): Promise<DonationResponseDTO | null> {
+  async findOne(id: number): Promise<DonationResponseDto | null> {
     const donation = await this.donationRepository.findOne({
       where: { id },
     });
@@ -121,27 +125,27 @@ export class DonationsService {
 
     return {
       id: donation.id,
-      createdAt: donation.createdAt.toISOString(),
-      stored: {
-        firstName: donation.firstName,
-        lastName: donation.lastName,
-        email: donation.email,
-        amount: donation.amount,
-        isAnonymous: donation.isAnonymous,
-        donationType: donation.donationType,
-        dedicationMessage: donation.dedicationMessage,
-        recurringInterval: donation.recurringInterval,
-        showDedicationPublicly: donation.showDedicationPublicly,
-      },
-      updatedAt: donation.updatedAt.toISOString(),
+      firstName: donation.firstName,
+      lastName: donation.lastName,
+      email: donation.email,
+      amount: donation.amount,
+      isAnonymous: donation.isAnonymous,
+      donationType: donation.donationType,
+      recurringInterval: donation.recurringInterval,
+      dedicationMessage: donation.dedicationMessage,
+      showDedicationPublicly: donation.showDedicationPublicly,
+      status: donation.status,
+      transactionId: donation.transactionId,
+      createdAt: donation.createdAt,
+      updatedAt: donation.updatedAt,
     };
   }
 
   async getTotalDonations(): Promise<{ total: number; count: number }> {
     const donations = await this.findAll();
     const total = donations.reduce(
-      (donationsTotal: number, currentDonation: DonationResponseDTO) => {
-        return donationsTotal + currentDonation.stored.amount;
+      (donationsTotal: number, currentDonation: DonationResponseDto) => {
+        return donationsTotal + currentDonation.amount;
       },
       0,
     );
