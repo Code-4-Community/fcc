@@ -2,7 +2,6 @@ import { PaymentsService } from './payments.service';
 import { DonationStatus } from '../donations/donation.entity';
 import Stripe from 'stripe';
 
-// Define a type-safe mock that matches Stripe's interface structure
 const stripeMock = {
   paymentIntents: {
     create: jest.fn(),
@@ -16,7 +15,6 @@ const stripeMock = {
     update: jest.fn(),
     cancel: jest.fn(),
   },
-  // Add other Stripe resources as needed
 };
 
 // Mock the Stripe constructor to return our mock
@@ -31,7 +29,6 @@ function createStripeError(type, code, message, extraProps = {}) {
     code,
     message,
     ...extraProps,
-    // Add common error properties that Stripe would include
     raw: {
       type: type.replace('Stripe', '').toLowerCase(),
       code,

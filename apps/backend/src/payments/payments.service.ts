@@ -10,7 +10,26 @@ import {
  */
 export type PaymentIntentMetadata = Record<string, string>;
 
-// Define a common interface for PaymentIntent responses
+/**
+ * Interface for object shape returned by service methods that output detailed payment intent info
+ * 
+ * id - The unique identifier for the PaymentIntent, equivalent to what Stripe API returns
+ * clientSecret - The client secret used for client-side confirmation, equivalent to what Stripe API returns
+ * amount - The payment amount in smallest currency unit (e.g., cents), equivalent to what Stripe API returns
+ * currency - The three-letter ISO currency code (e.g., 'usd'), equivalent to what Stripe API returns
+ * status - An enum value from DonationStatus (PENDING, SUCCEEDED, FAILED, CANCELLED), mapped from Stripe's status to these four statuses
+ * metadata - Optional key-value pairs attached to the payment, equivalent to what Stripe API returns
+ * paymentMethodId - The ID of the payment method used, mapped from paymentIntent.payment_method cast as a string
+ * paymentMethodTypes - Array of payment method types enabled for this PaymentIntent, equivalent to what Stripe API returns
+ * created - Unix timestamp representing when the PaymentIntent was created, equivalent to what Stripe API returns
+ * requiresAction - Boolean indicating if the payment requires customer action, determined by checking if paymentIntent.status === 'requires_action'
+ * nextAction - Details about the required next action (if any), equivalent to what Stripe API returns
+ * lastPaymentError - Object containing error details if the payment failed, with properties -
+ * code - The error code, mapped from paymentIntent.last_payment_error.code
+ * message - The error message, mapped from paymentIntent.last_payment_error.message
+ * type - The error type, mapped from paymentIntent.last_payment_error.type
+ * canceledAt - Unix timestamp representing when the PaymentIntent was canceled (if applicable), equivalent to what Stripe API returns
+ */
 interface PaymentIntentResponse {
   id: string;
   clientSecret: string;
@@ -57,7 +76,6 @@ export class PaymentsService {
       return 'Invalid amount: amount needs to be defined';
     }
 
-    // amount is expected to already be in the smallest currency unit (e.g. cents)
     if (!Number.isFinite(amount) || amount < 0) {
       this.logger.warn(
         'createPaymentIntent called with invalid amount: ' + amount,
@@ -77,8 +95,6 @@ export class PaymentsService {
       return 'Invalid currency';
     }
 
-    // Since most donations are going to be in USD just going to do this check here instead of
-    //  waiting until Stripe rejects it:
     if (currency === 'usd' && amount < 50) {
       this.logger.warn(
         'createPaymentIntent called with less than 50 cents (USD): was called with ' +
@@ -87,7 +103,6 @@ export class PaymentsService {
       return 'Invalid amount, US currency donations must be at least 50 cents';
     }
 
-    // Basic ISO currency code check (3 letters)
     if (!/^[a-z]{3}$/i.test(currency)) {
       this.logger.warn(
         'createPaymentIntent called with malformed currency: ' + currency,
@@ -106,12 +121,7 @@ export class PaymentsService {
   /**
    * Create a payment intent.
    *
-   * Notes:
-   * - `amount` is expected in the smallest currency unit (e.g. cents).
-   * - This is a stub. Replace the body with a call to your payment provider SDK and
-   *   map the provider response to the returned shape.
-   *
-   * @param amount number - amount in smallest currency unit (required, positive integer)
+   * @param amount number - amount in smallest currency unit e.g. cents (required, positive integer)
    * @param currency string - ISO currency code, e.g. 'usd' (required)
    * @param metadata object - optional key/value metadata to attach to the payment
    * @returns Promise resolving to a PaymentIntent-like object
@@ -139,7 +149,6 @@ export class PaymentsService {
           amount,
           currency,
           metadata,
-          // Does GiveLively accept other bank accounts and do we care?
           payment_method_types: ['card', 'us_bank_accounts'],
         });
 
@@ -258,10 +267,6 @@ export class PaymentsService {
   /**
    * Retrieve a payment intent by id.
    *
-   * Notes:
-   * - Stubbed to return a mock object. In a real implementation, map provider fields
-   *   to the returned shape and return null or throw a NotFound-like error when appropriate.
-   *
    * @param paymentIntentId string - provider payment intent id
    * @returns Promise resolving to a PaymentIntent-like object
    */
@@ -301,23 +306,25 @@ export class PaymentsService {
         return DonationStatus.CANCELLED;
 
       case 'requires_payment_method':
-        // The payment attempt failed, customer needs to provide a new payment method
         return DonationStatus.FAILED;
 
       case 'processing':
       case 'requires_confirmation':
       case 'requires_action':
       case 'requires_capture':
-        // These statuses indicate the payment is still in progress
         return DonationStatus.PENDING;
 
       default:
-        // For any unknown status, default to PENDING
         return DonationStatus.PENDING;
     }
   }
 
-  // Create a helper method to transform Stripe PaymentIntent to your response
+  /**
+   * Maps Stripe API payment Intent to response returned by service methods for a payment intent
+   * 
+   * @param paymentIntent the payment intent object returned directly by the stripe api
+   * @returns A PaymentIntentResponse object that is closer to data used in backend
+   */
   private mapPaymentIntentToResponse(
     paymentIntent: Stripe.PaymentIntent,
   ): PaymentIntentResponse {
