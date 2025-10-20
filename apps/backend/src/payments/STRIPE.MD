@@ -72,6 +72,6 @@ Testing
 
 The Stripe integration can be tested using:
 
-- Stripe's test mode (sandbox) with test API keys
+- Stripe's test mode or sandbox with test API keys
 - Stripe's test cards found from: https://docs.stripe.com/testing
 - The provided unit tests with mocked Stripe responses
