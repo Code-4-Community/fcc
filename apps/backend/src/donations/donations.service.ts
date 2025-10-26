@@ -38,12 +38,6 @@ export class DonationsService {
       );
     }
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailPattern.test(createDonationDTO.email.trim())) {
-      throw new BadRequestException('Invalid email format.');
-    }
-
     const donation = await this.donationRepository.create(createDonationDTO);
     const savedDonation = await this.donationRepository.save(donation);
 
@@ -93,9 +87,7 @@ export class DonationsService {
   }
 
   async findPublic(): Promise<PublicDonationDto[]> {
-    const publicDonationDtos = this.donationRepository.find({
-      where: { showDedicationPublicly: true },
-    });
+    const publicDonationDtos = this.findAll();
 
     return (await publicDonationDtos).map((dto) => {
       return {
@@ -103,11 +95,13 @@ export class DonationsService {
         amount: dto.amount,
         donationType: dto.donationType,
         recurringInterval: dto.recurringInterval,
-        dedicationMessage: dto.dedicationMessage,
+        ...(dto.showDedicationPublicly
+          ? { dedicationMessage: dto.dedicationMessage }
+          : {}),
         isAnonymous: dto.isAnonymous,
-        donorName: dto.isAnonymous
-          ? 'Anonymous'
-          : dto.firstName + ' ' + dto.lastName,
+        ...(!dto.isAnonymous
+          ? { donorName: dto.firstName + ' ' + dto.lastName }
+          : {}),
         status: dto.status,
         createdAt: dto.createdAt,
       };
@@ -142,13 +136,10 @@ export class DonationsService {
   }
 
   async getTotalDonations(): Promise<{ total: number; count: number }> {
-    const donations = await this.findAll();
-    const total = donations.reduce(
-      (donationsTotal: number, currentDonation: DonationResponseDto) => {
-        return donationsTotal + currentDonation.amount;
-      },
-      0,
+    const [donations] = await this.donationRepository.manager.query(
+      `SELECT COUNT(amount) AS count, SUM(amount) AS total FROM donation`,
     );
-    return { total: total, count: donations.length };
+
+    return { total: donations.total, count: donations.count };
   }
 }

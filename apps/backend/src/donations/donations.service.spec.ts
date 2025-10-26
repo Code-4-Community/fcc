@@ -1,17 +1,17 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { DonationsService } from './donations.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository, FindOneOptions, FindOptionsWhere } from 'typeorm';
 import {
-  Donation,
   DonationType,
   RecurringInterval,
+  Donation,
   DonationStatus,
 } from './donation.entity';
-import { Repository } from 'typeorm/repository/Repository';
-import { getRepositoryToken } from '@nestjs/typeorm';
+import { DonationsService } from './donations.service';
 import { CreateDonationDto } from './dtos/create-donation-dto';
 import { DonationResponseDto } from './dtos/donation-response-dto';
-import { BadRequestException } from '@nestjs/common';
-import { FindManyOptions, FindOneOptions, FindOptionsWhere } from 'typeorm';
+import { PublicDonationDto } from './dtos/public-donation-dto';
 
 // mock donations
 
@@ -76,7 +76,7 @@ const validCreateDonation1: CreateDonationDto = {
 
   donationType: DonationType.ONE_TIME,
 
-  dedicationMessage: '',
+  dedicationMessage: 'I love fcc!',
 
   showDedicationPublicly: false,
 };
@@ -97,7 +97,7 @@ const validDonation1: Donation = {
 
   donationType: DonationType.ONE_TIME,
 
-  dedicationMessage: '',
+  dedicationMessage: 'I love fcc!',
 
   showDedicationPublicly: false,
 
@@ -139,10 +139,44 @@ const validDonation2: Donation = {
 
   recurringInterval: undefined,
 
-  dedicationMessage: '',
+  dedicationMessage: 'I love fcc!',
 };
 
-const allDonations: Donation[] = [validDonation1, validDonation2];
+const validDonation3: Donation = {
+  id: 2,
+
+  firstName: 'Hannah',
+
+  lastName: 'Smith',
+
+  email: 'hannah.smith@gmail.com',
+
+  amount: 100,
+
+  isAnonymous: false,
+
+  donationType: DonationType.ONE_TIME,
+
+  showDedicationPublicly: false,
+
+  status: DonationStatus.PENDING,
+
+  transactionId: null,
+
+  createdAt: new Date(2025, 6, 4),
+
+  updatedAt: new Date(2026, 7, 1),
+
+  recurringInterval: undefined,
+
+  dedicationMessage: 'I love fcc!',
+};
+
+const allDonations: Donation[] = [
+  validDonation1,
+  validDonation2,
+  validDonation3,
+];
 
 const expectedDonations: DonationResponseDto[] = allDonations.map(
   (donation) => {
@@ -165,17 +199,46 @@ const expectedDonations: DonationResponseDto[] = allDonations.map(
   },
 );
 
+const publicInfoDonations: PublicDonationDto[] = allDonations.map((dto) => {
+  return {
+    id: dto.id,
+    amount: dto.amount,
+    donationType: dto.donationType,
+    recurringInterval: dto.recurringInterval,
+    ...(dto.showDedicationPublicly
+      ? { dedicationMessage: dto.dedicationMessage }
+      : {}),
+    isAnonymous: dto.isAnonymous,
+    ...(!dto.isAnonymous
+      ? { donorName: dto.firstName + ' ' + dto.lastName }
+      : {}),
+    status: dto.status,
+    createdAt: dto.createdAt,
+  };
+});
+
 describe('DonationsService', () => {
   let service: DonationsService;
-  let repo: jest.Mocked<Repository<Donation>>;
+  let repo: jest.Mocked<Partial<Repository<Donation>>>;
 
   beforeAll(async () => {
     const repoMock = {
-      save: jest.fn(),
+      manager: {
+        query: jest.fn().mockResolvedValue([
+          {
+            count: allDonations.length,
+            total: allDonations.reduce(
+              (total, current) => total + current.amount,
+              0,
+            ),
+          },
+        ]),
+      },
+      save: jest.fn().mockResolvedValue(validDonation1),
       create: jest.fn(),
-      find: jest.fn(),
+      find: jest.fn().mockResolvedValue(allDonations),
       findOne: jest.fn(),
-    } as unknown as jest.Mocked<Repository<Donation>>;
+    } as unknown as jest.Mocked<Partial<Repository<Donation>>>;
 
     const app = await Test.createTestingModule({
       providers: [
@@ -186,19 +249,7 @@ describe('DonationsService', () => {
 
     service = app.get<DonationsService>(DonationsService);
     repo = app.get(getRepositoryToken(Donation));
-    repo.find.mockResolvedValue(allDonations);
-    repo.find.mockImplementation((options?: FindManyOptions<Donation>) => {
-      const where = options?.where;
-      const isPublicQuery =
-        where &&
-        !Array.isArray(where) &&
-        (where as FindOptionsWhere<Donation>).showDedicationPublicly === true;
-      const publicDonations = allDonations.filter(
-        (donation) => donation.showDedicationPublicly,
-      );
-      return Promise.resolve(isPublicQuery ? publicDonations : allDonations);
-    });
-    repo.save.mockResolvedValue(validDonation1);
+
     repo.findOne.mockImplementation(
       async (options?: FindOneOptions<Donation>) => {
         const where = options?.where;
@@ -268,29 +319,9 @@ describe('DonationsService', () => {
   describe('Find public donations method', () => {
     it('should return all public donations', async () => {
       const publicDonations = await service.findPublic();
-      expect(publicDonations).toEqual([
-        {
-          id: validDonation2.id,
-
-          amount: validDonation2.amount,
-
-          donationType: validDonation2.donationType,
-
-          dedicationMessage: validDonation2.dedicationMessage,
-
-          isAnonymous: validDonation2.isAnonymous,
-
-          donorName: validDonation2.isAnonymous
-            ? 'Anonymous'
-            : validDonation2.firstName + ' ' + validDonation2.lastName,
-
-          status: validDonation2.status,
-
-          recurringInterval: validDonation2.recurringInterval,
-
-          createdAt: validDonation2.createdAt,
-        },
-      ]);
+      expect(JSON.stringify(publicDonations)).toEqual(
+        JSON.stringify(publicInfoDonations),
+      );
     });
   });
 
@@ -316,8 +347,9 @@ describe('DonationsService', () => {
     it('should find total amount and count of all donations', async () => {
       const { total, count } = await service.getTotalDonations();
       expect({ total, count }).toEqual({
-        total: validDonation1.amount + validDonation2.amount,
-        count: 2,
+        total:
+          validDonation1.amount + validDonation2.amount + validDonation3.amount,
+        count: 3,
       });
     });
   });
