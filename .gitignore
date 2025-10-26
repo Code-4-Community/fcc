@@ -45,3 +45,4 @@ Thumbs.db
 
 # Yarn releases
 .yarn/releases/
+*.env.*

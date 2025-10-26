@@ -5,6 +5,7 @@ import apiClient from '@api/apiClient';
 import Root from '@containers/root';
 import NotFound from '@containers/404';
 import Test from '@containers/test';
+import { DonationForm } from '@containers/donations/DonationForm';
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,15 @@ const router = createBrowserRouter([
   {
     path: '/test',
     element: <Test />,
+  },
+  {
+    path: '/donate',
+    element: (
+      <DonationForm
+        onSuccess={(id) => console.log('Donation successful:', id)}
+        onError={(err) => console.error('Donation failed:', err)}
+      />
+    ),
   },
 ]);
 
