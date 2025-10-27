@@ -310,7 +310,7 @@ describe('PaymentsService', () => {
       expect(pi.amount).toBe(50);
       expect(pi.currency).toBe('usd');
       expect(pi.status).toBe(DonationStatus.PENDING);
-      expect(pi.metadata).toEqual({ orderId:'123'});
+      expect(pi.metadata).toEqual({ orderId: '123' });
     });
 
     it('throws for null currency', async () => {
@@ -438,7 +438,7 @@ describe('PaymentsService', () => {
   });
 
   describe('retrievePaymentIntent', () => {
-    it('throws for undedined id', async () => {
+    it('throws for undefined id', async () => {
       await expect(svc.retrievePaymentIntent(undefined)).rejects.toThrow(
         /Invalid paymentIntentId/i,
       );
@@ -469,7 +469,7 @@ describe('PaymentsService', () => {
       expect(pi).toHaveProperty('amount', 500); // This matches our mock's return value
       expect(pi).toHaveProperty('currency', 'usd');
       expect(pi).toHaveProperty('status', DonationStatus.SUCCEEDED); // Should map from 'succeeded'
-      expect(pi).toHaveProperty('metadata', { 'orderId': '123' });
+      expect(pi).toHaveProperty('metadata', { orderId: '123' });
       expect(pi).toHaveProperty('paymentMethodId', 'pm_1234567890abcdef');
       expect(pi).toHaveProperty('paymentMethodTypes', ['card']);
       expect(pi).toHaveProperty('created');
