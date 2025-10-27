@@ -36,6 +36,7 @@
     "@aws-sdk/client-cognito-identity-provider": "^3.410.0",
     "@nestjs/cli": "^10.1.17",
     "@nestjs/common": "^10.0.2",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^10.0.2",
     "@nestjs/passport": "^10.0.2",
     "@nestjs/platform-express": "^10.0.2",
@@ -56,6 +57,7 @@
     "react-router-dom": "^6.15.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
+    "stripe": "^19.1.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typeorm": "^0.3.17"
