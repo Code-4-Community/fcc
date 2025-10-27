@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { DonationsModule } from './donations/donations.module';
 import AppDataSource from './data-source';
 
 @Module({
@@ -12,6 +13,7 @@ import AppDataSource from './data-source';
     TypeOrmModule.forRoot(AppDataSource.options),
     UsersModule,
     AuthModule,
+    DonationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
