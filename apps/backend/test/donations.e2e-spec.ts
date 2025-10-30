@@ -8,6 +8,10 @@ import { Donation } from '../src/donations/donation.entity';
 import { User } from '../src/users/user.entity';
 
 describe('Donations (e2e) - expanded stubs', () => {
+  // Increase Jest timeout for slower CI/initialization (DB + Nest app init)
+  // Default is 5000ms which is often too small for integration tests.
+  jest.setTimeout(30000);
+
   let app: INestApplication;
   let donationRepo: Repository<Donation> | null = null;
 
