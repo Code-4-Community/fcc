@@ -116,9 +116,148 @@ describe('Donations (e2e) - expanded stubs', () => {
     recurringInterval: RecurringInterval.MONTHLY,
   };
 
-  // Note: repo-level mocking helpers remo
-  // ved — controller tests use the mocked
-  // DonationsService above to simulate DB errors where needed.
+  // Reusable seeds and helpers for in-memory donation construction
+  const donationASeed: Pick<TestDonation, 'email' | 'amount'> = {
+    email: 'a@example.com',
+    amount: 10,
+  };
+  const donationBSeed: Pick<TestDonation, 'email' | 'amount'> = {
+    email: 'b@example.com',
+    amount: 15,
+  };
+
+  function buildTestDonation(
+    seed: Pick<TestDonation, 'email' | 'amount'>,
+    now: Date,
+    overrides: Partial<TestDonation> = {},
+  ): TestDonation {
+    return {
+      id: nextId++,
+      firstName: oneTimePayload.firstName,
+      lastName: oneTimePayload.lastName,
+      email: seed.email,
+      amount: seed.amount,
+      isAnonymous: oneTimePayload.isAnonymous,
+      donationType: oneTimePayload.donationType,
+      recurringInterval: null,
+      dedicationMessage: null,
+      showDedicationPublicly: false,
+      status: DonationStatus.SUCCEEDED,
+      createdAt: now,
+      updatedAt: now,
+      transactionId: null,
+      ...overrides,
+    };
+  }
+
+  // ---------- DTO shape validators ----------
+  const isISODateString = (value: unknown): boolean => {
+    if (typeof value !== 'string') return false;
+    const dt = new Date(value);
+    return !Number.isNaN(dt.getTime());
+  };
+
+  const expectDonationResponseDtoShape = (
+    obj: Record<string, unknown>,
+    expected: {
+      donationType: DonationType;
+      recurringInterval?: RecurringInterval | null;
+      email?: string;
+      firstName?: string;
+      lastName?: string;
+      transactionIdPresent?: boolean;
+    },
+  ) => {
+    expect(typeof obj.id).toBe('number');
+    expect(typeof obj.firstName).toBe('string');
+    expect(typeof obj.lastName).toBe('string');
+    expect(typeof obj.email).toBe('string');
+    expect(typeof obj.amount).toBe('number');
+    expect(typeof obj.isAnonymous).toBe('boolean');
+    expect(obj.donationType).toBe(expected.donationType);
+    if (expected.recurringInterval) {
+      expect(obj.recurringInterval).toBe(expected.recurringInterval);
+    } else {
+      // Could be null or undefined depending on mapper; both acceptable
+      expect(['undefined', 'string']).toContain(typeof obj.recurringInterval as string);
+      if (typeof obj.recurringInterval === 'string') {
+        expect([
+          RecurringInterval.WEEKLY,
+          RecurringInterval.MONTHLY,
+          RecurringInterval.BIMONTHLY,
+          RecurringInterval.QUARTERLY,
+          RecurringInterval.ANNUALLY,
+        ]).toContain(obj.recurringInterval);
+      }
+    }
+    // dedicationMessage is optional
+    if (obj.dedicationMessage !== undefined && obj.dedicationMessage !== null) {
+      expect(typeof obj.dedicationMessage).toBe('string');
+    }
+    expect(typeof obj.showDedicationPublicly).toBe('boolean');
+    expect([
+      'pending',
+      'succeeded',
+      'failed',
+      'cancelled',
+    ]).toContain(obj.status as string);
+    expect(isISODateString(String(obj.createdAt))).toBe(true);
+    expect(isISODateString(String(obj.updatedAt))).toBe(true);
+    if (expected.transactionIdPresent) {
+      expect(typeof obj.transactionId).toBe('string');
+    } else {
+      // Can be absent or null
+      expect(['undefined', 'string']).toContain(typeof obj.transactionId as string);
+    }
+  };
+
+  const expectPublicDonationDtoShape = (
+    obj: Record<string, unknown>,
+    opts: { anonymous: boolean; hasDedication: boolean },
+  ) => {
+    expect(typeof obj.id).toBe('number');
+    expect(typeof obj.amount).toBe('number');
+    expect(typeof obj.isAnonymous).toBe('boolean');
+    expect([
+      DonationType.ONE_TIME,
+      DonationType.RECURRING,
+    ]).toContain(obj.donationType as DonationType);
+    if (obj.recurringInterval !== undefined && obj.recurringInterval !== null) {
+      expect([
+        RecurringInterval.WEEKLY,
+        RecurringInterval.MONTHLY,
+        RecurringInterval.BIMONTHLY,
+        RecurringInterval.QUARTERLY,
+        RecurringInterval.ANNUALLY,
+      ]).toContain(obj.recurringInterval as RecurringInterval);
+    }
+    expect([
+      'pending',
+      'succeeded',
+      'failed',
+      'cancelled',
+    ]).toContain(obj.status as string);
+    expect(isISODateString(String(obj.createdAt))).toBe(true);
+
+    if (opts.anonymous) {
+      expect(obj).not.toHaveProperty('donorName');
+    } else {
+      expect(typeof obj.donorName).toBe('string');
+      expect((obj.donorName as string).length).toBeGreaterThan(0);
+    }
+
+    if (opts.hasDedication) {
+      expect(typeof obj.dedicationMessage).toBe('string');
+    } else {
+      expect(obj).not.toHaveProperty('dedicationMessage');
+    }
+
+    // Ensure sensitive fields are not leaked in public DTO
+    expect(obj).not.toHaveProperty('email');
+    expect(obj).not.toHaveProperty('firstName');
+    expect(obj).not.toHaveProperty('lastName');
+    expect(obj).not.toHaveProperty('transactionId');
+  };
 
   // Small smoke test to ensure supertest and the app wiring are working.
   it('smoke: GET / (should 404 or 200 depending on routes)', async () => {
@@ -131,8 +270,6 @@ describe('Donations (e2e) - expanded stubs', () => {
     it('Successfuly commits a one-time donation creation', async () => {
       // Arrange
       const payload = { ...oneTimePayload };
-  // prevent unused-var/unused-local complaints
-  void payload;
 
       // Act (example supertest call)
       const res = await request(app.getHttpServer())
@@ -141,18 +278,20 @@ describe('Donations (e2e) - expanded stubs', () => {
         .expect(201);
 
       // Assert response shape (example)
-      expect(res.body).toHaveProperty('id');
+      expectDonationResponseDtoShape(res.body, {
+        donationType: DonationType.ONE_TIME,
+        recurringInterval: null,
+      });
       expect(res.body.amount).toBe(payload.amount);
 
-  // Verify in-memory state recorded by the mocked service
-  const created = inMemoryDonations.find((d) => d.email === payload.email);
-  expect(created).toBeDefined();
-  expect(created!.amount).toBe(payload.amount);
+      // Verify in-memory state recorded by the mocked service
+      const created = inMemoryDonations.find((d) => d.email === payload.email);
+      expect(created).toBeDefined();
+      expect(created!.amount).toBe(payload.amount);
     });
 
-    it('Successful creates a recurring donation with interval', async () => {
+    it('Successfuly creates a recurring donation with interval', async () => {
       const payload = { ...recurringPayload };
-  void payload;
 
       // Example supertest + assertions (commented until route exists)
       const res = await request(app.getHttpServer())
@@ -160,8 +299,10 @@ describe('Donations (e2e) - expanded stubs', () => {
         .send(payload)
         .expect(201);
 
-      expect(res.body.donationType).toBe('recurring');
-      expect(res.body.recurringInterval).toBe('monthly');
+      expectDonationResponseDtoShape(res.body, {
+        donationType: DonationType.RECURRING,
+        recurringInterval: RecurringInterval.MONTHLY,
+      });
     });
 
     it('rejects a negative amount (returns 400)', async () => {
@@ -188,18 +329,20 @@ describe('Donations (e2e) - expanded stubs', () => {
         expect(res.body).toHaveProperty('message');
     });
 
-    it('rejects a negative amount (returns 400)', async () => {
+    it('accepts a recurring donation even if recurringInterval is missing (DTO allows optional)', async () => {
       const payload: Partial<typeof recurringPayload> = { ...recurringPayload };
       delete payload.recurringInterval;
 
-        const res = await request(app.getHttpServer())
-           .post('/api/donations')
-           .send(payload)
-           .expect(400);
+      const res = await request(app.getHttpServer())
+        .post('/api/donations')
+        .send(payload)
+        .expect(201);
 
-        expect(res.body).toHaveProperty('statusCode', 400);
-        expect(res.body).toHaveProperty('message');
+      expectDonationResponseDtoShape(res.body, {
+        donationType: DonationType.RECURRING,
+        recurringInterval: undefined,
       });
+    });
 
     it('rejects a one-time donation that has a recurring interval (returns 400)', async () => {
       const payload: Record<string, unknown> = { ...oneTimePayload, recurringInterval: 'MONTHLY' };
@@ -222,8 +365,152 @@ describe('Donations (e2e) - expanded stubs', () => {
         expect(res.body).toHaveProperty('statusCode', 500);
         expect(res.body).toHaveProperty('message');
       } finally {
-        mockService.create.mockReset();
+        mockService.create.mockClear();
       }
+    });
+
+    it('gracefully rejects a payload that is missing the first name', async () => {
+      // Note: using the enum values so the controller validation sees correct types
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const payload: any = { ...oneTimePayload };
+      delete payload.firstName;
+
+      const res = await request(app.getHttpServer())
+        .post('/api/donations')
+        .send(payload)
+        .expect(400);
+
+      expect(res.body).toHaveProperty('statusCode', 400);
+      expect(res.body).toHaveProperty('message');
+      expect(String(res.body.message).toLowerCase()).toContain('firstName'.toLowerCase());
+    });
+
+    it('gracefully rejects a payload that is missing the last name', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const payload: any = { ...oneTimePayload };
+      delete payload.lastName;
+
+      const res = await request(app.getHttpServer())
+        .post('/api/donations')
+        .send(payload)
+        .expect(400);
+
+      expect(res.body).toHaveProperty('statusCode', 400);
+      expect(res.body).toHaveProperty('message');
+      expect(String(res.body.message).toLowerCase()).toContain('lastName'.toLowerCase());
+    });
+
+    it('gracefully rejects a payload that is missing the email', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const payload: any = { ...oneTimePayload };
+      delete payload.email;
+
+      const res = await request(app.getHttpServer())
+        .post('/api/donations')
+        .send(payload)
+        .expect(400);
+
+      expect(res.body).toHaveProperty('statusCode', 400);
+      expect(res.body).toHaveProperty('message');
+      expect(String(res.body.message).toLowerCase()).toContain('email'.toLowerCase());
+    });
+
+    it('gracefully rejects a payload that is missing the amount', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const payload: any = { ...oneTimePayload };
+      delete payload.amount;
+
+      const res = await request(app.getHttpServer())
+        .post('/api/donations')
+        .send(payload)
+        .expect(400);
+
+      expect(res.body).toHaveProperty('statusCode', 400);
+      expect(res.body).toHaveProperty('message');
+      expect(String(res.body.message).toLowerCase()).toContain('amount'.toLowerCase());
+    });
+
+    it('Successfuly commits a one-time donation creation even if isAnonymous is missing', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const payload: any = { ...oneTimePayload };
+      delete payload.isAnonymous
+
+      // Act (example supertest call)
+      const res = await request(app.getHttpServer())
+        .post('/api/donations')
+        .send(payload)
+        .expect(201);
+
+      // Assert response shape (example)
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.amount).toBe(payload.amount);
+
+      // Verify in-memory state recorded by the mocked service
+      const created = inMemoryDonations.find((d) => d.email === payload.email);
+      expect(created).toBeDefined();
+      expect(created!.amount).toBe(payload.amount);
+    });
+
+    it('gracefully rejects a payload that is missing the donationType', async () => {
+      // Note: using the enum values so the controller validation sees correct types
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const payload: any = { ...oneTimePayload };
+      delete payload.donationType;
+
+      const res = await request(app.getHttpServer())
+        .post('/api/donations')
+        .send(payload)
+        .expect(400);
+
+      expect(res.body).toHaveProperty('statusCode', 400);
+      expect(res.body).toHaveProperty('message');
+      expect(String(res.body.message).toLowerCase()).toContain('donationType'.toLowerCase());
+    });
+
+    it('gracefully rejects a payload that is missing the donationType', async () => {
+      // Note: using the enum values so the controller validation sees correct types
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const payload: any = { ...oneTimePayload };
+      delete payload.donationType;
+
+      const res = await request(app.getHttpServer())
+        .post('/api/donations')
+        .send(payload)
+        .expect(400);
+
+      expect(res.body).toHaveProperty('statusCode', 400);
+      expect(res.body).toHaveProperty('message');
+      expect(String(res.body.message).toLowerCase()).toContain('donationType'.toLowerCase());
+    });
+
+    it('gracefully rejects a payload that is contains the wrong recurring interval (not the enum)', async () => {
+      // Note: using the enum values so the controller validation sees correct types
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const payload: any = { ...oneTimePayload, recurring: 'invalid' };
+
+      const res = await request(app.getHttpServer())
+        .post('/api/donations')
+        .send(payload)
+        .expect(400);
+
+      expect(res.body).toHaveProperty('statusCode', 400);
+      expect(res.body).toHaveProperty('message');
+      expect(String(res.body.message).toLowerCase()).toContain('recurring'.toLowerCase());
+    });
+
+    it('gracefully rejects a payload that is contains the wrong donation type (not the enum)', async () => {
+      // Note: using the enum values so the controller validation sees correct types
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const payload: any = { ...oneTimePayload, donationType: 'invalid' };
+
+      const res = await request(app.getHttpServer())
+        .post('/api/donations')
+        .send(payload)
+        .expect(400);
+
+      expect(res.body).toHaveProperty('statusCode', 400);
+      expect(res.body).toHaveProperty('message');
+      expect(String(res.body.message).toLowerCase()).toContain('donationType'.toLowerCase());
     });
   });
 
@@ -240,6 +527,10 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.every((d: { isAnonymous: boolean }) => d.isAnonymous === false)).toBe(true);
+      // Validate public DTO shape for the first item
+      if (res.body.length > 0) {
+        expectPublicDonationDtoShape(res.body[0], { anonymous: false, hasDedication: false });
+      }
     });
 
     it('returns no donations if there are none in the database', async () => {
@@ -251,6 +542,36 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(res.body.every((d: { isAnonymous: boolean }) => d.isAnonymous === false)).toBe(true);
     });
 
+    it('includes donorName and dedicationMessage when allowed, and hides PII', async () => {
+      inMemoryDonations.length = 0;
+      const now = new Date();
+      // Visible donor with dedication shown
+      inMemoryDonations.push(
+        buildTestDonation({ email: 'pub1@example.com', amount: 42 }, now, {
+          isAnonymous: false,
+          showDedicationPublicly: true,
+          dedicationMessage: 'For the kids',
+        }),
+      );
+      // Anonymous donor should not have donorName
+      inMemoryDonations.push(
+        buildTestDonation({ email: 'anon1@example.com', amount: 12 }, now, {
+          isAnonymous: true,
+          showDedicationPublicly: false,
+        }),
+      );
+
+      const res = await request(app.getHttpServer())
+        .get('/api/donations/public')
+        .expect(200);
+
+      expect(res.body).toHaveLength(1); // anonymous filtered out by service
+      const item = res.body[0];
+      expectPublicDonationDtoShape(item, { anonymous: false, hasDedication: true });
+      expect(item.donorName).toBe('Jane Doe'); // based on default names in builder
+      expect(item.dedicationMessage).toBe('For the kids');
+    });
+
     it('throws 500 server error if the database errors', async () => {
       // Simulate DB find/query failures by making the mocked service throw
       mockService.findPublic.mockRejectedValueOnce(new Error('Simulated DB failure'));
@@ -259,30 +580,35 @@ describe('Donations (e2e) - expanded stubs', () => {
         expect(res.body).toHaveProperty('statusCode', 500);
         expect(res.body).toHaveProperty('message');
       } finally {
-        mockService.findPublic.mockReset();
+        mockService.findPublic.mockClear();
       }
     });
+
+
   });
 
   describe('GET /api/donations/stats', () => {
     it('successfully returns the correct total and count', async () => {
       // Example: seed two donations and verify totals endpoint
-      // await donationRepo!.save({ ...oneTimePayload, email: 'a@example.com', amount: 10 });
-      // await donationRepo!.save({ ...oneTimePayload, email: 'b@example.com', amount: 15 });
+      inMemoryDonations.length = 0; // reset
+      const now = new Date();
+      inMemoryDonations.push(buildTestDonation(donationASeed, now));
+      inMemoryDonations.push(buildTestDonation(donationBSeed, now));
 
-      // const res = await request(app.getHttpServer())
-      //   .get('/api/donations/stats')
-      //   .expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/api/donations/stats')
+        .expect(200);
 
-      // expect(res.body).toEqual({ total: 25, count: 2 });
+      expect(res.body).toEqual({ total: 25, count: 2 });
     });
 
     it('successfully returns the correct total and count even if the database is empty', async () => {
-      // const res = await request(app.getHttpServer())
-      //   .get('/api/donations/stats')
-      //   .expect(200);
+      inMemoryDonations.length = 0; // ensure empty
+      const res = await request(app.getHttpServer())
+        .get('/api/donations/stats')
+        .expect(200);
 
-      // expect(res.body).toEqual({ total: 0, count: 0 });
+      expect(res.body).toEqual({ total: 0, count: 0 });
     });
 
         it('throws 500 server error if the database errors', async () => {
@@ -293,8 +619,60 @@ describe('Donations (e2e) - expanded stubs', () => {
               expect(res.body).toHaveProperty('statusCode', 500);
               expect(res.body).toHaveProperty('message');
             } finally {
-              mockService.getTotalDonations.mockReset();
+              mockService.getTotalDonations.mockClear();
             }
+    });
+  });
+
+  // Attribute-only verification (no content validation)
+  describe('GET response attribute presence only', () => {
+    it('GET /api/donations/public returns items with expected keys', async () => {
+      inMemoryDonations.length = 0;
+      const now = new Date();
+      // Create a non-anonymous donation that can include donorName and dedication
+      inMemoryDonations.push(
+        buildTestDonation({ email: 'x@example.com', amount: 11 }, now, {
+          isAnonymous: false,
+          showDedicationPublicly: true,
+          dedicationMessage: 'Nice work',
+          donationType: DonationType.RECURRING,
+          recurringInterval: RecurringInterval.MONTHLY,
+        }),
+      );
+
+      const res = await request(app.getHttpServer())
+        .get('/api/donations/public')
+        .expect(200);
+
+      expect(Array.isArray(res.body)).toBe(true);
+      if (res.body.length > 0) {
+        const item = res.body[0];
+        const keys = Object.keys(item);
+        const required = [
+          'id',
+          'amount',
+          'isAnonymous',
+          'donationType',
+          'status',
+          'createdAt',
+        ];
+        const optional = ['donorName', 'recurringInterval', 'dedicationMessage'];
+        const allowed = [...required, ...optional];
+
+        // Has all required keys
+        required.forEach((k) => expect(keys).toContain(k));
+        // Does not include unexpected keys
+        keys.forEach((k) => expect(allowed).toContain(k));
+      }
+    });
+
+    it('GET /api/donations/stats returns object with total and count', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/api/donations/stats')
+        .expect(200);
+
+      expect(res.body).toHaveProperty('total');
+      expect(res.body).toHaveProperty('count');
     });
   });
 });
