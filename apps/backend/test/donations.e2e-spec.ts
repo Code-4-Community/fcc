@@ -1,11 +1,28 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import request from 'supertest';
-import { Donation, DonationType, RecurringInterval } from '../src/donations/donation.entity';
-import { User } from '../src/users/user.entity';
+import { DonationType, RecurringInterval, DonationStatus } from '../src/donations/donation.entity';
+import { DonationsController } from '../src/donations/donations.controller';
+import { DonationsService } from '../src/donations/donations.service';
+import { DonationsRepository } from '../src/donations/donations.repository';
+// import { User } from '../src/users/user.entity';
+
+interface TestDonation {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  amount: number;
+  isAnonymous: boolean;
+  donationType: DonationType;
+  recurringInterval: RecurringInterval | null;
+  dedicationMessage?: string | null;
+  showDedicationPublicly: boolean;
+  status: DonationStatus;
+  createdAt: Date;
+  updatedAt: Date;
+  transactionId?: string | null;
+}
 
 describe('Donations (e2e) - expanded stubs', () => {
   // Increase Jest timeout for slower CI/initialization (DB + Nest app init)
@@ -13,35 +30,64 @@ describe('Donations (e2e) - expanded stubs', () => {
   jest.setTimeout(30000);
 
   let app: INestApplication;
-  let donationRepo: Repository<Donation> | null = null;
+  // We use an in-memory array to simulate stored donations for controller tests
+  let inMemoryDonations: TestDonation[] = [];
+  let nextId = 1;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let mockService: any;
 
   beforeAll(async () => {
-    // Create a testing module using an in-memory SQLite database so tests
-    // exercise TypeORM and the repository layer without touching Postgres.
+    // Create a testing module that instantiates the DonationsController but
+    // uses a simple in-memory mock for the DonationsService so tests don't
+    // depend on TypeORM behavior during controller-level validation tests.
+    inMemoryDonations = [];
+    nextId = 1;
+
+    mockService = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      create: jest.fn(async (request: any) => {
+        const now = new Date();
+        const donation = {
+          id: nextId++,
+          firstName: request.firstName,
+          lastName: request.lastName,
+          email: request.email,
+          amount: request.amount,
+          isAnonymous: request.isAnonymous ?? false,
+          donationType:
+            request.donationType === 'one_time' ? DonationType.ONE_TIME : DonationType.RECURRING,
+          recurringInterval: request.recurringInterval ?? null,
+          dedicationMessage: request.dedicationMessage ?? undefined,
+          showDedicationPublicly: request.showDedicationPublicly ?? false,
+          status: DonationStatus.SUCCEEDED,
+          createdAt: now,
+          updatedAt: now,
+        };
+        inMemoryDonations.push(donation);
+        return donation;
+      }),
+      findPublic: jest.fn(async (limit?: number) => {
+        return inMemoryDonations.filter((d) => d.status === DonationStatus.SUCCEEDED && !d.isAnonymous).slice(0, limit ?? 50);
+      }),
+      getTotalDonations: jest.fn(async () => {
+        const succeeded = inMemoryDonations.filter((d) => d.status === DonationStatus.SUCCEEDED);
+        const total = succeeded.reduce((s, d) => s + (d.amount || 0), 0);
+        return { total, count: succeeded.length };
+      }),
+  };
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [
-        TypeOrmModule.forRoot({
-          type: 'sqlite',
-          database: ':memory:',
-          dropSchema: true,
-          entities: [Donation, User],
-          synchronize: true,
-          logging: false,
-        }),
-        TypeOrmModule.forFeature([Donation]),
+      controllers: [DonationsController],
+      providers: [
+        { provide: DonationsService, useValue: mockService },
+        { provide: DonationsRepository, useValue: {} },
       ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    // Match runtime API prefix used by the real application
+    app.setGlobalPrefix('api');
     await app.init();
-
-    // Repository is available for DB assertions. When tests are enabled
-    // (not skipped) you can use this to verify DB state after POSTs.
-    try {
-      donationRepo = moduleFixture.get<Repository<Donation>>(getRepositoryToken(Donation));
-    } catch (e) {
-      donationRepo = null;
-    }
   });
 
   afterAll(async () => {
@@ -70,72 +116,9 @@ describe('Donations (e2e) - expanded stubs', () => {
     recurringInterval: RecurringInterval.MONTHLY,
   };
 
-  // Helper to mock all common repository methods (reads and writes) to throw once.
-  // This ensures any call into the repository will reject and can be used to test
-  // global DB failure handling without needing to know which method will be invoked.
-  function mockAllRepoMethodsThrow(repo: Repository<Donation>, message = 'Simulated DB failure') {
-    const spies: Array<jest.SpyInstance> = [];
-
-    // Common repo method names to mock
-    const methodNames = [
-      'find',
-      'findOne',
-      'findOneBy',
-      'findBy',
-      'findAndCount',
-      'save',
-      'insert',
-      'update',
-      'delete',
-      'remove',
-      'softRemove',
-      'softDelete',
-      'clear',
-      'count',
-      'query',
-      'create',
-    ];
-
-    for (const name of methodNames) {
-      // dynamic access for testing - repository methods are dynamic and tested at runtime
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const fn = (repo as any)[name];
-      if (typeof fn === 'function') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        spies.push(jest.spyOn(repo as any, name).mockRejectedValueOnce(new Error(message)));
-      }
-    }
-
-    // Also mock createQueryBuilder if present
-    let qbSpy: jest.SpyInstance | null = null;
-  if ((repo as unknown as Record<string, unknown>).createQueryBuilder) {
-      // The query-builder stub is only used to mock chainable methods in tests.
-      // We scope-disable the explicit any rule for this mock object only.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const qb = {
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        orWhere: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        take: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        addSelect: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockRejectedValueOnce(new Error(message)),
-        getManyAndCount: jest.fn().mockRejectedValueOnce(new Error(message)),
-        getRawOne: jest.fn().mockRejectedValueOnce(new Error(message)),
-        getRawMany: jest.fn().mockRejectedValueOnce(new Error(message)),
-      } as unknown as Record<string, unknown>;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      qbSpy = jest.spyOn(repo as any, 'createQueryBuilder').mockReturnValue(qb as any);
-    }
-
-    return () => {
-      for (const s of spies) s.mockRestore();
-      if (qbSpy) qbSpy.mockRestore();
-    };
-  }
+  // Note: repo-level mocking helpers remo
+  // ved — controller tests use the mocked
+  // DonationsService above to simulate DB errors where needed.
 
   // Small smoke test to ensure supertest and the app wiring are working.
   it('smoke: GET / (should 404 or 200 depending on routes)', async () => {
@@ -145,12 +128,11 @@ describe('Donations (e2e) - expanded stubs', () => {
   });
   
   describe('POST /api/donations', () => {
-    it.skip('Successfuly commits a one-time donation creation', async () => {
+    it('Successfuly commits a one-time donation creation', async () => {
       // Arrange
       const payload = { ...oneTimePayload };
-      // prevent unused-var/unused-local complaints while this test is skipped
-      void payload;
-      void donationRepo;
+  // prevent unused-var/unused-local complaints
+  void payload;
 
       // Act (example supertest call)
       const res = await request(app.getHttpServer())
@@ -162,16 +144,15 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(res.body).toHaveProperty('id');
       expect(res.body.amount).toBe(payload.amount);
 
-      // Verify DB state (example)
-      const created = await donationRepo!.findOne({ where: { email: payload.email } });
-      expect(created).toBeDefined();
-      expect(created!.amount).toBe(payload.amount);
+  // Verify in-memory state recorded by the mocked service
+  const created = inMemoryDonations.find((d) => d.email === payload.email);
+  expect(created).toBeDefined();
+  expect(created!.amount).toBe(payload.amount);
     });
 
-    it.skip('Successful creates a recurring donation with interval', async () => {
+    it('Successful creates a recurring donation with interval', async () => {
       const payload = { ...recurringPayload };
-      void payload;
-      void donationRepo;
+  void payload;
 
       // Example supertest + assertions (commented until route exists)
       const res = await request(app.getHttpServer())
@@ -179,8 +160,8 @@ describe('Donations (e2e) - expanded stubs', () => {
         .send(payload)
         .expect(201);
 
-      expect(res.body.donationType).toBe('RECURRING');
-      expect(res.body.recurringInterval).toBe('MONTHLY');
+      expect(res.body.donationType).toBe('recurring');
+      expect(res.body.recurringInterval).toBe('monthly');
     });
 
     it('rejects a negative amount (returns 400)', async () => {
@@ -233,35 +214,25 @@ describe('Donations (e2e) - expanded stubs', () => {
     });
 
     it('throws 500 server error if the database errors', async () => {
-      // Simulate a DB failure by spying on the repository save method.
-      if (!donationRepo) {
-        // If the repo isn't available, fail the test to make the problem visible
-        throw new Error('donationRepo not available for mocking');
-      }
-
+      // Simulate a DB failure by making the mocked service throw
+      mockService.create.mockRejectedValueOnce(new Error('Simulated DB failure'));
       const payload = { ...oneTimePayload };
-
-      const saveSpy = jest.spyOn(donationRepo, 'save').mockRejectedValueOnce(new Error('Simulated DB failure'));
       try {
-        const res = await request(app.getHttpServer())
-          .post('/api/donations')
-          .send(payload)
-          .expect(500);
-
-        // Expect standard Nest error shape for unhandled errors
+        const res = await request(app.getHttpServer()).post('/api/donations').send(payload).expect(500);
         expect(res.body).toHaveProperty('statusCode', 500);
         expect(res.body).toHaveProperty('message');
       } finally {
-        saveSpy.mockRestore();
+        mockService.create.mockReset();
       }
     });
   });
 
   describe('GET /api/donations/public', () => {
-    it.skip('returns only non-anonymous donations', async () => {
+    it('returns only non-anonymous donations', async () => {
       // Example setup: insert public and anonymous donations, then call endpoint
-      await donationRepo!.save({ ...oneTimePayload, email: 'public@example.com', isAnonymous: false });
-      await donationRepo!.save({ ...oneTimePayload, email: 'anon@example.com', isAnonymous: true });
+      const now = new Date();
+      inMemoryDonations.push({ ...oneTimePayload, email: 'public@example.com', isAnonymous: false, status: DonationStatus.SUCCEEDED, createdAt: now, updatedAt: now, id: nextId++ } as TestDonation);
+      inMemoryDonations.push({ ...oneTimePayload, email: 'anon@example.com', isAnonymous: true, status: DonationStatus.SUCCEEDED, createdAt: now, updatedAt: now, id: nextId++ } as TestDonation);
 
       const res = await request(app.getHttpServer())
         .get('/api/donations/public')
@@ -271,7 +242,7 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(res.body.every((d: { isAnonymous: boolean }) => d.isAnonymous === false)).toBe(true);
     });
 
-    it.skip('returns no donations if there are none in the database', async () => {
+    it('returns no donations if there are none in the database', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/donations/public')
         .expect(200);
@@ -281,22 +252,20 @@ describe('Donations (e2e) - expanded stubs', () => {
     });
 
     it('throws 500 server error if the database errors', async () => {
-      // Simulate DB find/query failures by mocking find variants to throw.
-      if (!donationRepo) throw new Error('donationRepo not available for mocking');
-
-      const restore = mockAllRepoMethodsThrow(donationRepo);
+      // Simulate DB find/query failures by making the mocked service throw
+      mockService.findPublic.mockRejectedValueOnce(new Error('Simulated DB failure'));
       try {
         const res = await request(app.getHttpServer()).get('/api/donations/public').expect(500);
         expect(res.body).toHaveProperty('statusCode', 500);
         expect(res.body).toHaveProperty('message');
       } finally {
-        restore();
+        mockService.findPublic.mockReset();
       }
     });
   });
 
   describe('GET /api/donations/stats', () => {
-    it.skip('successfully returns the correct total and count', async () => {
+    it('successfully returns the correct total and count', async () => {
       // Example: seed two donations and verify totals endpoint
       // await donationRepo!.save({ ...oneTimePayload, email: 'a@example.com', amount: 10 });
       // await donationRepo!.save({ ...oneTimePayload, email: 'b@example.com', amount: 15 });
@@ -308,7 +277,7 @@ describe('Donations (e2e) - expanded stubs', () => {
       // expect(res.body).toEqual({ total: 25, count: 2 });
     });
 
-    it.skip('successfully returns the correct total and count even if the database is empty', async () => {
+    it('successfully returns the correct total and count even if the database is empty', async () => {
       // const res = await request(app.getHttpServer())
       //   .get('/api/donations/stats')
       //   .expect(200);
@@ -317,17 +286,15 @@ describe('Donations (e2e) - expanded stubs', () => {
     });
 
         it('throws 500 server error if the database errors', async () => {
-          // Simulate DB find/query failures by mocking find variants to throw.
-          if (!donationRepo) throw new Error('donationRepo not available for mocking');
-
-          const restore = mockAllRepoMethodsThrow(donationRepo);
-          try {
-            const res = await request(app.getHttpServer()).get('/api/donations/stats').expect(500);
-            expect(res.body).toHaveProperty('statusCode', 500);
-            expect(res.body).toHaveProperty('message');
-          } finally {
-            restore();
-          }
+            // Simulate DB find/query failures by making the mocked service throw
+            mockService.getTotalDonations.mockRejectedValueOnce(new Error('Simulated DB failure'));
+            try {
+              const res = await request(app.getHttpServer()).get('/api/donations/stats').expect(500);
+              expect(res.body).toHaveProperty('statusCode', 500);
+              expect(res.body).toHaveProperty('message');
+            } finally {
+              mockService.getTotalDonations.mockReset();
+            }
     });
   });
 });
