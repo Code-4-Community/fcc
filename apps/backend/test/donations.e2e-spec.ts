@@ -1,7 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
-import { DonationType, RecurringInterval, DonationStatus } from '../src/donations/donation.entity';
+import {
+  DonationType,
+  RecurringInterval,
+  DonationStatus,
+} from '../src/donations/donation.entity';
 import { DonationsController } from '../src/donations/donations.controller';
 import { DonationsService } from '../src/donations/donations.service';
 import { DonationsRepository } from '../src/donations/donations.repository';
@@ -55,7 +59,9 @@ describe('Donations (e2e) - expanded stubs', () => {
           amount: request.amount,
           isAnonymous: request.isAnonymous ?? false,
           donationType:
-            request.donationType === 'one_time' ? DonationType.ONE_TIME : DonationType.RECURRING,
+            request.donationType === 'one_time'
+              ? DonationType.ONE_TIME
+              : DonationType.RECURRING,
           recurringInterval: request.recurringInterval ?? null,
           dedicationMessage: request.dedicationMessage ?? undefined,
           showDedicationPublicly: request.showDedicationPublicly ?? false,
@@ -67,14 +73,20 @@ describe('Donations (e2e) - expanded stubs', () => {
         return donation;
       }),
       findPublic: jest.fn(async (limit?: number) => {
-        return inMemoryDonations.filter((d) => d.status === DonationStatus.SUCCEEDED && !d.isAnonymous).slice(0, limit ?? 50);
+        return inMemoryDonations
+          .filter(
+            (d) => d.status === DonationStatus.SUCCEEDED && !d.isAnonymous,
+          )
+          .slice(0, limit ?? 50);
       }),
       getTotalDonations: jest.fn(async () => {
-        const succeeded = inMemoryDonations.filter((d) => d.status === DonationStatus.SUCCEEDED);
+        const succeeded = inMemoryDonations.filter(
+          (d) => d.status === DonationStatus.SUCCEEDED,
+        );
         const total = succeeded.reduce((s, d) => s + (d.amount || 0), 0);
         return { total, count: succeeded.length };
       }),
-  };
+    };
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [DonationsController],
@@ -179,7 +191,9 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(obj.recurringInterval).toBe(expected.recurringInterval);
     } else {
       // Could be null or undefined depending on mapper; both acceptable
-      expect(['undefined', 'string']).toContain(typeof obj.recurringInterval as string);
+      expect(['undefined', 'string']).toContain(
+        typeof obj.recurringInterval as string,
+      );
       if (typeof obj.recurringInterval === 'string') {
         expect([
           RecurringInterval.WEEKLY,
@@ -195,19 +209,18 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(typeof obj.dedicationMessage).toBe('string');
     }
     expect(typeof obj.showDedicationPublicly).toBe('boolean');
-    expect([
-      'pending',
-      'succeeded',
-      'failed',
-      'cancelled',
-    ]).toContain(obj.status as string);
+    expect(['pending', 'succeeded', 'failed', 'cancelled']).toContain(
+      obj.status as string,
+    );
     expect(isISODateString(String(obj.createdAt))).toBe(true);
     expect(isISODateString(String(obj.updatedAt))).toBe(true);
     if (expected.transactionIdPresent) {
       expect(typeof obj.transactionId).toBe('string');
     } else {
       // Can be absent or null
-      expect(['undefined', 'string']).toContain(typeof obj.transactionId as string);
+      expect(['undefined', 'string']).toContain(
+        typeof obj.transactionId as string,
+      );
     }
   };
 
@@ -218,10 +231,9 @@ describe('Donations (e2e) - expanded stubs', () => {
     expect(typeof obj.id).toBe('number');
     expect(typeof obj.amount).toBe('number');
     expect(typeof obj.isAnonymous).toBe('boolean');
-    expect([
-      DonationType.ONE_TIME,
-      DonationType.RECURRING,
-    ]).toContain(obj.donationType as DonationType);
+    expect([DonationType.ONE_TIME, DonationType.RECURRING]).toContain(
+      obj.donationType as DonationType,
+    );
     if (obj.recurringInterval !== undefined && obj.recurringInterval !== null) {
       expect([
         RecurringInterval.WEEKLY,
@@ -231,12 +243,9 @@ describe('Donations (e2e) - expanded stubs', () => {
         RecurringInterval.ANNUALLY,
       ]).toContain(obj.recurringInterval as RecurringInterval);
     }
-    expect([
-      'pending',
-      'succeeded',
-      'failed',
-      'cancelled',
-    ]).toContain(obj.status as string);
+    expect(['pending', 'succeeded', 'failed', 'cancelled']).toContain(
+      obj.status as string,
+    );
     expect(isISODateString(String(obj.createdAt))).toBe(true);
 
     if (opts.anonymous) {
@@ -265,26 +274,22 @@ describe('Donations (e2e) - expanded stubs', () => {
     // We don't make assumptions about the root route; assert we get a response
     expect([200, 404]).toContain(res.status);
   });
-  
+
   describe('POST /api/donations', () => {
     it('Successfuly commits a one-time donation creation', async () => {
-      // Arrange
       const payload = { ...oneTimePayload };
 
-      // Act (example supertest call)
       const res = await request(app.getHttpServer())
         .post('/api/donations')
         .send(payload)
         .expect(201);
 
-      // Assert response shape (example)
       expectDonationResponseDtoShape(res.body, {
         donationType: DonationType.ONE_TIME,
         recurringInterval: null,
       });
       expect(res.body.amount).toBe(payload.amount);
 
-      // Verify in-memory state recorded by the mocked service
       const created = inMemoryDonations.find((d) => d.email === payload.email);
       expect(created).toBeDefined();
       expect(created!.amount).toBe(payload.amount);
@@ -293,7 +298,6 @@ describe('Donations (e2e) - expanded stubs', () => {
     it('Successfuly creates a recurring donation with interval', async () => {
       const payload = { ...recurringPayload };
 
-      // Example supertest + assertions (commented until route exists)
       const res = await request(app.getHttpServer())
         .post('/api/donations')
         .send(payload)
@@ -306,27 +310,27 @@ describe('Donations (e2e) - expanded stubs', () => {
     });
 
     it('rejects a negative amount (returns 400)', async () => {
-        const payload = { ...oneTimePayload, amount: -10 };
+      const payload = { ...oneTimePayload, amount: -10 };
 
-        const res = await request(app.getHttpServer())
-           .post('/api/donations')
-           .send(payload)
-           .expect(400);
+      const res = await request(app.getHttpServer())
+        .post('/api/donations')
+        .send(payload)
+        .expect(400);
 
-        expect(res.body).toHaveProperty('statusCode', 400);
-        expect(res.body).toHaveProperty('message');
-      });
+      expect(res.body).toHaveProperty('statusCode', 400);
+      expect(res.body).toHaveProperty('message');
+    });
 
     it('rejects an invalid email format amount (returns 400)', async () => {
-        const payload = { ...oneTimePayload, email: 'not-an-email' };
+      const payload = { ...oneTimePayload, email: 'not-an-email' };
 
-        const res = await request(app.getHttpServer())
-           .post('/api/donations')
-           .send(payload)
-           .expect(400);
+      const res = await request(app.getHttpServer())
+        .post('/api/donations')
+        .send(payload)
+        .expect(400);
 
-        expect(res.body).toHaveProperty('statusCode', 400);
-        expect(res.body).toHaveProperty('message');
+      expect(res.body).toHaveProperty('statusCode', 400);
+      expect(res.body).toHaveProperty('message');
     });
 
     it('accepts a recurring donation even if recurringInterval is missing (DTO allows optional)', async () => {
@@ -345,23 +349,31 @@ describe('Donations (e2e) - expanded stubs', () => {
     });
 
     it('rejects a one-time donation that has a recurring interval (returns 400)', async () => {
-      const payload: Record<string, unknown> = { ...oneTimePayload, recurringInterval: 'MONTHLY' };
+      const payload: Record<string, unknown> = {
+        ...oneTimePayload,
+        recurringInterval: 'MONTHLY',
+      };
 
-        const res = await request(app.getHttpServer())
-           .post('/api/donations')
-           .send(payload)
-           .expect(400);
+      const res = await request(app.getHttpServer())
+        .post('/api/donations')
+        .send(payload)
+        .expect(400);
 
-        expect(res.body).toHaveProperty('statusCode', 400);
-        expect(res.body).toHaveProperty('message');
+      expect(res.body).toHaveProperty('statusCode', 400);
+      expect(res.body).toHaveProperty('message');
     });
 
     it('throws 500 server error if the database errors', async () => {
       // Simulate a DB failure by making the mocked service throw
-      mockService.create.mockRejectedValueOnce(new Error('Simulated DB failure'));
+      mockService.create.mockRejectedValueOnce(
+        new Error('Simulated DB failure'),
+      );
       const payload = { ...oneTimePayload };
       try {
-        const res = await request(app.getHttpServer()).post('/api/donations').send(payload).expect(500);
+        const res = await request(app.getHttpServer())
+          .post('/api/donations')
+          .send(payload)
+          .expect(500);
         expect(res.body).toHaveProperty('statusCode', 500);
         expect(res.body).toHaveProperty('message');
       } finally {
@@ -370,7 +382,6 @@ describe('Donations (e2e) - expanded stubs', () => {
     });
 
     it('gracefully rejects a payload that is missing the first name', async () => {
-      // Note: using the enum values so the controller validation sees correct types
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: any = { ...oneTimePayload };
       delete payload.firstName;
@@ -382,7 +393,9 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(res.body).toHaveProperty('statusCode', 400);
       expect(res.body).toHaveProperty('message');
-      expect(String(res.body.message).toLowerCase()).toContain('firstName'.toLowerCase());
+      expect(String(res.body.message).toLowerCase()).toContain(
+        'firstName'.toLowerCase(),
+      );
     });
 
     it('gracefully rejects a payload that is missing the last name', async () => {
@@ -397,7 +410,9 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(res.body).toHaveProperty('statusCode', 400);
       expect(res.body).toHaveProperty('message');
-      expect(String(res.body.message).toLowerCase()).toContain('lastName'.toLowerCase());
+      expect(String(res.body.message).toLowerCase()).toContain(
+        'lastName'.toLowerCase(),
+      );
     });
 
     it('gracefully rejects a payload that is missing the email', async () => {
@@ -412,7 +427,9 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(res.body).toHaveProperty('statusCode', 400);
       expect(res.body).toHaveProperty('message');
-      expect(String(res.body.message).toLowerCase()).toContain('email'.toLowerCase());
+      expect(String(res.body.message).toLowerCase()).toContain(
+        'email'.toLowerCase(),
+      );
     });
 
     it('gracefully rejects a payload that is missing the amount', async () => {
@@ -427,25 +444,24 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(res.body).toHaveProperty('statusCode', 400);
       expect(res.body).toHaveProperty('message');
-      expect(String(res.body.message).toLowerCase()).toContain('amount'.toLowerCase());
+      expect(String(res.body.message).toLowerCase()).toContain(
+        'amount'.toLowerCase(),
+      );
     });
 
     it('Successfuly commits a one-time donation creation even if isAnonymous is missing', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: any = { ...oneTimePayload };
-      delete payload.isAnonymous
+      delete payload.isAnonymous;
 
-      // Act (example supertest call)
       const res = await request(app.getHttpServer())
         .post('/api/donations')
         .send(payload)
         .expect(201);
 
-      // Assert response shape (example)
       expect(res.body).toHaveProperty('id');
       expect(res.body.amount).toBe(payload.amount);
 
-      // Verify in-memory state recorded by the mocked service
       const created = inMemoryDonations.find((d) => d.email === payload.email);
       expect(created).toBeDefined();
       expect(created!.amount).toBe(payload.amount);
@@ -464,11 +480,12 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(res.body).toHaveProperty('statusCode', 400);
       expect(res.body).toHaveProperty('message');
-      expect(String(res.body.message).toLowerCase()).toContain('donationType'.toLowerCase());
+      expect(String(res.body.message).toLowerCase()).toContain(
+        'donationType'.toLowerCase(),
+      );
     });
 
     it('gracefully rejects a payload that is missing the donationType', async () => {
-      // Note: using the enum values so the controller validation sees correct types
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: any = { ...oneTimePayload };
       delete payload.donationType;
@@ -480,11 +497,12 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(res.body).toHaveProperty('statusCode', 400);
       expect(res.body).toHaveProperty('message');
-      expect(String(res.body.message).toLowerCase()).toContain('donationType'.toLowerCase());
+      expect(String(res.body.message).toLowerCase()).toContain(
+        'donationType'.toLowerCase(),
+      );
     });
 
     it('gracefully rejects a payload that is contains the wrong recurring interval (not the enum)', async () => {
-      // Note: using the enum values so the controller validation sees correct types
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: any = { ...oneTimePayload, recurring: 'invalid' };
 
@@ -495,11 +513,12 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(res.body).toHaveProperty('statusCode', 400);
       expect(res.body).toHaveProperty('message');
-      expect(String(res.body.message).toLowerCase()).toContain('recurring'.toLowerCase());
+      expect(String(res.body.message).toLowerCase()).toContain(
+        'recurring'.toLowerCase(),
+      );
     });
 
     it('gracefully rejects a payload that is contains the wrong donation type (not the enum)', async () => {
-      // Note: using the enum values so the controller validation sees correct types
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: any = { ...oneTimePayload, donationType: 'invalid' };
 
@@ -510,26 +529,50 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(res.body).toHaveProperty('statusCode', 400);
       expect(res.body).toHaveProperty('message');
-      expect(String(res.body.message).toLowerCase()).toContain('donationType'.toLowerCase());
+      expect(String(res.body.message).toLowerCase()).toContain(
+        'donationType'.toLowerCase(),
+      );
     });
   });
 
   describe('GET /api/donations/public', () => {
     it('returns only non-anonymous donations', async () => {
-      // Example setup: insert public and anonymous donations, then call endpoint
       const now = new Date();
-      inMemoryDonations.push({ ...oneTimePayload, email: 'public@example.com', isAnonymous: false, status: DonationStatus.SUCCEEDED, createdAt: now, updatedAt: now, id: nextId++ } as TestDonation);
-      inMemoryDonations.push({ ...oneTimePayload, email: 'anon@example.com', isAnonymous: true, status: DonationStatus.SUCCEEDED, createdAt: now, updatedAt: now, id: nextId++ } as TestDonation);
+      inMemoryDonations.push({
+        ...oneTimePayload,
+        email: 'public@example.com',
+        isAnonymous: false,
+        status: DonationStatus.SUCCEEDED,
+        createdAt: now,
+        updatedAt: now,
+        id: nextId++,
+      } as TestDonation);
+      inMemoryDonations.push({
+        ...oneTimePayload,
+        email: 'anon@example.com',
+        isAnonymous: true,
+        status: DonationStatus.SUCCEEDED,
+        createdAt: now,
+        updatedAt: now,
+        id: nextId++,
+      } as TestDonation);
 
       const res = await request(app.getHttpServer())
         .get('/api/donations/public')
         .expect(200);
 
       expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.every((d: { isAnonymous: boolean }) => d.isAnonymous === false)).toBe(true);
+      expect(
+        res.body.every(
+          (d: { isAnonymous: boolean }) => d.isAnonymous === false,
+        ),
+      ).toBe(true);
       // Validate public DTO shape for the first item
       if (res.body.length > 0) {
-        expectPublicDonationDtoShape(res.body[0], { anonymous: false, hasDedication: false });
+        expectPublicDonationDtoShape(res.body[0], {
+          anonymous: false,
+          hasDedication: false,
+        });
       }
     });
 
@@ -539,7 +582,11 @@ describe('Donations (e2e) - expanded stubs', () => {
         .expect(200);
 
       expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.every((d: { isAnonymous: boolean }) => d.isAnonymous === false)).toBe(true);
+      expect(
+        res.body.every(
+          (d: { isAnonymous: boolean }) => d.isAnonymous === false,
+        ),
+      ).toBe(true);
     });
 
     it('includes donorName and dedicationMessage when allowed, and hides PII', async () => {
@@ -567,16 +614,23 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(res.body).toHaveLength(1); // anonymous filtered out by service
       const item = res.body[0];
-      expectPublicDonationDtoShape(item, { anonymous: false, hasDedication: true });
+      expectPublicDonationDtoShape(item, {
+        anonymous: false,
+        hasDedication: true,
+      });
       expect(item.donorName).toBe('Jane Doe'); // based on default names in builder
       expect(item.dedicationMessage).toBe('For the kids');
     });
 
     it('throws 500 server error if the database errors', async () => {
       // Simulate DB find/query failures by making the mocked service throw
-      mockService.findPublic.mockRejectedValueOnce(new Error('Simulated DB failure'));
+      mockService.findPublic.mockRejectedValueOnce(
+        new Error('Simulated DB failure'),
+      );
       try {
-        const res = await request(app.getHttpServer()).get('/api/donations/public').expect(500);
+        const res = await request(app.getHttpServer())
+          .get('/api/donations/public')
+          .expect(500);
         expect(res.body).toHaveProperty('statusCode', 500);
         expect(res.body).toHaveProperty('message');
       } finally {
@@ -584,52 +638,9 @@ describe('Donations (e2e) - expanded stubs', () => {
       }
     });
 
-
-  });
-
-  describe('GET /api/donations/stats', () => {
-    it('successfully returns the correct total and count', async () => {
-      // Example: seed two donations and verify totals endpoint
-      inMemoryDonations.length = 0; // reset
-      const now = new Date();
-      inMemoryDonations.push(buildTestDonation(donationASeed, now));
-      inMemoryDonations.push(buildTestDonation(donationBSeed, now));
-
-      const res = await request(app.getHttpServer())
-        .get('/api/donations/stats')
-        .expect(200);
-
-      expect(res.body).toEqual({ total: 25, count: 2 });
-    });
-
-    it('successfully returns the correct total and count even if the database is empty', async () => {
-      inMemoryDonations.length = 0; // ensure empty
-      const res = await request(app.getHttpServer())
-        .get('/api/donations/stats')
-        .expect(200);
-
-      expect(res.body).toEqual({ total: 0, count: 0 });
-    });
-
-        it('throws 500 server error if the database errors', async () => {
-            // Simulate DB find/query failures by making the mocked service throw
-            mockService.getTotalDonations.mockRejectedValueOnce(new Error('Simulated DB failure'));
-            try {
-              const res = await request(app.getHttpServer()).get('/api/donations/stats').expect(500);
-              expect(res.body).toHaveProperty('statusCode', 500);
-              expect(res.body).toHaveProperty('message');
-            } finally {
-              mockService.getTotalDonations.mockClear();
-            }
-    });
-  });
-
-  // Attribute-only verification (no content validation)
-  describe('GET response attribute presence only', () => {
     it('GET /api/donations/public returns items with expected keys', async () => {
       inMemoryDonations.length = 0;
       const now = new Date();
-      // Create a non-anonymous donation that can include donorName and dedication
       inMemoryDonations.push(
         buildTestDonation({ email: 'x@example.com', amount: 11 }, now, {
           isAnonymous: false,
@@ -656,13 +667,55 @@ describe('Donations (e2e) - expanded stubs', () => {
           'status',
           'createdAt',
         ];
-        const optional = ['donorName', 'recurringInterval', 'dedicationMessage'];
+        const optional = [
+          'donorName',
+          'recurringInterval',
+          'dedicationMessage',
+        ];
         const allowed = [...required, ...optional];
 
-        // Has all required keys
         required.forEach((k) => expect(keys).toContain(k));
-        // Does not include unexpected keys
         keys.forEach((k) => expect(allowed).toContain(k));
+      }
+    });
+  });
+
+  describe('GET /api/donations/stats', () => {
+    it('successfully returns the correct total and count', async () => {
+      // Example: seed two donations and verify totals endpoint
+      inMemoryDonations.length = 0; // reset
+      const now = new Date();
+      inMemoryDonations.push(buildTestDonation(donationASeed, now));
+      inMemoryDonations.push(buildTestDonation(donationBSeed, now));
+
+      const res = await request(app.getHttpServer())
+        .get('/api/donations/stats')
+        .expect(200);
+
+      expect(res.body).toEqual({ total: 25, count: 2 });
+    });
+
+    it('successfully returns the correct total and count even if the database is empty', async () => {
+      inMemoryDonations.length = 0;
+      const res = await request(app.getHttpServer())
+        .get('/api/donations/stats')
+        .expect(200);
+
+      expect(res.body).toEqual({ total: 0, count: 0 });
+    });
+
+    it('throws 500 server error if the database errors', async () => {
+      mockService.getTotalDonations.mockRejectedValueOnce(
+        new Error('Simulated DB failure'),
+      );
+      try {
+        const res = await request(app.getHttpServer())
+          .get('/api/donations/stats')
+          .expect(500);
+        expect(res.body).toHaveProperty('statusCode', 500);
+        expect(res.body).toHaveProperty('message');
+      } finally {
+        mockService.getTotalDonations.mockClear();
       }
     });
 
