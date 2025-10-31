@@ -191,7 +191,7 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(obj.recurringInterval).toBe(expected.recurringInterval);
     } else {
       // Could be null or undefined depending on mapper; both acceptable
-      expect(['undefined', 'string']).toContain(
+      expect(['undefined', 'string', 'object']).toContain(
         typeof obj.recurringInterval as string,
       );
       if (typeof obj.recurringInterval === 'string') {
@@ -202,6 +202,9 @@ describe('Donations (e2e) - expanded stubs', () => {
           RecurringInterval.QUARTERLY,
           RecurringInterval.ANNUALLY,
         ]).toContain(obj.recurringInterval);
+      } else if (typeof obj.recurringInterval === 'object') {
+        // JSON null
+        expect(obj.recurringInterval).toBeNull();
       }
     }
     // dedicationMessage is optional
@@ -268,10 +271,8 @@ describe('Donations (e2e) - expanded stubs', () => {
     expect(obj).not.toHaveProperty('transactionId');
   };
 
-  // Small smoke test to ensure supertest and the app wiring are working.
   it('smoke: GET / (should 404 or 200 depending on routes)', async () => {
     const res = await request(app.getHttpServer()).get('/');
-    // We don't make assumptions about the root route; assert we get a response
     expect([200, 404]).toContain(res.status);
   });
 
@@ -465,24 +466,6 @@ describe('Donations (e2e) - expanded stubs', () => {
       const created = inMemoryDonations.find((d) => d.email === payload.email);
       expect(created).toBeDefined();
       expect(created!.amount).toBe(payload.amount);
-    });
-
-    it('gracefully rejects a payload that is missing the donationType', async () => {
-      // Note: using the enum values so the controller validation sees correct types
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const payload: any = { ...oneTimePayload };
-      delete payload.donationType;
-
-      const res = await request(app.getHttpServer())
-        .post('/api/donations')
-        .send(payload)
-        .expect(400);
-
-      expect(res.body).toHaveProperty('statusCode', 400);
-      expect(res.body).toHaveProperty('message');
-      expect(String(res.body.message).toLowerCase()).toContain(
-        'donationType'.toLowerCase(),
-      );
     });
 
     it('gracefully rejects a payload that is missing the donationType', async () => {
