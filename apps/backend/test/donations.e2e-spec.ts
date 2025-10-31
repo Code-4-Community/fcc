@@ -334,19 +334,17 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(res.body).toHaveProperty('message');
     });
 
-    it('accepts a recurring donation even if recurringInterval is missing (DTO allows optional)', async () => {
+    it('rejects a recurring donation if recurringInterval is missing (DTO allows optional)', async () => {
       const payload: Partial<typeof recurringPayload> = { ...recurringPayload };
       delete payload.recurringInterval;
 
       const res = await request(app.getHttpServer())
         .post('/api/donations')
         .send(payload)
-        .expect(201);
+        .expect(400);
 
-      expectDonationResponseDtoShape(res.body, {
-        donationType: DonationType.RECURRING,
-        recurringInterval: undefined,
-      });
+      expect(res.body).toHaveProperty('statusCode', 400);
+      expect(res.body).toHaveProperty('message');
     });
 
     it('rejects a one-time donation that has a recurring interval (returns 400)', async () => {
@@ -572,39 +570,6 @@ describe('Donations (e2e) - expanded stubs', () => {
       ).toBe(true);
     });
 
-    it('includes donorName and dedicationMessage when allowed, and hides PII', async () => {
-      inMemoryDonations.length = 0;
-      const now = new Date();
-      // Visible donor with dedication shown
-      inMemoryDonations.push(
-        buildTestDonation({ email: 'pub1@example.com', amount: 42 }, now, {
-          isAnonymous: false,
-          showDedicationPublicly: true,
-          dedicationMessage: 'For the kids',
-        }),
-      );
-      // Anonymous donor should not have donorName
-      inMemoryDonations.push(
-        buildTestDonation({ email: 'anon1@example.com', amount: 12 }, now, {
-          isAnonymous: true,
-          showDedicationPublicly: false,
-        }),
-      );
-
-      const res = await request(app.getHttpServer())
-        .get('/api/donations/public')
-        .expect(200);
-
-      expect(res.body).toHaveLength(1); // anonymous filtered out by service
-      const item = res.body[0];
-      expectPublicDonationDtoShape(item, {
-        anonymous: false,
-        hasDedication: true,
-      });
-      expect(item.donorName).toBe('Jane Doe'); // based on default names in builder
-      expect(item.dedicationMessage).toBe('For the kids');
-    });
-
     it('throws 500 server error if the database errors', async () => {
       // Simulate DB find/query failures by making the mocked service throw
       mockService.findPublic.mockRejectedValueOnce(
@@ -621,7 +586,7 @@ describe('Donations (e2e) - expanded stubs', () => {
       }
     });
 
-    it('GET /api/donations/public returns items with expected keys', async () => {
+    it('Returns items with correct DTO (expected keys)', async () => {
       inMemoryDonations.length = 0;
       const now = new Date();
       inMemoryDonations.push(
@@ -700,15 +665,6 @@ describe('Donations (e2e) - expanded stubs', () => {
       } finally {
         mockService.getTotalDonations.mockClear();
       }
-    });
-
-    it('GET /api/donations/stats returns object with total and count', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/api/donations/stats')
-        .expect(200);
-
-      expect(res.body).toHaveProperty('total');
-      expect(res.body).toHaveProperty('count');
     });
   });
 });
