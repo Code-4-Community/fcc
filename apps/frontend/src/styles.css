@@ -1,1 +1,41 @@
 /* You can add global styles to this file, and also import other style files */
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-slider {
+  width: 50px;
+  height: 25px;
+  background-color: #ccc;
+  border-radius: 25px;
+  position: relative;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-slider.on {
+  background-color: #4caf50;
+}
+
+.toggle-circle {
+  width: 21px;
+  height: 21px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s ease;
+}
+
+.toggle-slider.on .toggle-circle {
+  transform: translateX(25px);
+}
+
+.toggle-label {
+  font-size: 14px;
+  font-weight: bold;
+}
