@@ -62,6 +62,23 @@ const invalidOneTimeDonation: CreateDonationDto = {
   recurringInterval: RecurringInterval.BIMONTHLY,
 };
 
+// invalid donation: showing dedication publicly without a message
+const invalidDedicationDonation: CreateDonationDto = {
+  firstName: 'John',
+
+  lastName: 'Smith',
+
+  email: 'john.smith@gmail.com',
+
+  amount: 500,
+
+  isAnonymous: false,
+
+  donationType: DonationType.ONE_TIME,
+
+  showDedicationPublicly: true,
+};
+
 // valid donation
 const validCreateDonation1: CreateDonationDto = {
   firstName: 'John',
@@ -281,6 +298,12 @@ describe('DonationsService', () => {
 
     it('should throw an error if recurring donation does not have interval set', async () => {
       await expect(service.create(invalidRecurringDonation)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw an error if showing dedication publicly without a message', async () => {
+      await expect(service.create(invalidDedicationDonation)).rejects.toThrow(
         BadRequestException,
       );
     });

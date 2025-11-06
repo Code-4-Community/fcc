@@ -38,6 +38,15 @@ export class DonationsService {
       );
     }
 
+    if (
+      createDonationDTO.showDedicationPublicly &&
+      !createDonationDTO.dedicationMessage
+    ) {
+      throw new BadRequestException(
+        'Cannot show dedication publicly without a dedication message.',
+      );
+    }
+
     const donation = await this.donationRepository.create(createDonationDTO);
     const savedDonation = await this.donationRepository.save(donation);
 
@@ -95,7 +104,7 @@ export class DonationsService {
         amount: dto.amount,
         donationType: dto.donationType,
         recurringInterval: dto.recurringInterval,
-        ...(dto.showDedicationPublicly
+        ...(dto.showDedicationPublicly && dto.dedicationMessage
           ? { dedicationMessage: dto.dedicationMessage }
           : {}),
         isAnonymous: dto.isAnonymous,
