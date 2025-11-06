@@ -125,7 +125,7 @@ export class DonationsRepository {
    */
   async searchByDonorNameOrEmail(
     query: string,
-    limit: number = 50,
+    limit = 50,
   ): Promise<Donation[]> {
     const searchTerm = `%${query.toLowerCase()}%`;
 

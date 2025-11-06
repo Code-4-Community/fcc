@@ -12,7 +12,7 @@ export class CreateDonationDTO {
 
   amount: number;
 
-  isAnonymous: boolean = false;
+  isAnonymous = false;
 
   donationType: DonationType;
 
