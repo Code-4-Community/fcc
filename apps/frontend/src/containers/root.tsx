@@ -1,7 +1,5 @@
-import { DonationSummary } from './donations/DonationSummary';
-
 const Root: React.FC = () => {
-  return <DonationSummary baseAmount={1} />;
+  return <>Welcome to scaffolding!</>;
 };
 
 export default Root;
