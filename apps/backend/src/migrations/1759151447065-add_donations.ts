@@ -5,7 +5,7 @@ export class AddDonations1759151447065 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "donation" (
+      `CREATE TABLE "donations" (
         "id" integer GENERATED ALWAYS AS IDENTITY NOT NULL,
         "firstName" character varying NOT NULL,
         "lastName" character varying NOT NULL,
@@ -26,6 +26,6 @@ export class AddDonations1759151447065 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TABLE "donation"`);
+    await queryRunner.query(`DROP TABLE "donations"`);
   }
 }
