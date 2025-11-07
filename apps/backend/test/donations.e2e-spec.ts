@@ -334,7 +334,7 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(res.body).toHaveProperty('message');
     });
 
-    it('rejects a recurring donation if recurringInterval is missing (DTO allows optional)', async () => {
+    it('rejects a donation marked recurring if recurringInterval is missing', async () => {
       const payload: Partial<typeof recurringPayload> = { ...recurringPayload };
       delete payload.recurringInterval;
 
