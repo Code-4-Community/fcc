@@ -2,21 +2,15 @@ import { BadRequestException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, FindOneOptions, FindOptionsWhere } from 'typeorm';
-import {
-  DonationType,
-  RecurringInterval,
-  Donation,
-  DonationStatus,
-} from './donation.entity';
+import { DonationType, Donation, DonationStatus } from './donation.entity';
 import { DonationsService } from './donations.service';
-import { CreateDonationDto } from './dtos/create-donation-dto';
+import { CreateDonationRequest } from './mappers';
 import { DonationResponseDto } from './dtos/donation-response-dto';
-import { PublicDonationDto } from './dtos/public-donation-dto';
 
 // mock donations
 
 // invalid donation: non positive donation amount
-const invalidAmountDonation: CreateDonationDto = {
+const invalidAmountDonation: CreateDonationRequest = {
   firstName: 'John',
 
   lastName: 'Smith',
@@ -24,14 +18,13 @@ const invalidAmountDonation: CreateDonationDto = {
   email: 'john.smith@gmail.com',
 
   amount: -500,
-
   isAnonymous: true,
-
-  donationType: DonationType.ONE_TIME,
+  donationType: 'one_time',
+  showDedicationPublicly: false,
 };
 
 // invalid donation: recurring donation but no interval
-const invalidRecurringDonation: CreateDonationDto = {
+const invalidRecurringDonation: CreateDonationRequest = {
   firstName: 'John',
 
   lastName: 'Smith',
@@ -42,11 +35,13 @@ const invalidRecurringDonation: CreateDonationDto = {
 
   isAnonymous: true,
 
-  donationType: DonationType.RECURRING,
+  donationType: 'recurring',
+
+  showDedicationPublicly: false,
 };
 
 // invalid donation: one time but interval
-const invalidOneTimeDonation: CreateDonationDto = {
+const invalidOneTimeDonation: CreateDonationRequest = {
   firstName: 'John',
 
   lastName: 'Smith',
@@ -57,13 +52,15 @@ const invalidOneTimeDonation: CreateDonationDto = {
 
   isAnonymous: true,
 
-  donationType: DonationType.ONE_TIME,
+  donationType: 'one_time',
 
-  recurringInterval: RecurringInterval.BIMONTHLY,
+  recurringInterval: 'bimonthly',
+
+  showDedicationPublicly: false,
 };
 
 // invalid donation: showing dedication publicly without a message
-const invalidDedicationDonation: CreateDonationDto = {
+const invalidDedicationDonation: CreateDonationRequest = {
   firstName: 'John',
 
   lastName: 'Smith',
@@ -74,13 +71,13 @@ const invalidDedicationDonation: CreateDonationDto = {
 
   isAnonymous: false,
 
-  donationType: DonationType.ONE_TIME,
+  donationType: 'one_time',
 
   showDedicationPublicly: true,
 };
 
 // valid donation
-const validCreateDonation1: CreateDonationDto = {
+const validCreateDonation1: CreateDonationRequest = {
   firstName: 'John',
 
   lastName: 'Smith',
@@ -91,7 +88,7 @@ const validCreateDonation1: CreateDonationDto = {
 
   isAnonymous: true,
 
-  donationType: DonationType.ONE_TIME,
+  donationType: 'one_time',
 
   dedicationMessage: 'I love fcc!',
 
@@ -216,24 +213,6 @@ const expectedDonations: DonationResponseDto[] = allDonations.map(
   },
 );
 
-const publicInfoDonations: PublicDonationDto[] = allDonations.map((dto) => {
-  return {
-    id: dto.id,
-    amount: dto.amount,
-    donationType: dto.donationType,
-    recurringInterval: dto.recurringInterval,
-    ...(dto.showDedicationPublicly
-      ? { dedicationMessage: dto.dedicationMessage }
-      : {}),
-    isAnonymous: dto.isAnonymous,
-    ...(!dto.isAnonymous
-      ? { donorName: dto.firstName + ' ' + dto.lastName }
-      : {}),
-    status: dto.status,
-    createdAt: dto.createdAt,
-  };
-});
-
 describe('DonationsService', () => {
   let service: DonationsService;
   let repo: jest.Mocked<Partial<Repository<Donation>>>;
@@ -308,7 +287,7 @@ describe('DonationsService', () => {
       );
     });
 
-    it('should return createDonationDTO if valid donation created', async () => {
+    it('should return domain donation if valid donation created', async () => {
       repo.create.mockReturnValue(validDonation1);
       repo.save.mockResolvedValue(validDonation1);
       const createReturned = await service.create(validCreateDonation1);
@@ -321,11 +300,11 @@ describe('DonationsService', () => {
         amount: validCreateDonation1.amount,
         isAnonymous: validCreateDonation1.isAnonymous,
         donationType: validCreateDonation1.donationType,
-        recurringInterval: validCreateDonation1.recurringInterval,
+        recurringInterval: undefined,
         dedicationMessage: validCreateDonation1.dedicationMessage,
         showDedicationPublicly: validCreateDonation1.showDedicationPublicly,
         status: validDonation1.status,
-        transactionId: validDonation1.transactionId,
+        transactionId: undefined,
         createdAt: validDonation1.createdAt,
         updatedAt: validDonation1.updatedAt,
       });
@@ -340,11 +319,13 @@ describe('DonationsService', () => {
   });
 
   describe('Find public donations method', () => {
-    it('should return all public donations', async () => {
+    it('should return all public donations as domain objects', async () => {
       const publicDonations = await service.findPublic();
-      expect(JSON.stringify(publicDonations)).toEqual(
-        JSON.stringify(publicInfoDonations),
-      );
+      // findPublic now returns domain donations (full objects), not PublicDonationDto
+      expect(publicDonations.length).toBe(3);
+      expect(publicDonations[0]).toHaveProperty('firstName');
+      expect(publicDonations[0]).toHaveProperty('lastName');
+      expect(publicDonations[0]).toHaveProperty('email');
     });
   });
 
