@@ -10,12 +10,12 @@ import { PaymentsService } from './payments.service';
       provide: 'STRIPE_CLIENT',
       useFactory: (configService: ConfigService) => {
         return new Stripe(configService.get<string>('STRIPE_SECRET_KEY'), {
-          apiVersion: '2025-09-30.clover', 
+          apiVersion: '2025-09-30.clover',
         });
       },
       inject: [ConfigService],
     },
-    PaymentsService
+    PaymentsService,
   ],
   exports: [PaymentsService],
 })

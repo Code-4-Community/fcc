@@ -1,291 +1,360 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { BadRequestException } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, FindOneOptions, FindOptionsWhere } from 'typeorm';
+import { DonationType, Donation, DonationStatus } from './donation.entity';
 import { DonationsService } from './donations.service';
-import { DonationsRepository } from './donations.repository';
-import {
-  Donation,
-  DonationType,
-  DonationStatus,
-  RecurringInterval,
-} from './donation.entity';
 import { CreateDonationRequest } from './mappers';
+import { DonationResponseDto } from './dtos/donation-response-dto';
+
+// mock donations
+
+// invalid donation: non positive donation amount
+const invalidAmountDonation: CreateDonationRequest = {
+  firstName: 'John',
+
+  lastName: 'Smith',
+
+  email: 'john.smith@gmail.com',
+
+  amount: -500,
+  isAnonymous: true,
+  donationType: 'one_time',
+  showDedicationPublicly: false,
+};
+
+// invalid donation: recurring donation but no interval
+const invalidRecurringDonation: CreateDonationRequest = {
+  firstName: 'John',
+
+  lastName: 'Smith',
+
+  email: 'john.smith@gmail.com',
+
+  amount: 500,
+
+  isAnonymous: true,
+
+  donationType: 'recurring',
+
+  showDedicationPublicly: false,
+};
+
+// invalid donation: one time but interval
+const invalidOneTimeDonation: CreateDonationRequest = {
+  firstName: 'John',
+
+  lastName: 'Smith',
+
+  email: 'john.smith@gmail.com',
+
+  amount: 500,
+
+  isAnonymous: true,
+
+  donationType: 'one_time',
+
+  recurringInterval: 'bimonthly',
+
+  showDedicationPublicly: false,
+};
+
+// invalid donation: showing dedication publicly without a message
+const invalidDedicationDonation: CreateDonationRequest = {
+  firstName: 'John',
+
+  lastName: 'Smith',
+
+  email: 'john.smith@gmail.com',
+
+  amount: 500,
+
+  isAnonymous: false,
+
+  donationType: 'one_time',
+
+  showDedicationPublicly: true,
+};
+
+// valid donation
+const validCreateDonation1: CreateDonationRequest = {
+  firstName: 'John',
+
+  lastName: 'Smith',
+
+  email: 'john.smith@gmail.com',
+
+  amount: 500,
+
+  isAnonymous: true,
+
+  donationType: 'one_time',
+
+  dedicationMessage: 'I love fcc!',
+
+  showDedicationPublicly: false,
+};
+
+// valid donation
+const validDonation1: Donation = {
+  id: 0,
+
+  firstName: 'John',
+
+  lastName: 'Smith',
+
+  email: 'john.smith@gmail.com',
+
+  amount: 500,
+
+  isAnonymous: true,
+
+  donationType: DonationType.ONE_TIME,
+
+  dedicationMessage: 'I love fcc!',
+
+  showDedicationPublicly: false,
+
+  status: DonationStatus.PENDING,
+
+  transactionId: null,
+
+  createdAt: new Date(2025, 6, 4),
+
+  updatedAt: new Date(2026, 7, 1),
+
+  recurringInterval: undefined,
+};
+
+const validDonation2: Donation = {
+  id: 1,
+
+  firstName: 'Sally',
+
+  lastName: 'Smith',
+
+  email: 'sally.smith@gmail.com',
+
+  amount: 700,
+
+  isAnonymous: false,
+
+  donationType: DonationType.ONE_TIME,
+
+  showDedicationPublicly: true,
+
+  status: DonationStatus.PENDING,
+
+  transactionId: null,
+
+  createdAt: new Date(2025, 6, 4),
+
+  updatedAt: new Date(2026, 7, 1),
+
+  recurringInterval: undefined,
+
+  dedicationMessage: 'I love fcc!',
+};
+
+const validDonation3: Donation = {
+  id: 2,
+
+  firstName: 'Hannah',
+
+  lastName: 'Smith',
+
+  email: 'hannah.smith@gmail.com',
+
+  amount: 100,
+
+  isAnonymous: false,
+
+  donationType: DonationType.ONE_TIME,
+
+  showDedicationPublicly: false,
+
+  status: DonationStatus.PENDING,
+
+  transactionId: null,
+
+  createdAt: new Date(2025, 6, 4),
+
+  updatedAt: new Date(2026, 7, 1),
+
+  recurringInterval: undefined,
+
+  dedicationMessage: 'I love fcc!',
+};
+
+const allDonations: Donation[] = [
+  validDonation1,
+  validDonation2,
+  validDonation3,
+];
+
+const expectedDonations: DonationResponseDto[] = allDonations.map(
+  (donation) => {
+    return {
+      id: donation.id,
+      firstName: donation.firstName,
+      lastName: donation.lastName,
+      email: donation.email,
+      amount: donation.amount,
+      isAnonymous: donation.isAnonymous,
+      donationType: donation.donationType,
+      recurringInterval: donation.recurringInterval,
+      dedicationMessage: donation.dedicationMessage,
+      showDedicationPublicly: donation.showDedicationPublicly,
+      status: donation.status,
+      transactionId: donation.transactionId,
+      createdAt: donation.createdAt,
+      updatedAt: donation.updatedAt,
+    };
+  },
+);
 
 describe('DonationsService', () => {
   let service: DonationsService;
-  let donationRepository: Repository<Donation>;
+  let repo: jest.Mocked<Partial<Repository<Donation>>>;
 
-  const mockDonationEntity: Donation = {
-    id: 1,
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john@example.com',
-    amount: 100,
-    isAnonymous: false,
-    donationType: DonationType.ONE_TIME,
-    recurringInterval: null,
-    dedicationMessage: null,
-    showDedicationPublicly: false,
-    status: DonationStatus.PENDING,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    transactionId: null,
-  };
+  beforeAll(async () => {
+    const repoMock = {
+      manager: {
+        query: jest.fn().mockResolvedValue([
+          {
+            count: allDonations.length,
+            total: allDonations.reduce(
+              (total, current) => total + current.amount,
+              0,
+            ),
+          },
+        ]),
+      },
+      save: jest.fn().mockResolvedValue(validDonation1),
+      create: jest.fn(),
+      find: jest.fn().mockResolvedValue(allDonations),
+      findOne: jest.fn(),
+    } as unknown as jest.Mocked<Partial<Repository<Donation>>>;
 
-  const mockRepository = {
-    create: jest.fn(),
-    save: jest.fn(),
-    find: jest.fn(),
-    createQueryBuilder: jest.fn(),
-  };
-
-  const mockDonationsRepository = {
-    findRecentPublic: jest.fn(),
-    getTotalsByDateRange: jest.fn(),
-  };
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const app = await Test.createTestingModule({
       providers: [
         DonationsService,
-        {
-          provide: getRepositoryToken(Donation),
-          useValue: mockRepository,
-        },
-        {
-          provide: DonationsRepository,
-          useValue: mockDonationsRepository,
-        },
+        { provide: getRepositoryToken(Donation), useValue: repoMock },
       ],
     }).compile();
 
-    service = module.get<DonationsService>(DonationsService);
-    donationRepository = module.get<Repository<Donation>>(
-      getRepositoryToken(Donation),
+    service = app.get<DonationsService>(DonationsService);
+    repo = app.get(getRepositoryToken(Donation));
+
+    repo.findOne.mockImplementation(
+      async (options?: FindOneOptions<Donation>) => {
+        const where = options?.where;
+        if (where && !Array.isArray(where)) {
+          const id = (where as FindOptionsWhere<Donation>).id;
+          if (id !== undefined && id !== null) {
+            const donation = allDonations.find((d) => d.id === id);
+            return donation ?? null;
+          }
+        }
+
+        return null;
+      },
     );
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  describe('create', () => {
-    it('should create a one-time donation', async () => {
-      const request: CreateDonationRequest = {
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        amount: 100,
-        isAnonymous: false,
-        donationType: 'one_time',
-        showDedicationPublicly: false,
-      };
-
-      mockRepository.create.mockReturnValue(mockDonationEntity);
-      mockRepository.save.mockResolvedValue(mockDonationEntity);
-
-      const result = await service.create(request);
-
-      expect(donationRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'john@example.com',
-          amount: 100,
-          isAnonymous: false,
-          donationType: DonationType.ONE_TIME,
-          status: DonationStatus.PENDING,
-        }),
+  describe('Create donation method', () => {
+    it('should throw an error if the donation amount is not positive', async () => {
+      await expect(service.create(invalidAmountDonation)).rejects.toThrow(
+        BadRequestException,
       );
+    });
 
-      expect(donationRepository.save).toHaveBeenCalled();
+    it('should throw an error if one time donation has recurring interval', async () => {
+      await expect(service.create(invalidOneTimeDonation)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
 
-      expect(result).toMatchObject({
-        id: 1,
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        amount: 100,
-        isAnonymous: false,
-        donationType: 'one_time',
-        status: 'pending',
+    it('should throw an error if recurring donation does not have interval set', async () => {
+      await expect(service.create(invalidRecurringDonation)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw an error if showing dedication publicly without a message', async () => {
+      await expect(service.create(invalidDedicationDonation)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should return domain donation if valid donation created', async () => {
+      repo.create.mockReturnValue(validDonation1);
+      repo.save.mockResolvedValue(validDonation1);
+      const createReturned = await service.create(validCreateDonation1);
+
+      expect(createReturned).toEqual({
+        id: validDonation1.id,
+        firstName: validCreateDonation1.firstName,
+        lastName: validCreateDonation1.lastName,
+        email: validCreateDonation1.email,
+        amount: validCreateDonation1.amount,
+        isAnonymous: validCreateDonation1.isAnonymous,
+        donationType: validCreateDonation1.donationType,
+        recurringInterval: undefined,
+        dedicationMessage: validCreateDonation1.dedicationMessage,
+        showDedicationPublicly: validCreateDonation1.showDedicationPublicly,
+        status: validDonation1.status,
+        transactionId: undefined,
+        createdAt: validDonation1.createdAt,
+        updatedAt: validDonation1.updatedAt,
       });
-    });
-
-    it('should create a recurring donation', async () => {
-      const request: CreateDonationRequest = {
-        firstName: 'Jane',
-        lastName: 'Smith',
-        email: 'jane@example.com',
-        amount: 50,
-        isAnonymous: true,
-        donationType: 'recurring',
-        recurringInterval: 'monthly',
-        showDedicationPublicly: false,
-      };
-
-      const recurringEntity = {
-        ...mockDonationEntity,
-        firstName: 'Jane',
-        lastName: 'Smith',
-        email: 'jane@example.com',
-        amount: 50,
-        isAnonymous: true,
-        donationType: DonationType.RECURRING,
-        recurringInterval: RecurringInterval.MONTHLY,
-      };
-
-      mockRepository.create.mockReturnValue(recurringEntity);
-      mockRepository.save.mockResolvedValue(recurringEntity);
-
-      const result = await service.create(request);
-
-      expect(donationRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          donationType: DonationType.RECURRING,
-          recurringInterval: 'monthly',
-        }),
-      );
-
-      expect(result.donationType).toBe('recurring');
-      expect(result.recurringInterval).toBe('monthly');
-    });
-
-    it('should handle dedication messages', async () => {
-      const request: CreateDonationRequest = {
-        firstName: 'Bob',
-        lastName: 'Johnson',
-        email: 'bob@example.com',
-        amount: 200,
-        isAnonymous: false,
-        donationType: 'one_time',
-        dedicationMessage: 'In memory of...',
-        showDedicationPublicly: true,
-      };
-
-      const entityWithDedication = {
-        ...mockDonationEntity,
-        dedicationMessage: 'In memory of...',
-        showDedicationPublicly: true,
-      };
-
-      mockRepository.create.mockReturnValue(entityWithDedication);
-      mockRepository.save.mockResolvedValue(entityWithDedication);
-
-      const result = await service.create(request);
-
-      expect(result.dedicationMessage).toBe('In memory of...');
-      expect(result.showDedicationPublicly).toBe(true);
     });
   });
 
-  describe('findPublic', () => {
-    it('should return public donations with default limit', async () => {
-      mockRepository.find.mockResolvedValue([mockDonationEntity]);
-
-      const result = await service.findPublic();
-
-      expect(donationRepository.find).toHaveBeenCalledWith({
-        where: { status: DonationStatus.SUCCEEDED },
-        order: { createdAt: 'DESC' },
-        take: 50,
-      });
-
-      expect(result).toHaveLength(1);
-      expect(result[0]).toMatchObject({
-        id: 1,
-        firstName: 'John',
-        lastName: 'Doe',
-        amount: 100,
-      });
-    });
-
-    it('should respect custom limit', async () => {
-      mockRepository.find.mockResolvedValue([]);
-
-      await service.findPublic(10);
-
-      expect(donationRepository.find).toHaveBeenCalledWith({
-        where: { status: DonationStatus.SUCCEEDED },
-        order: { createdAt: 'DESC' },
-        take: 10,
-      });
-    });
-
-    it('should map multiple donations correctly', async () => {
-      const donations = [
-        mockDonationEntity,
-        { ...mockDonationEntity, id: 2, amount: 200 },
-        { ...mockDonationEntity, id: 3, amount: 300 },
-      ];
-
-      mockRepository.find.mockResolvedValue(donations);
-
-      const result = await service.findPublic(3);
-
-      expect(result).toHaveLength(3);
-      expect(result[0].id).toBe(1);
-      expect(result[1].id).toBe(2);
-      expect(result[2].id).toBe(3);
+  describe('Find all donations method', () => {
+    it('should return createDonationDTO if valid donation', async () => {
+      const findDonations = await service.findAll();
+      expect(findDonations).toEqual(expectedDonations);
     });
   });
 
-  describe('getTotalDonations', () => {
-    it('should return total amount and count', async () => {
-      const mockQueryBuilder = {
-        select: jest.fn().mockReturnThis(),
-        addSelect: jest.fn().mockReturnThis(),
-        getRawOne: jest
-          .fn()
-          .mockResolvedValue({ total: '10000.00', count: '50' }),
-      };
+  describe('Find public donations method', () => {
+    it('should return all public donations as domain objects', async () => {
+      const publicDonations = await service.findPublic();
+      // findPublic now returns domain donations (full objects), not PublicDonationDto
+      expect(publicDonations.length).toBe(3);
+      expect(publicDonations[0]).toHaveProperty('firstName');
+      expect(publicDonations[0]).toHaveProperty('lastName');
+      expect(publicDonations[0]).toHaveProperty('email');
+    });
+  });
 
-      mockRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+  describe('Find one donation method', () => {
+    it('should find donation by id', async () => {
+      const findDonation0 = await service.findOne(0);
+      const findDonation1 = await service.findOne(1);
+      const findDonation2 = await service.findOne(2);
 
-      const result = await service.getTotalDonations();
-
-      expect(result).toEqual({ total: 10000, count: 50 });
-      expect(mockQueryBuilder.select).toHaveBeenCalledWith(
-        'SUM(donation.amount)',
-        'total',
+      expect(findDonation0).toEqual(
+        expectedDonations.find((d) => d.id === 0) ?? null,
       );
-      expect(mockQueryBuilder.addSelect).toHaveBeenCalledWith(
-        'COUNT(donation.id)',
-        'count',
+      expect(findDonation1).toEqual(
+        expectedDonations.find((d) => d.id === 1) ?? null,
+      );
+      expect(findDonation2).toEqual(
+        expectedDonations.find((d) => d.id === 2) ?? null,
       );
     });
+  });
 
-    it('should handle zero donations', async () => {
-      const mockQueryBuilder = {
-        select: jest.fn().mockReturnThis(),
-        addSelect: jest.fn().mockReturnThis(),
-        getRawOne: jest.fn().mockResolvedValue({ total: null, count: '0' }),
-      };
-
-      mockRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
-
-      const result = await service.getTotalDonations();
-
-      expect(result).toEqual({ total: 0, count: 0 });
-    });
-
-    it('should parse numeric values correctly', async () => {
-      const mockQueryBuilder = {
-        select: jest.fn().mockReturnThis(),
-        addSelect: jest.fn().mockReturnThis(),
-        getRawOne: jest
-          .fn()
-          .mockResolvedValue({ total: '12345.67', count: '123' }),
-      };
-
-      mockRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
-
-      const result = await service.getTotalDonations();
-
-      expect(result.total).toBe(12345.67);
-      expect(result.count).toBe(123);
-      expect(typeof result.total).toBe('number');
-      expect(typeof result.count).toBe('number');
+  describe('Get total donations method', () => {
+    it('should find total amount and count of all donations', async () => {
+      const { total, count } = await service.getTotalDonations();
+      expect({ total, count }).toEqual({
+        total:
+          validDonation1.amount + validDonation2.amount + validDonation3.amount,
+        count: 3,
+      });
     });
   });
 });

@@ -197,9 +197,9 @@ export class DonationsController {
     description: 'unauthorized',
   })
   async findAll(
-    @Query('page', new ParseIntPipe({ optional: true })) page: number = 1,
+    @Query('page', new ParseIntPipe({ optional: true })) page = 1,
     @Query('perPage', new ParseIntPipe({ optional: true }))
-    perPage: number = 20,
+    perPage = 20,
     @Query('donationType') donationType?: DonationType,
     @Query('status') status?: DonationStatus,
     @Query('isAnonymous') isAnonymous?: boolean,

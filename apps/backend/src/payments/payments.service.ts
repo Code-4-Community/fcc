@@ -12,7 +12,7 @@ export type PaymentIntentMetadata = Record<string, string>;
 
 /**
  * Interface for object shape returned by service methods that output detailed payment intent info
- * 
+ *
  * id - The unique identifier for the PaymentIntent, equivalent to what Stripe API returns
  * clientSecret - The client secret used for client-side confirmation, equivalent to what Stripe API returns
  * amount - The payment amount in smallest currency unit (e.g., cents), equivalent to what Stripe API returns
@@ -321,7 +321,7 @@ export class PaymentsService {
 
   /**
    * Maps Stripe API payment Intent to response returned by service methods for a payment intent
-   * 
+   *
    * @param paymentIntent the payment intent object returned directly by the stripe api
    * @returns A PaymentIntentResponse object that is closer to data used in backend
    */

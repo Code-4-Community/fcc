@@ -1,96 +1,190 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { DonationResponseDto } from './dtos/donation-response-dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Donation, DonationType, RecurringInterval } from './donation.entity';
 import { Repository } from 'typeorm';
-import {
-  Donation,
-  DonationType,
-  RecurringInterval,
-  DonationStatus,
-} from './donation.entity';
 import { CreateDonationRequest, Donation as DomainDonation } from './mappers';
-import { DonationsRepository } from './donations.repository';
-
-export interface DonationsServiceInterface {
-  create(request: CreateDonationRequest): Promise<DomainDonation>;
-  findPublic(limit?: number): Promise<DomainDonation[]>;
-  getTotalDonations(): Promise<{ total: number; count: number }>;
-}
 
 @Injectable()
-export class DonationsService implements DonationsServiceInterface {
+export class DonationsService {
   constructor(
     @InjectRepository(Donation)
-    private readonly donationRepository: Repository<Donation>,
-    private readonly donationsRepository: DonationsRepository,
+    private donationRepository: Repository<Donation>,
   ) {}
 
-  async create(request: CreateDonationRequest): Promise<DomainDonation> {
+  async create(
+    createDonationRequest: CreateDonationRequest,
+  ): Promise<DomainDonation> {
+    if (createDonationRequest.amount <= 0) {
+      throw new BadRequestException('Donation amount must be positive.');
+    }
+
+    if (
+      createDonationRequest.donationType === 'recurring' &&
+      !createDonationRequest.recurringInterval
+    ) {
+      throw new BadRequestException(
+        'Recurring donation must specify interval.',
+      );
+    }
+
+    if (
+      createDonationRequest.donationType === 'one_time' &&
+      createDonationRequest.recurringInterval
+    ) {
+      throw new BadRequestException(
+        'One time donation does not have recurring interval.',
+      );
+    }
+
+    if (
+      createDonationRequest.showDedicationPublicly &&
+      !createDonationRequest.dedicationMessage
+    ) {
+      throw new BadRequestException(
+        'Cannot show dedication publicly without a dedication message.',
+      );
+    }
+
     const donation = this.donationRepository.create({
-      firstName: request.firstName,
-      lastName: request.lastName,
-      email: request.email,
-      amount: request.amount,
-      isAnonymous: request.isAnonymous ?? false,
+      firstName: createDonationRequest.firstName,
+      lastName: createDonationRequest.lastName,
+      email: createDonationRequest.email,
+      amount: createDonationRequest.amount,
+      isAnonymous: createDonationRequest.isAnonymous,
       donationType:
-        request.donationType === 'one_time'
+        createDonationRequest.donationType === 'one_time'
           ? DonationType.ONE_TIME
           : DonationType.RECURRING,
-      recurringInterval: request.recurringInterval
-        ? (request.recurringInterval as RecurringInterval)
-        : null,
-      dedicationMessage: request.dedicationMessage ?? null,
-      showDedicationPublicly: request.showDedicationPublicly ?? false,
-      status: DonationStatus.PENDING,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      recurringInterval:
+        createDonationRequest.recurringInterval as RecurringInterval | null,
+      dedicationMessage: createDonationRequest.dedicationMessage || null,
+      showDedicationPublicly: createDonationRequest.showDedicationPublicly,
     });
-    const saved = await this.donationRepository.save(donation);
-    return this.mapEntityToDomain(saved);
-  }
 
-  async findPublic(limit: number = 50): Promise<DomainDonation[]> {
-    const donations = await this.donationRepository.find({
-      where: { status: DonationStatus.SUCCEEDED },
-      order: { createdAt: 'DESC' },
-      take: limit,
-    });
-    return donations.map((d) => this.mapEntityToDomain(d));
-  }
+    const savedDonation = await this.donationRepository.save(donation);
 
-  async getTotalDonations(): Promise<{ total: number; count: number }> {
-    const result = await this.donationRepository
-      .createQueryBuilder('donation')
-      .select('SUM(donation.amount)', 'total')
-      .addSelect('COUNT(donation.id)', 'count')
-      .getRawOne();
     return {
-      total: parseFloat(result.total) || 0,
-      count: parseInt(result.count, 10) || 0,
-    };
-  }
-
-  private mapEntityToDomain(entity: Donation): DomainDonation {
-    return {
-      id: entity.id,
-      firstName: entity.firstName,
-      lastName: entity.lastName,
-      email: entity.email,
-      amount: entity.amount,
-      isAnonymous: entity.isAnonymous,
-      donationType: entity.donationType as 'one_time' | 'recurring',
-      recurringInterval: entity.recurringInterval as
+      id: savedDonation.id,
+      firstName: savedDonation.firstName,
+      lastName: savedDonation.lastName,
+      email: savedDonation.email,
+      amount: savedDonation.amount,
+      isAnonymous: savedDonation.isAnonymous,
+      donationType: savedDonation.donationType as 'one_time' | 'recurring',
+      recurringInterval: savedDonation.recurringInterval as
         | 'weekly'
         | 'monthly'
         | 'bimonthly'
         | 'quarterly'
         | 'annually'
         | undefined,
-      dedicationMessage: entity.dedicationMessage ?? undefined,
-      showDedicationPublicly: entity.showDedicationPublicly,
-      status: entity.status as 'pending' | 'succeeded' | 'failed' | 'cancelled',
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
-      transactionId: entity.transactionId ?? undefined,
+      dedicationMessage: savedDonation.dedicationMessage || undefined,
+      showDedicationPublicly: savedDonation.showDedicationPublicly,
+      status: savedDonation.status as
+        | 'pending'
+        | 'succeeded'
+        | 'failed'
+        | 'cancelled',
+      createdAt: savedDonation.createdAt,
+      updatedAt: savedDonation.updatedAt,
+      transactionId: savedDonation.transactionId || undefined,
     };
+  }
+
+  async findAll(): Promise<DonationResponseDto[]> {
+    const donations: Donation[] = await this.donationRepository.find();
+
+    const donationResponseDtos: DonationResponseDto[] = donations.map(
+      (donation) => {
+        return {
+          id: donation.id,
+          firstName: donation.firstName,
+          lastName: donation.lastName,
+          email: donation.email,
+          amount: donation.amount,
+          isAnonymous: donation.isAnonymous,
+          donationType: donation.donationType,
+          recurringInterval: donation.recurringInterval,
+          dedicationMessage: donation.dedicationMessage,
+          showDedicationPublicly: donation.showDedicationPublicly,
+          status: donation.status,
+          transactionId: donation.transactionId,
+          createdAt: donation.createdAt,
+          updatedAt: donation.updatedAt,
+        };
+      },
+    );
+
+    return donationResponseDtos;
+  }
+
+  async findPublic(limit = 50): Promise<DomainDonation[]> {
+    const donations: Donation[] = await this.donationRepository.find({
+      take: limit,
+      order: { createdAt: 'DESC' },
+    });
+
+    return donations.map((donation) => ({
+      id: donation.id,
+      firstName: donation.firstName,
+      lastName: donation.lastName,
+      email: donation.email,
+      amount: donation.amount,
+      isAnonymous: donation.isAnonymous,
+      donationType: donation.donationType as 'one_time' | 'recurring',
+      recurringInterval: donation.recurringInterval as
+        | 'weekly'
+        | 'monthly'
+        | 'bimonthly'
+        | 'quarterly'
+        | 'annually'
+        | undefined,
+      dedicationMessage: donation.dedicationMessage || undefined,
+      showDedicationPublicly: donation.showDedicationPublicly,
+      status: donation.status as
+        | 'pending'
+        | 'succeeded'
+        | 'failed'
+        | 'cancelled',
+      createdAt: donation.createdAt,
+      updatedAt: donation.updatedAt,
+      transactionId: donation.transactionId || undefined,
+    }));
+  }
+
+  async findOne(id: number): Promise<DonationResponseDto | null> {
+    const donation = await this.donationRepository.findOne({
+      where: { id },
+    });
+
+    if (donation === undefined || donation === null) {
+      return null;
+    }
+
+    return {
+      id: donation.id,
+      firstName: donation.firstName,
+      lastName: donation.lastName,
+      email: donation.email,
+      amount: donation.amount,
+      isAnonymous: donation.isAnonymous,
+      donationType: donation.donationType,
+      recurringInterval: donation.recurringInterval,
+      dedicationMessage: donation.dedicationMessage,
+      showDedicationPublicly: donation.showDedicationPublicly,
+      status: donation.status,
+      transactionId: donation.transactionId,
+      createdAt: donation.createdAt,
+      updatedAt: donation.updatedAt,
+    };
+  }
+
+  async getTotalDonations(): Promise<{ total: number; count: number }> {
+    const [donations] = await this.donationRepository.manager.query(
+      `SELECT COUNT(amount) AS count, SUM(amount) AS total FROM donations`,
+    );
+
+    return { total: donations.total, count: donations.count };
   }
 }
