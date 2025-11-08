@@ -378,11 +378,11 @@ export const DonationForm: React.FC<DonationFormProps> = ({
           Show dedication message publicly
         </label>
       </div>
+      <DonationSummary baseAmount={10} />
 
       <button type="submit" className="submit-button" disabled={isSubmitting}>
         {isSubmitting ? 'Processing...' : 'Submit Donation'}
       </button>
-      <DonationSummary baseAmount={10} />
     </form>
   );
 };

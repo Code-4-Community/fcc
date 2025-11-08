@@ -75,18 +75,15 @@ describe('DonationSummary Component', () => {
     // donation total calculation should include fee
     expect(
       screen.queryByText(
-        new RegExp(`\\$${(baseAmount).toFixed(2)}`),
+        new RegExp(`\\$${(baseAmount + feeTotal).toFixed(2)}`),
       ),
     ).not.toBeNull();
 
-    // donation total calculation should include fee
     fireEvent.click(feeToggle[0]);
 
-    // donation total calculation should include fee
+    // donation total calculation should not include fee
     expect(
-      screen.queryByText(
-        new RegExp(`\\$${(baseAmount).toFixed(2)}`),
-      ),
+      screen.queryByText(new RegExp(`\\$${baseAmount.toFixed(2)}`)),
     ).not.toBeNull();
   });
 });
