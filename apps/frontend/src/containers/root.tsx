@@ -1,9 +1,17 @@
-import { DonationSummary } from '@components/donations/DonationSummary';
+import { DonationSummary } from '@containers/donations/DonationSummary';
+import { DonationForm } from './donations/DonationForm';
 
 const Root: React.FC = () => {
   return (
     <>
-      <DonationSummary baseAmount={10.99} />
+      <DonationForm
+        onSuccess={function (donationId: string): void {
+          throw new Error('Function not implemented.');
+        }}
+        onError={function (error: Error): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
     </>
   );
 };
