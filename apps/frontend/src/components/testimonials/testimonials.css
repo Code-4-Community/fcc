@@ -1,180 +1,192 @@
 .testimonial-carousel {
-    background: #127A64;
-    border-radius: 10px;
-    padding: 2.5rem 3rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
-    position: relative;
-    overflow: visible;
-    min-height: 132px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: #127a64;
+  border-radius: 10px;
+  padding: 2.5rem 3rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  position: relative;
+  overflow: visible;
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.testimonial-carousel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+}
+
+.testimonial-content {
+  text-align: center;
+  color: white;
+  position: relative;
+  width: 100%;
+  max-width: 579px;
+  transition: opacity 0.3s ease-in-out;
+  padding: 0;
+}
+
+.testimonial-content.fade-in {
+  opacity: 1;
+}
+
+.testimonial-content.fade-out {
+  opacity: 0;
+}
+
+.quote-icon {
+  font-size: 4rem;
+  font-family: Georgia, serif;
+  color: #ffffff;
+  line-height: 0.6;
+  position: absolute;
+  top: -20px;
+  left: -40px;
+  font-weight: bold;
+  opacity: 1;
+}
+
+.quote-icon-end {
+  top: -20px;
+  bottom: auto;
+  left: auto;
+  right: -40px;
+}
+
+.testimonial-text {
+  font-family:
+    'IBM Plex Sans',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 100%;
+  letter-spacing: 0;
+  margin: 0 0 1rem 0;
+  padding: 0;
+  color: #ffffff;
+  text-align: center;
+}
+
+.testimonial-author {
+  display: block;
+  font-family:
+    'IBM Plex Sans',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 100%;
+  letter-spacing: 0;
+  font-style: normal;
+  color: #ffffff;
+  margin-top: 1rem;
+  text-align: right;
+  padding-right: 0;
+}
+
+.carousel-indicators {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator:hover {
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(1.2);
+}
+
+.indicator.active {
+  background: white;
+  width: 12px;
+  height: 12px;
+}
+
+.indicator:focus {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .testimonial-carousel {
+    padding: 2rem 2.5rem;
+    min-height: 140px;
   }
-  
-  .testimonial-carousel:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
-  }
-  
+
   .testimonial-content {
-    text-align: center;
-    color: white;
-    position: relative;
-    width: 100%;
-    max-width: 579px;
-    transition: opacity 0.3s ease-in-out;
-    padding: 0;
+    max-width: 100%;
   }
-  
-  .testimonial-content.fade-in {
-    opacity: 1;
-  }
-  
-  .testimonial-content.fade-out {
-    opacity: 0;
-  }
-  
-  .quote-icon {
-    font-size: 4rem;
-    font-family: Georgia, serif;
-    color: #FFFFFF;
-    line-height: 0.6;
-    position: absolute;
-    top: -20px;
-    left: -40px;
-    font-weight: bold;
-    opacity: 1;
-  }
-  
-  .quote-icon-end {
-    top: -20px;
-    bottom: auto;
-    left: auto;
-    right: -40px;
-  }
-  
+
   .testimonial-text {
-    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 24px;
-    font-weight: 600;
-    line-height: 100%;
-    letter-spacing: 0;
-    margin: 0 0 1rem 0;
-    padding: 0;
-    color: #FFFFFF;
-    text-align: center;
+    font-size: 20px;
   }
-  
+
   .testimonial-author {
-    display: block;
-    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 100%;
-    letter-spacing: 0;
-    font-style: normal;
-    color: #FFFFFF;
-    margin-top: 1rem;
-    text-align: right;
-    padding-right: 0;
+    font-size: 14px;
   }
-  
-  .carousel-indicators {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    margin-top: 1.5rem;
+
+  .quote-icon {
+    font-size: 3rem;
+    left: -30px;
   }
-  
-  .indicator {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.4);
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    transition: all 0.3s ease;
+
+  .quote-icon-end {
+    right: -30px;
   }
-  
-  .indicator:hover {
-    background: rgba(255, 255, 255, 0.6);
-    transform: scale(1.2);
+}
+
+@media (max-width: 480px) {
+  .testimonial-carousel {
+    padding: 1.75rem 1.5rem;
+    border-radius: 8px;
+    min-height: 160px;
   }
-  
-  .indicator.active {
-    background: white;
-    width: 12px;
-    height: 12px;
+
+  .testimonial-content {
+    padding: 0 1rem;
   }
-  
-  .indicator:focus {
-    outline: 2px solid white;
-    outline-offset: 2px;
+
+  .testimonial-text {
+    font-size: 18px;
+    line-height: 120%;
   }
-  
-  /* Responsive design */
-  @media (max-width: 768px) {
-    .testimonial-carousel {
-      padding: 2rem 2.5rem;
-      min-height: 140px;
-    }
-  
-    .testimonial-content {
-      max-width: 100%;
-    }
-  
-    .testimonial-text {
-      font-size: 20px;
-    }
-  
-    .testimonial-author {
-      font-size: 14px;
-    }
-  
-    .quote-icon {
-      font-size: 3rem;
-      left: -30px;
-    }
-  
-    .quote-icon-end {
-      right: -30px;
-    }
+
+  .testimonial-author {
+    font-size: 13px;
+    margin-top: 0.75rem;
   }
-  
-  @media (max-width: 480px) {
-    .testimonial-carousel {
-      padding: 1.75rem 1.5rem;
-      border-radius: 8px;
-      min-height: 160px;
-    }
-  
-    .testimonial-content {
-      padding: 0 1rem;
-    }
-  
-    .testimonial-text {
-      font-size: 18px;
-      line-height: 120%;
-    }
-  
-    .testimonial-author {
-      font-size: 13px;
-      margin-top: 0.75rem;
-    }
-  
-    .quote-icon {
-      font-size: 2.5rem;
-      left: -10px;
-      top: -15px;
-    }
-  
-    .quote-icon-end {
-      right: -10px;
-      top: -15px;
-    }
+
+  .quote-icon {
+    font-size: 2.5rem;
+    left: -10px;
+    top: -15px;
   }
+
+  .quote-icon-end {
+    right: -10px;
+    top: -15px;
+  }
+}
