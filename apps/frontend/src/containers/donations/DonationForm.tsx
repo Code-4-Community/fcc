@@ -3,6 +3,7 @@ import apiClient, {
   type CreateDonationRequest,
 } from '../../api/apiClient';
 import React, { useState, FormEvent } from 'react';
+import { TestimonialCarousel } from '../../components/testimonials/TestimonialCarousel';
 import './donations.css';
 
 type RecurringInterval = 'weekly' | 'bimonthly' | 'monthly' | 'quarterly';
@@ -189,198 +190,206 @@ export const DonationForm: React.FC<DonationFormProps> = ({
   };
 
   return (
-    <form className="donation-form" onSubmit={handleSubmit} noValidate>
-      <h2>Make a Donation</h2>
+    <div className="donation-form-container">
+      {/* Testimonial Carousel */}
+      <TestimonialCarousel />
 
-      {submitError && (
-        <div className="error-banner" role="alert" aria-live="assertive">
-          {submitError}
-        </div>
-      )}
+      {/* Donation Form */}
+      <form className="donation-form" onSubmit={handleSubmit} noValidate>
+        <h2>Make a Donation</h2>
 
-      <div className="form-group">
-        <label htmlFor="firstName">
-          First Name <span className="required">*</span>
-        </label>
-        <input
-          type="text"
-          id="firstName"
-          name="firstName"
-          autoComplete="given-name"
-          required
-          aria-invalid={!!errors.firstName}
-          aria-describedby={errors.firstName ? 'firstName-error' : undefined}
-          value={formData.firstName}
-          onChange={handleInputChange}
-          className={errors.firstName ? 'error' : ''}
-          disabled={isSubmitting}
-        />
-        {errors.firstName && (
-          <span id="firstName-error" className="error-message">
-            {errors.firstName}
-          </span>
+        {submitError && (
+          <div className="error-banner" role="alert" aria-live="assertive">
+            {submitError}
+          </div>
         )}
-      </div>
 
-      <div className="form-group">
-        <label htmlFor="lastName">
-          Last Name <span className="required">*</span>
-        </label>
-        <input
-          type="text"
-          id="lastName"
-          name="lastName"
-          autoComplete="family-name"
-          required
-          aria-invalid={!!errors.lastName}
-          aria-describedby={errors.lastName ? 'lastName-error' : undefined}
-          value={formData.lastName}
-          onChange={handleInputChange}
-          className={errors.lastName ? 'error' : ''}
-          disabled={isSubmitting}
-        />
-        {errors.lastName && (
-          <span id="lastName-error" className="error-message">
-            {errors.lastName}
-          </span>
-        )}
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="email">
-          Email <span className="required">*</span>
-        </label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          autoComplete="email"
-          required
-          aria-invalid={!!errors.email}
-          aria-describedby={errors.email ? 'email-error' : undefined}
-          value={formData.email}
-          onChange={handleInputChange}
-          className={errors.email ? 'error' : ''}
-          disabled={isSubmitting}
-        />
-        {errors.email && (
-          <span id="email-error" className="error-message">
-            {errors.email}
-          </span>
-        )}
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="amount">
-          Donation Amount <span className="required">*</span>
-        </label>
-        <input
-          type="text"
-          id="amount"
-          name="amount"
-          inputMode="decimal"
-          pattern="\d+(\.\d{1,2})?"
-          placeholder="0.00"
-          value={formData.amount}
-          onChange={handleInputChange}
-          className={errors.amount ? 'error' : ''}
-          disabled={isSubmitting}
-          aria-invalid={!!errors.amount}
-          aria-describedby={errors.amount ? 'amount-error' : undefined}
-        />
-        {errors.amount && (
-          <span id="amount-error" className="error-message">
-            {errors.amount}
-          </span>
-        )}
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="donationType">
-          Donation Type <span className="required">*</span>
-        </label>
-        <select
-          id="donationType"
-          name="donationType"
-          value={formData.donationType}
-          onChange={handleInputChange}
-          disabled={isSubmitting}
-        >
-          <option value="one_time">One-time</option>
-          <option value="recurring">Recurring</option>
-        </select>
-      </div>
-
-      {formData.donationType === 'recurring' && (
         <div className="form-group">
-          <label htmlFor="recurringInterval">
-            Recurring Interval <span className="required">*</span>
+          <label htmlFor="firstName">
+            First Name <span className="required">*</span>
           </label>
-          <select
-            id="recurringInterval"
-            name="recurringInterval"
-            value={formData.recurringInterval}
+          <input
+            type="text"
+            id="firstName"
+            name="firstName"
+            autoComplete="given-name"
+            required
+            aria-invalid={!!errors.firstName}
+            aria-describedby={errors.firstName ? 'firstName-error' : undefined}
+            value={formData.firstName}
             onChange={handleInputChange}
-            className={errors.recurringInterval ? 'error' : ''}
+            className={errors.firstName ? 'error' : ''}
             disabled={isSubmitting}
-            aria-invalid={!!errors.recurringInterval}
-            aria-describedby={
-              errors.recurringInterval ? 'recurringInterval-error' : undefined
-            }
-          >
-            <option value="weekly">Weekly</option>
-            <option value="bimonthly">Bi-monthly</option>
-            <option value="monthly">Monthly</option>
-            <option value="quarterly">Quarterly</option>
-          </select>
-          {errors.recurringInterval && (
-            <span className="error-message">{errors.recurringInterval}</span>
+          />
+          {errors.firstName && (
+            <span id="firstName-error" className="error-message">
+              {errors.firstName}
+            </span>
           )}
         </div>
-      )}
 
-      <div className="form-group checkbox-group">
-        <label>
+        <div className="form-group">
+          <label htmlFor="lastName">
+            Last Name <span className="required">*</span>
+          </label>
           <input
-            type="checkbox"
-            name="isAnonymous"
-            checked={formData.isAnonymous}
+            type="text"
+            id="lastName"
+            name="lastName"
+            autoComplete="family-name"
+            required
+            aria-invalid={!!errors.lastName}
+            aria-describedby={errors.lastName ? 'lastName-error' : undefined}
+            value={formData.lastName}
             onChange={handleInputChange}
+            className={errors.lastName ? 'error' : ''}
             disabled={isSubmitting}
           />
-          Make this donation anonymous
-        </label>
-      </div>
+          {errors.lastName && (
+            <span id="lastName-error" className="error-message">
+              {errors.lastName}
+            </span>
+          )}
+        </div>
 
-      <div className="form-group">
-        <label htmlFor="dedicationMessage">Dedication Message (optional)</label>
-        <textarea
-          id="dedicationMessage"
-          name="dedicationMessage"
-          value={formData.dedicationMessage}
-          onChange={handleInputChange}
-          rows={4}
-          disabled={isSubmitting}
-          placeholder="Add a special message or dedication..."
-        />
-      </div>
-
-      <div className="form-group checkbox-group">
-        <label>
+        <div className="form-group">
+          <label htmlFor="email">
+            Email <span className="required">*</span>
+          </label>
           <input
-            type="checkbox"
-            name="showDedicationPublicly"
-            checked={formData.showDedicationPublicly}
+            type="email"
+            id="email"
+            name="email"
+            autoComplete="email"
+            required
+            aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? 'email-error' : undefined}
+            value={formData.email}
             onChange={handleInputChange}
+            className={errors.email ? 'error' : ''}
             disabled={isSubmitting}
           />
-          Show dedication message publicly
-        </label>
-      </div>
+          {errors.email && (
+            <span id="email-error" className="error-message">
+              {errors.email}
+            </span>
+          )}
+        </div>
 
-      <button type="submit" className="submit-button" disabled={isSubmitting}>
-        {isSubmitting ? 'Processing...' : 'Submit Donation'}
-      </button>
-    </form>
+        <div className="form-group">
+          <label htmlFor="amount">
+            Donation Amount <span className="required">*</span>
+          </label>
+          <input
+            type="text"
+            id="amount"
+            name="amount"
+            inputMode="decimal"
+            pattern="\d+(\.\d{1,2})?"
+            placeholder="0.00"
+            value={formData.amount}
+            onChange={handleInputChange}
+            className={errors.amount ? 'error' : ''}
+            disabled={isSubmitting}
+            aria-invalid={!!errors.amount}
+            aria-describedby={errors.amount ? 'amount-error' : undefined}
+          />
+          {errors.amount && (
+            <span id="amount-error" className="error-message">
+              {errors.amount}
+            </span>
+          )}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="donationType">
+            Donation Type <span className="required">*</span>
+          </label>
+          <select
+            id="donationType"
+            name="donationType"
+            value={formData.donationType}
+            onChange={handleInputChange}
+            disabled={isSubmitting}
+          >
+            <option value="one_time">One-time</option>
+            <option value="recurring">Recurring</option>
+          </select>
+        </div>
+
+        {formData.donationType === 'recurring' && (
+          <div className="form-group">
+            <label htmlFor="recurringInterval">
+              Recurring Interval <span className="required">*</span>
+            </label>
+            <select
+              id="recurringInterval"
+              name="recurringInterval"
+              value={formData.recurringInterval}
+              onChange={handleInputChange}
+              className={errors.recurringInterval ? 'error' : ''}
+              disabled={isSubmitting}
+              aria-invalid={!!errors.recurringInterval}
+              aria-describedby={
+                errors.recurringInterval ? 'recurringInterval-error' : undefined
+              }
+            >
+              <option value="weekly">Weekly</option>
+              <option value="bimonthly">Bi-monthly</option>
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+            </select>
+            {errors.recurringInterval && (
+              <span className="error-message">{errors.recurringInterval}</span>
+            )}
+          </div>
+        )}
+
+        <div className="form-group checkbox-group">
+          <label>
+            <input
+              type="checkbox"
+              name="isAnonymous"
+              checked={formData.isAnonymous}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+            />
+            Make this donation anonymous
+          </label>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="dedicationMessage">
+            Dedication Message (optional)
+          </label>
+          <textarea
+            id="dedicationMessage"
+            name="dedicationMessage"
+            value={formData.dedicationMessage}
+            onChange={handleInputChange}
+            rows={4}
+            disabled={isSubmitting}
+            placeholder="Add a special message or dedication..."
+          />
+        </div>
+
+        <div className="form-group checkbox-group">
+          <label>
+            <input
+              type="checkbox"
+              name="showDedicationPublicly"
+              checked={formData.showDedicationPublicly}
+              onChange={handleInputChange}
+              disabled={isSubmitting}
+            />
+            Show dedication message publicly
+          </label>
+        </div>
+
+        <button type="submit" className="submit-button" disabled={isSubmitting}>
+          {isSubmitting ? 'Processing...' : 'Submit Donation'}
+        </button>
+      </form>
+    </div>
   );
 };
