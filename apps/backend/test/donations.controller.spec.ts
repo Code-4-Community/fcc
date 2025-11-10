@@ -7,6 +7,9 @@ import {
   DonationStatus,
 } from '../src/donations/donation.entity';
 import { DonationsController } from '../src/donations/donations.controller';
+import { DonationsService } from '../src/donations/donations.service';
+import { DonationsRepository } from '../src/donations/donations.repository';
+// import { User } from '../src/users/user.entity';
 
 interface TestDonation {
   id: number;
@@ -31,11 +34,76 @@ describe('Donations (e2e) - expanded stubs', () => {
   jest.setTimeout(30000);
 
   let app: INestApplication;
+  // We use an in-memory array to simulate stored donations for controller tests
+  let inMemoryDonations: TestDonation[] = [];
+  let nextId = 1;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let mockService: any;
 
   beforeAll(async () => {
+    // Create a testing module that instantiates the DonationsController but
+    // uses a simple in-memory mock for the DonationsService so tests don't
+    // depend on TypeORM behavior during controller-level validation tests.
+    inMemoryDonations = [];
+    nextId = 1;
+
+    mockService = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      create: jest.fn(async (request: any) => {
+        // Validation to match real service behavior
+        if (
+          request.donationType === 'recurring' &&
+          !request.recurringInterval
+        ) {
+          throw new BadRequestException(
+            'Recurring donation must specify interval.',
+          );
+        }
+
+        const now = new Date();
+        const donation = {
+          id: nextId++,
+          firstName: request.firstName,
+          lastName: request.lastName,
+          email: request.email,
+          amount: request.amount,
+          isAnonymous: request.isAnonymous ?? false,
+          donationType:
+            request.donationType === 'one_time'
+              ? DonationType.ONE_TIME
+              : DonationType.RECURRING,
+          recurringInterval: request.recurringInterval ?? null,
+          dedicationMessage: request.dedicationMessage ?? undefined,
+          showDedicationPublicly: request.showDedicationPublicly ?? false,
+          status: DonationStatus.SUCCEEDED,
+          createdAt: now,
+          updatedAt: now,
+        };
+        inMemoryDonations.push(donation);
+        return donation;
+      }),
+      findPublic: jest.fn(async (limit?: number) => {
+        return inMemoryDonations
+          .filter(
+            (d) => d.status === DonationStatus.SUCCEEDED && !d.isAnonymous,
+          )
+          .slice(0, limit ?? 50);
+      }),
+      getTotalDonations: jest.fn(async () => {
+        const succeeded = inMemoryDonations.filter(
+          (d) => d.status === DonationStatus.SUCCEEDED,
+        );
+        const total = succeeded.reduce((s, d) => s + (d.amount || 0), 0);
+        return { total, count: succeeded.length };
+      }),
+    };
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [DonationsController],
-      providers: [],
+      providers: [
+        { provide: DonationsService, useValue: mockService },
+        { provide: DonationsRepository, useValue: {} },
+      ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
@@ -304,6 +372,24 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(res.body).toHaveProperty('message');
     });
 
+    it('throws 500 server error if the database errors', async () => {
+      // Simulate a DB failure by making the mocked service throw
+      mockService.create.mockRejectedValueOnce(
+        new Error('Simulated DB failure'),
+      );
+      const payload = { ...oneTimePayload };
+      try {
+        const res = await request(app.getHttpServer())
+          .post('/api/donations')
+          .send(payload)
+          .expect(500);
+        expect(res.body).toHaveProperty('statusCode', 500);
+        expect(res.body).toHaveProperty('message');
+      } finally {
+        mockService.create.mockClear();
+      }
+    });
+
     it('gracefully rejects a payload that is missing the first name', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: any = { ...oneTimePayload };
@@ -494,6 +580,22 @@ describe('Donations (e2e) - expanded stubs', () => {
       ).toBe(true);
     });
 
+    it('throws 500 server error if the database errors', async () => {
+      // Simulate DB find/query failures by making the mocked service throw
+      mockService.findPublic.mockRejectedValueOnce(
+        new Error('Simulated DB failure'),
+      );
+      try {
+        const res = await request(app.getHttpServer())
+          .get('/api/donations/public')
+          .expect(500);
+        expect(res.body).toHaveProperty('statusCode', 500);
+        expect(res.body).toHaveProperty('message');
+      } finally {
+        mockService.findPublic.mockClear();
+      }
+    });
+
     it('Returns items with correct DTO (expected keys)', async () => {
       inMemoryDonations.length = 0;
       const now = new Date();
@@ -558,6 +660,21 @@ describe('Donations (e2e) - expanded stubs', () => {
         .expect(200);
 
       expect(res.body).toEqual({ total: 0, count: 0 });
+    });
+
+    it('throws 500 server error if the database errors', async () => {
+      mockService.getTotalDonations.mockRejectedValueOnce(
+        new Error('Simulated DB failure'),
+      );
+      try {
+        const res = await request(app.getHttpServer())
+          .get('/api/donations/stats')
+          .expect(500);
+        expect(res.body).toHaveProperty('statusCode', 500);
+        expect(res.body).toHaveProperty('message');
+      } finally {
+        mockService.getTotalDonations.mockClear();
+      }
     });
   });
 });
