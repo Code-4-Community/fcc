@@ -1,4 +1,4 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import {
@@ -50,6 +50,16 @@ describe('Donations (e2e) - expanded stubs', () => {
     mockService = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       create: jest.fn(async (request: any) => {
+        // Validation to match real service behavior
+        if (
+          request.donationType === 'recurring' &&
+          !request.recurringInterval
+        ) {
+          throw new BadRequestException(
+            'Recurring donation must specify interval.',
+          );
+        }
+
         const now = new Date();
         const donation = {
           id: nextId++,
