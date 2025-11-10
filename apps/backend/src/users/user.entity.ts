@@ -2,7 +2,7 @@ import { Entity, Column } from 'typeorm';
 
 import type { Status } from './types';
 
-@Entity()
+@Entity('users')
 export class User {
   @Column({ primary: true })
   id: number;

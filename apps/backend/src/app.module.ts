@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PaymentsModule } from './payments/payments.module';
+import { DonationsModule } from './donations/donations.module';
 import AppDataSource from './data-source';
 
 @Module({
@@ -14,6 +15,7 @@ import AppDataSource from './data-source';
     UsersModule,
     AuthModule,
     PaymentsModule,
+    DonationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

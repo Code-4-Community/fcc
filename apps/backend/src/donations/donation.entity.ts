@@ -20,7 +20,7 @@ export enum DonationStatus {
   CANCELLED = 'cancelled',
 }
 
-@Entity()
+@Entity('donations')
 export class Donation {
   @PrimaryGeneratedColumn('identity', {
     generatedIdentity: 'ALWAYS',
