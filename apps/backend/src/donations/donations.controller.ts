@@ -58,6 +58,7 @@ export class DonationsController {
     @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
     createDonationDto: CreateDonationDto,
   ): Promise<DonationResponseDto> {
+    console.log('[DonationsController.create] payload:', createDonationDto);
     const request = DonationMappers.toCreateDonationRequest(createDonationDto);
     const donation = await this.donationsService.create(request);
     return DonationMappers.toDonationResponseDto(donation);
@@ -84,6 +85,7 @@ export class DonationsController {
   async findPublic(
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ): Promise<PublicDonationDto[]> {
+    console.log('[DonationsController.findPublic] limit=', limit);
     const donations = await this.donationsService.findPublic(limit);
     return DonationMappers.toPublicDonationDtos(donations);
   }
@@ -114,7 +116,10 @@ export class DonationsController {
     },
   })
   async getStats(): Promise<{ total: number; count: number }> {
-    return this.donationsService.getTotalDonations();
+    console.log('[DonationsController.getStats] fetching totals');
+    const stats = await this.donationsService.getTotalDonations();
+    console.log('[DonationsController.getStats] result=', stats);
+    return stats;
   }
 
   @Get()

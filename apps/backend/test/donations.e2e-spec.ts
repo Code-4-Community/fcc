@@ -9,6 +9,7 @@ import {
 import { DonationsController } from '../src/donations/donations.controller';
 import { DonationsService } from '../src/donations/donations.service';
 import { DonationsRepository } from '../src/donations/donations.repository';
+import { DonationsModule } from '../src/donations/donations.module';
 import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Donation } from '../src/donations/donation.entity'; // adjust path if needed
@@ -43,20 +44,28 @@ describe('Donations (e2e) - expanded stubs', () => {
   beforeAll(async () => {
     nextId = 1;
 
+    // Use actual Postgres DB for tests. IMPORTANT: Make sure these env vars
+    // point to a dedicated test database (never run tests against production DB).
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         TypeOrmModule.forRoot({
-          type: 'sqlite',
-          database: ':memory:',
+          type: 'postgres',
+          host: process.env.NX_DB_HOST || 'localhost',
+          port: parseInt(process.env.NX_DB_PORT || '5432', 10),
+          username: 'postgres',
+          password: '12345678',
+          database: 'fcc_dev',
           entities: [__dirname + '/../src/**/*.entity{.ts,.js}'],
-          synchronize: true, // OK for tests; creates schema automatically
-          dropSchema: true, // drop schema on connect (clean)
+          // Prefer running migrations in tests for parity; set migrationsRun to true
+          // if you keep migrations up-to-date. If you want schema auto-sync for
+          // a test DB, set `synchronize: true` manually here.
+          synchronize: false,
+          migrationsRun: true,
+          migrations: [__dirname + '/../src/migrations/*{.ts,.js}'],
           logging: false,
         }),
-        TypeOrmModule.forFeature([Donation]),
+        DonationsModule,
       ],
-      controllers: [DonationsController],
-      providers: [DonationsService, DonationsRepository],
     }).compile();
 
     app = moduleFixture.createNestApplication();
@@ -73,6 +82,9 @@ describe('Donations (e2e) - expanded stubs', () => {
   afterAll(async () => {
     if (app) {
       await app.close();
+    }
+    if (dataSource) {
+      await dataSource.destroy();
     }
   });
 
