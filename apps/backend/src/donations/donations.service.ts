@@ -15,10 +15,6 @@ export class DonationsService {
   async create(
     createDonationRequest: CreateDonationRequest,
   ): Promise<DomainDonation> {
-    console.log(
-      '[DonationsService.create] incoming request:',
-      createDonationRequest,
-    );
     if (createDonationRequest.amount <= 0) {
       throw new BadRequestException('Donation amount must be positive.');
     }
@@ -67,11 +63,6 @@ export class DonationsService {
     });
 
     const savedDonation = await this.donationRepository.save(donation);
-
-    console.log(
-      `[DonationsService.create] savedDonation id=${savedDonation.id} email=${savedDonation.email} amount=${savedDonation.amount}`,
-      savedDonation,
-    );
 
     return {
       id: savedDonation.id,
@@ -129,7 +120,6 @@ export class DonationsService {
   }
 
   async findPublic(limit = 50): Promise<DomainDonation[]> {
-    console.log('[DonationsService.findPublic] limit=', limit);
     const donations: Donation[] = await this.donationRepository.find({
       take: limit,
       order: { createdAt: 'DESC' },
@@ -191,12 +181,9 @@ export class DonationsService {
   }
 
   async getTotalDonations(): Promise<{ total: number; count: number }> {
-    console.log('[DonationsService.getTotalDonations] querying totals');
     const [donations] = await this.donationRepository.manager.query(
       `SELECT COUNT(amount) AS count, SUM(amount) AS total FROM donations`,
     );
-
-    console.log('[DonationsService.getTotalDonations] result=', donations);
 
     // SQL SUM returns null when no rows exist; coerce to numbers with sensible defaults
     const total =
