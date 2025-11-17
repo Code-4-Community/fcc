@@ -1,4 +1,4 @@
-import { INestApplication, BadRequestException } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import {
@@ -6,12 +6,9 @@ import {
   RecurringInterval,
   DonationStatus,
 } from '../src/donations/donation.entity';
-import { DonationsController } from '../src/donations/donations.controller';
-import { DonationsService } from '../src/donations/donations.service';
-import { DonationsRepository } from '../src/donations/donations.repository';
 import { DonationsModule } from '../src/donations/donations.module';
 import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, QueryRunner } from 'typeorm';
 import { Donation } from '../src/donations/donation.entity'; // adjust path if needed
 
 interface TestDonation {
@@ -40,6 +37,7 @@ describe('Donations (e2e) - expanded stubs', () => {
   let nextId = 1;
   let donationRepository: Repository<Donation>;
   let dataSource: DataSource;
+  let queryRunner: QueryRunner;
 
   beforeAll(async () => {
     nextId = 1;
@@ -79,6 +77,18 @@ describe('Donations (e2e) - expanded stubs', () => {
     dataSource = moduleFixture.get<DataSource>(DataSource);
   });
 
+  beforeEach(async () => {
+    queryRunner = dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    await donationRepository.clear();
+  });
+
+  afterEach(async () => {
+    await queryRunner.rollbackTransaction();
+    await queryRunner.release();
+  });
+
   afterAll(async () => {
     if (app) {
       await app.close();
@@ -107,40 +117,6 @@ describe('Donations (e2e) - expanded stubs', () => {
     donationType: DonationType.RECURRING,
     recurringInterval: RecurringInterval.MONTHLY,
   };
-
-  // Reusable seeds and helpers for in-memory donation construction
-  const donationASeed: Pick<TestDonation, 'email' | 'amount'> = {
-    email: 'a@example.com',
-    amount: 10,
-  };
-  const donationBSeed: Pick<TestDonation, 'email' | 'amount'> = {
-    email: 'b@example.com',
-    amount: 15,
-  };
-
-  function buildTestDonation(
-    seed: Pick<TestDonation, 'email' | 'amount'>,
-    now: Date,
-    overrides: Partial<TestDonation> = {},
-  ): TestDonation {
-    return {
-      id: nextId++,
-      firstName: oneTimePayload.firstName,
-      lastName: oneTimePayload.lastName,
-      email: seed.email,
-      amount: seed.amount,
-      isAnonymous: oneTimePayload.isAnonymous,
-      donationType: oneTimePayload.donationType,
-      recurringInterval: null,
-      dedicationMessage: null,
-      showDedicationPublicly: false,
-      status: DonationStatus.SUCCEEDED,
-      createdAt: now,
-      updatedAt: now,
-      transactionId: null,
-      ...overrides,
-    };
-  }
 
   // ---------- DTO shape validators ----------
   const isISODateString = (value: unknown): boolean => {
@@ -265,7 +241,6 @@ describe('Donations (e2e) - expanded stubs', () => {
         .send(payload)
         .expect(201);
 
-      // HTTP response shape checks as you already do...
       expectDonationResponseDtoShape(res.body, {
         donationType: DonationType.ONE_TIME,
         recurringInterval: null,
@@ -276,7 +251,23 @@ describe('Donations (e2e) - expanded stubs', () => {
         where: { email: payload.email },
       });
       expect(created).toBeDefined();
-      expect(created!.amount).toBe(payload.amount);
+      expect(created).toBeInstanceOf(Donation);
+      if (created instanceof Donation) {
+        expect((created as Donation).id).toBeDefined();
+        expect((created as Donation).firstName).toBe(payload.firstName);
+        expect((created as Donation).lastName).toBe(payload.lastName);
+        expect((created as Donation).email).toBe(payload.email);
+        expect((created as Donation).amount).toBe(payload.amount);
+        expect((created as Donation).isAnonymous).toBe(payload.isAnonymous);
+        expect((created as Donation).donationType).toBe(payload.donationType);
+        expect((created as Donation).recurringInterval).toBeUndefined();
+        expect((created as Donation).dedicationMessage).toBeUndefined();
+        expect((created as Donation).showDedicationPublicly).toBe(false);
+        expect((created as Donation).status).toBe('pending');
+        expect(isISODateString((created as Donation).createdAt)).toBe(true);
+        expect(isISODateString((created as Donation).updatedAt)).toBe(true);
+        expect((created as Donation).transactionId).toBeInstanceOf(Number);
+      }
     });
 
     it('Successfuly creates a recurring donation with interval', async () => {
@@ -291,6 +282,32 @@ describe('Donations (e2e) - expanded stubs', () => {
         donationType: DonationType.RECURRING,
         recurringInterval: RecurringInterval.MONTHLY,
       });
+
+      // Validate DB state (repository query)
+      const created = await donationRepository.findOne({
+        where: { email: payload.email },
+      });
+
+      expect(created).toBeDefined();
+      expect(created).toBeInstanceOf(Donation);
+      if (created instanceof Donation) {
+        expect((created as Donation).id).toBeDefined();
+        expect((created as Donation).firstName).toBe(payload.firstName);
+        expect((created as Donation).lastName).toBe(payload.lastName);
+        expect((created as Donation).email).toBe(payload.email);
+        expect((created as Donation).amount).toBe(payload.amount);
+        expect((created as Donation).isAnonymous).toBe(payload.isAnonymous);
+        expect((created as Donation).donationType).toBe(payload.donationType);
+        expect((created as Donation).recurringInterval).toBe(
+          payload.recurringInterval,
+        );
+        expect((created as Donation).dedicationMessage).toBeUndefined();
+        expect((created as Donation).showDedicationPublicly).toBe(false);
+        expect((created as Donation).status).toBe('pending');
+        expect(isISODateString((created as Donation).createdAt)).toBe(true);
+        expect(isISODateString((created as Donation).updatedAt)).toBe(true);
+        expect((created as Donation).transactionId).toBeInstanceOf(Number);
+      }
     });
 
     it('rejects a negative amount (returns 400)', async () => {
@@ -303,6 +320,9 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(res.body).toHaveProperty('statusCode', 400);
       expect(res.body).toHaveProperty('message');
+
+      const dbCount = await donationRepository.count();
+      expect(dbCount).toBe(0);
     });
 
     it('rejects an invalid email format amount (returns 400)', async () => {
@@ -315,6 +335,9 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(res.body).toHaveProperty('statusCode', 400);
       expect(res.body).toHaveProperty('message');
+
+      const dbCount = await donationRepository.count();
+      expect(dbCount).toBe(0);
     });
 
     it('rejects a donation marked recurring if recurringInterval is missing', async () => {
@@ -328,6 +351,9 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(res.body).toHaveProperty('statusCode', 400);
       expect(res.body).toHaveProperty('message');
+
+      const dbCount = await donationRepository.count();
+      expect(dbCount).toBe(0);
     });
 
     it('rejects a one-time donation that has a recurring interval (returns 400)', async () => {
@@ -343,6 +369,9 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(res.body).toHaveProperty('statusCode', 400);
       expect(res.body).toHaveProperty('message');
+
+      const dbCount = await donationRepository.count();
+      expect(dbCount).toBe(0);
     });
 
     it('gracefully rejects a payload that is missing the first name', async () => {
@@ -360,6 +389,9 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(String(res.body.message).toLowerCase()).toContain(
         'firstName'.toLowerCase(),
       );
+
+      const dbCount = await donationRepository.count();
+      expect(dbCount).toBe(0);
     });
 
     it('gracefully rejects a payload that is missing the last name', async () => {
@@ -377,6 +409,9 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(String(res.body.message).toLowerCase()).toContain(
         'lastName'.toLowerCase(),
       );
+
+      const dbCount = await donationRepository.count();
+      expect(dbCount).toBe(0);
     });
 
     it('gracefully rejects a payload that is missing the email', async () => {
@@ -394,6 +429,9 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(String(res.body.message).toLowerCase()).toContain(
         'email'.toLowerCase(),
       );
+
+      const dbCount = await donationRepository.count();
+      expect(dbCount).toBe(0);
     });
 
     it('gracefully rejects a payload that is missing the amount', async () => {
@@ -411,6 +449,9 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(String(res.body.message).toLowerCase()).toContain(
         'amount'.toLowerCase(),
       );
+
+      const dbCount = await donationRepository.count();
+      expect(dbCount).toBe(0);
     });
 
     it('Successfuly commits a one-time donation creation even if isAnonymous is missing', async () => {
@@ -425,6 +466,30 @@ describe('Donations (e2e) - expanded stubs', () => {
 
       expect(res.body).toHaveProperty('id');
       expect(res.body.amount).toBe(payload.amount);
+
+      // Validate DB state (repository query)
+      const created = await donationRepository.findOne({
+        where: { email: payload.email },
+      });
+
+      expect(created).toBeDefined();
+      expect(created).toBeInstanceOf(Donation);
+      if (created instanceof Donation) {
+        expect((created as Donation).id).toBeDefined();
+        expect((created as Donation).firstName).toBe(payload.firstName);
+        expect((created as Donation).lastName).toBe(payload.lastName);
+        expect((created as Donation).email).toBe(payload.email);
+        expect((created as Donation).amount).toBe(payload.amount);
+        expect((created as Donation).isAnonymous).toBe(false);
+        expect((created as Donation).donationType).toBe(payload.donationType);
+        expect((created as Donation).recurringInterval).toBeUndefined();
+        expect((created as Donation).dedicationMessage).toBeUndefined();
+        expect((created as Donation).showDedicationPublicly).toBe(false);
+        expect((created as Donation).status).toBe('pending');
+        expect(isISODateString((created as Donation).createdAt)).toBe(true);
+        expect(isISODateString((created as Donation).updatedAt)).toBe(true);
+        expect((created as Donation).transactionId).toBeInstanceOf(Number);
+      }
     });
 
     it('gracefully rejects a payload that is missing the donationType', async () => {
@@ -442,6 +507,9 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(String(res.body.message).toLowerCase()).toContain(
         'donationType'.toLowerCase(),
       );
+
+      const dbCount = await donationRepository.count();
+      expect(dbCount).toBe(0);
     });
 
     it('gracefully rejects a payload that is contains the wrong recurring interval (not the enum)', async () => {
@@ -458,6 +526,9 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(String(res.body.message).toLowerCase()).toContain(
         'recurring'.toLowerCase(),
       );
+
+      const dbCount = await donationRepository.count();
+      expect(dbCount).toBe(0);
     });
 
     it('gracefully rejects a payload that is contains the wrong donation type (not the enum)', async () => {
@@ -474,21 +545,59 @@ describe('Donations (e2e) - expanded stubs', () => {
       expect(String(res.body.message).toLowerCase()).toContain(
         'donationType'.toLowerCase(),
       );
+
+      const dbCount = await donationRepository.count();
+      expect(dbCount).toBe(0);
     });
   });
 
   describe('GET /api/donations/public', () => {
     it('returns only non-anonymous donations', async () => {
+      // Seed anonymous and non-anonymous donations
+      const now = new Date();
+      await donationRepository.save([
+        {
+          firstName: 'Sam',
+          lastName: 'Nie',
+          email: 'nie.sa@example.com',
+          amount: 10,
+          isAnonymous: true,
+          donationType: DonationType.ONE_TIME,
+          recurringInterval: null,
+          dedicationMessage: null,
+          showDedicationPublicly: false,
+          status: DonationStatus.SUCCEEDED,
+          transactionId: null,
+          createdAt: now,
+          updatedAt: now,
+        },
+        {
+          firstName: 'Rex',
+          lastName: 'Jeff',
+          email: 'Re.Je@example.com',
+          amount: 15,
+          isAnonymous: false,
+          donationType: DonationType.ONE_TIME,
+          recurringInterval: null,
+          dedicationMessage: null,
+          showDedicationPublicly: false,
+          status: DonationStatus.SUCCEEDED,
+          transactionId: null,
+          createdAt: now,
+          updatedAt: now,
+        },
+      ] as Partial<Donation>[]);
+
       const res = await request(app.getHttpServer())
         .get('/api/donations/public')
         .expect(200);
-
       expect(Array.isArray(res.body)).toBe(true);
       expect(
         res.body.every(
           (d: { isAnonymous: boolean }) => d.isAnonymous === false,
         ),
       ).toBe(true);
+
       // Validate public DTO shape for the first item
       if (res.body.length > 0) {
         expectPublicDonationDtoShape(res.body[0], {
@@ -545,6 +654,41 @@ describe('Donations (e2e) - expanded stubs', () => {
 
   describe('GET /api/donations/stats', () => {
     it('successfully returns the correct total and count', async () => {
+      // Seed two donations so the total is 25 and count is 2
+      const now = new Date();
+      await donationRepository.save([
+        {
+          firstName: 'Sam',
+          lastName: 'Nie',
+          email: 'nie.sa@example.com',
+          amount: 10,
+          isAnonymous: false,
+          donationType: DonationType.ONE_TIME,
+          recurringInterval: null,
+          dedicationMessage: null,
+          showDedicationPublicly: false,
+          status: DonationStatus.SUCCEEDED,
+          transactionId: null,
+          createdAt: now,
+          updatedAt: now,
+        },
+        {
+          firstName: 'Rex',
+          lastName: 'Jeff',
+          email: 'Re.Je@example.com',
+          amount: 15,
+          isAnonymous: false,
+          donationType: DonationType.ONE_TIME,
+          recurringInterval: null,
+          dedicationMessage: null,
+          showDedicationPublicly: false,
+          status: DonationStatus.SUCCEEDED,
+          transactionId: null,
+          createdAt: now,
+          updatedAt: now,
+        },
+      ] as Partial<Donation>[]);
+
       const res = await request(app.getHttpServer())
         .get('/api/donations/stats')
         .expect(200);
@@ -553,6 +697,8 @@ describe('Donations (e2e) - expanded stubs', () => {
     });
 
     it('successfully returns the correct total and count even if the database is empty', async () => {
+      await donationRepository.clear();
+
       const res = await request(app.getHttpServer())
         .get('/api/donations/stats')
         .expect(200);
