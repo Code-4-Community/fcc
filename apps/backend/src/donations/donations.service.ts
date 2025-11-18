@@ -62,33 +62,39 @@ export class DonationsService {
       showDedicationPublicly: createDonationRequest.showDedicationPublicly,
     });
 
+    // Reload from database so any DB-side defaults are reflected
     const savedDonation = await this.donationRepository.save(donation);
+    const reloaded = await this.donationRepository.findOne({
+      where: { id: savedDonation.id },
+    });
+
+    const finalDonation = reloaded ?? savedDonation;
 
     return {
-      id: savedDonation.id,
-      firstName: savedDonation.firstName,
-      lastName: savedDonation.lastName,
-      email: savedDonation.email,
-      amount: savedDonation.amount,
-      isAnonymous: savedDonation.isAnonymous,
-      donationType: savedDonation.donationType as 'one_time' | 'recurring',
-      recurringInterval: savedDonation.recurringInterval as
+      id: finalDonation.id,
+      firstName: finalDonation.firstName,
+      lastName: finalDonation.lastName,
+      email: finalDonation.email,
+      amount: finalDonation.amount,
+      isAnonymous: finalDonation.isAnonymous,
+      donationType: finalDonation.donationType as 'one_time' | 'recurring',
+      recurringInterval: finalDonation.recurringInterval as
         | 'weekly'
         | 'monthly'
         | 'bimonthly'
         | 'quarterly'
         | 'annually'
         | undefined,
-      dedicationMessage: savedDonation.dedicationMessage || undefined,
-      showDedicationPublicly: savedDonation.showDedicationPublicly,
-      status: savedDonation.status as
+      dedicationMessage: finalDonation.dedicationMessage || undefined,
+      showDedicationPublicly: finalDonation.showDedicationPublicly,
+      status: finalDonation.status as
         | 'pending'
         | 'succeeded'
         | 'failed'
         | 'cancelled',
-      createdAt: savedDonation.createdAt,
-      updatedAt: savedDonation.updatedAt,
-      transactionId: savedDonation.transactionId || undefined,
+      createdAt: finalDonation.createdAt,
+      updatedAt: finalDonation.updatedAt,
+      transactionId: finalDonation.transactionId || undefined,
     };
   }
 

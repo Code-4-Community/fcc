@@ -121,9 +121,6 @@ describe('Donations (e2e) - expanded stubs', () => {
   // ---------- DTO shape validators ----------
   const isValidDateValue = (value: unknown): boolean => {
     // Accept either a Date object or a string that can be parsed as a date.
-    if (value instanceof Date) {
-      return !Number.isNaN(value.getTime());
-    }
     if (typeof value === 'string') {
       const dt = new Date(value);
       return !Number.isNaN(dt.getTime());
@@ -283,7 +280,6 @@ describe('Donations (e2e) - expanded stubs', () => {
         .post('/api/donations')
         .send(payload)
         .expect(201);
-
       expectDonationResponseDtoShape(res.body, {
         donationType: DonationType.RECURRING,
         recurringInterval: RecurringInterval.MONTHLY,
