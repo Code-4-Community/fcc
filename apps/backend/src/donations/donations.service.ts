@@ -1,7 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DonationResponseDto } from './dtos/donation-response-dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Donation, DonationType, RecurringInterval } from './donation.entity';
+import {
+  Donation,
+  DonationType,
+  RecurringInterval,
+  DonationStatus,
+} from './donation.entity';
 import { Repository } from 'typeorm';
 import { CreateDonationRequest, Donation as DomainDonation } from './mappers';
 
@@ -126,7 +131,9 @@ export class DonationsService {
   }
 
   async findPublic(limit = 50): Promise<DomainDonation[]> {
+    // Return only non-anonymous, succeeded donations for public display
     const donations: Donation[] = await this.donationRepository.find({
+      where: { isAnonymous: false, status: DonationStatus.SUCCEEDED },
       take: limit,
       order: { createdAt: 'DESC' },
     });
