@@ -36,7 +36,7 @@ export class Donation {
   @Column()
   email: string;
 
-  @Column({ type: 'numeric', precision: 10, scale: 2 })
+  @Column({ type: 'int' })
   amount: number;
 
   @Column({ default: false })
