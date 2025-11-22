@@ -5,98 +5,6 @@
   "nxJsonPlugins": [],
   "fileMap": {
     "projectFileMap": {
-      "frontend": [
-        {
-          "file": "apps/frontend/.eslintrc.json",
-          "hash": "14830867113928387670"
-        },
-        {
-          "file": "apps/frontend/index.html",
-          "hash": "15865628558909587485"
-        },
-        {
-          "file": "apps/frontend/project.json",
-          "hash": "9242714680806845410"
-        },
-        {
-          "file": "apps/frontend/proxy.conf.json",
-          "hash": "2514318380189041036"
-        },
-        {
-          "file": "apps/frontend/public/favicon.ico",
-          "hash": "9303420814833116677"
-        },
-        {
-          "file": "apps/frontend/src/api/apiClient.ts",
-          "hash": "731659272403751870"
-        },
-        {
-          "file": "apps/frontend/src/app.spec.tsx",
-          "hash": "18303175862115286083"
-        },
-        {
-          "file": "apps/frontend/src/app.tsx",
-          "hash": "7047361431182166026",
-          "deps": [
-            "npm:react",
-            "npm:react-router-dom"
-          ]
-        },
-        {
-          "file": "apps/frontend/src/assets/.gitkeep",
-          "hash": "3244421341483603138"
-        },
-        {
-          "file": "apps/frontend/src/containers/404.tsx",
-          "hash": "6818008100962500247",
-          "deps": [
-            "npm:react-router-dom"
-          ]
-        },
-        {
-          "file": "apps/frontend/src/containers/root.tsx",
-          "hash": "17560208078483401424"
-        },
-        {
-          "file": "apps/frontend/src/containers/test.tsx",
-          "hash": "7279507533136251642"
-        },
-        {
-          "file": "apps/frontend/src/main.tsx",
-          "hash": "17982854383415509796",
-          "deps": [
-            "npm:react",
-            "npm:react-dom"
-          ]
-        },
-        {
-          "file": "apps/frontend/src/styles.css",
-          "hash": "2917954890128038984"
-        },
-        {
-          "file": "apps/frontend/src/utils/router.ts",
-          "hash": "11600208852248260652",
-          "deps": [
-            "npm:react-router-dom"
-          ]
-        },
-        {
-          "file": "apps/frontend/tsconfig.app.json",
-          "hash": "7232119452847825095"
-        },
-        {
-          "file": "apps/frontend/tsconfig.json",
-          "hash": "13068693767609784982"
-        },
-        {
-          "file": "apps/frontend/tsconfig.spec.json",
-          "hash": "10880209246771498435"
-        },
-        {
-          "file": "apps/frontend/vite.config.ts",
-          "hash": "3793149223002691640"
-        }
-      ],
       "backend": [
         {
           "file": "apps/backend/.eslintrc.json",
@@ -162,7 +70,6 @@
           "hash": "9097318327402964302",
           "deps": [
             "npm:@nestjs/common",
-            "npm:@nestjs/passport",
             "npm:@nestjs/swagger"
           ]
         },
@@ -261,7 +168,8 @@
           "file": "apps/backend/src/data-source.ts",
           "hash": "14561681342134806594",
           "deps": [
-            "npm:typeorm"
+            "npm:typeorm",
+            "npm:dotenv"
           ]
         },
         {
@@ -345,7 +253,113 @@
         },
         {
           "file": "apps/backend/webpack.config.js",
-          "hash": "10619490397189790225"
+          "hash": "10619490397189790225",
+          "deps": [
+            "npm:@nx/webpack"
+          ]
+        }
+      ],
+      "frontend": [
+        {
+          "file": "apps/frontend/.eslintrc.json",
+          "hash": "14830867113928387670"
+        },
+        {
+          "file": "apps/frontend/index.html",
+          "hash": "15865628558909587485"
+        },
+        {
+          "file": "apps/frontend/project.json",
+          "hash": "9242714680806845410"
+        },
+        {
+          "file": "apps/frontend/proxy.conf.json",
+          "hash": "2514318380189041036"
+        },
+        {
+          "file": "apps/frontend/public/favicon.ico",
+          "hash": "9303420814833116677"
+        },
+        {
+          "file": "apps/frontend/src/api/apiClient.ts",
+          "hash": "731659272403751870",
+          "deps": [
+            "npm:axios"
+          ]
+        },
+        {
+          "file": "apps/frontend/src/app.spec.tsx",
+          "hash": "18303175862115286083",
+          "deps": [
+            "npm:@testing-library/react"
+          ]
+        },
+        {
+          "file": "apps/frontend/src/app.tsx",
+          "hash": "7047361431182166026",
+          "deps": [
+            "npm:react",
+            "npm:react-router-dom"
+          ]
+        },
+        {
+          "file": "apps/frontend/src/assets/.gitkeep",
+          "hash": "3244421341483603138"
+        },
+        {
+          "file": "apps/frontend/src/containers/404.tsx",
+          "hash": "6818008100962500247",
+          "deps": [
+            "npm:react-router-dom"
+          ]
+        },
+        {
+          "file": "apps/frontend/src/containers/root.tsx",
+          "hash": "17560208078483401424"
+        },
+        {
+          "file": "apps/frontend/src/containers/test.tsx",
+          "hash": "7279507533136251642"
+        },
+        {
+          "file": "apps/frontend/src/main.tsx",
+          "hash": "17982854383415509796",
+          "deps": [
+            "npm:react",
+            "npm:react-dom"
+          ]
+        },
+        {
+          "file": "apps/frontend/src/styles.css",
+          "hash": "2917954890128038984"
+        },
+        {
+          "file": "apps/frontend/src/utils/router.ts",
+          "hash": "11600208852248260652",
+          "deps": [
+            "npm:react-router-dom"
+          ]
+        },
+        {
+          "file": "apps/frontend/tsconfig.app.json",
+          "hash": "7232119452847825095"
+        },
+        {
+          "file": "apps/frontend/tsconfig.json",
+          "hash": "13068693767609784982"
+        },
+        {
+          "file": "apps/frontend/tsconfig.spec.json",
+          "hash": "10880209246771498435"
+        },
+        {
+          "file": "apps/frontend/vite.config.ts",
+          "hash": "3793149223002691640",
+          "deps": [
+            "npm:vite",
+            "npm:@vitejs/plugin-react",
+            "npm:@nx/vite"
+          ]
         }
       ]
     },
@@ -508,5 +522,5 @@
       }
     ]
   },
-  "externalNodesHash": "17183805961345331064"
+  "externalNodesHash": "18039297837853266012"
 }

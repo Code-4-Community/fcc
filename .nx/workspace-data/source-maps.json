@@ -228,6 +228,10 @@
       "nx.json",
       "nx/target-defaults"
     ],
+    "targets.build.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
     "targets.build.parallelism": [
       "nx.json",
       "nx/target-defaults"
@@ -236,11 +240,19 @@
       "nx.json",
       "nx/target-defaults"
     ],
+    "targets.lint.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
     "targets.lint.parallelism": [
       "nx.json",
       "nx/target-defaults"
     ],
     "targets.test.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.test.cache": [
       "nx.json",
       "nx/target-defaults"
     ],
@@ -303,6 +315,10 @@
       "nx/core/project-json"
     ],
     "targets.build.options.outputPath": [
+      "apps/frontend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build.options.configFile": [
       "apps/frontend/project.json",
       "nx/core/project-json"
     ],
@@ -506,6 +522,10 @@
       "nx.json",
       "nx/target-defaults"
     ],
+    "targets.build.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
     "targets.build.parallelism": [
       "nx.json",
       "nx/target-defaults"
@@ -514,11 +534,19 @@
       "nx.json",
       "nx/target-defaults"
     ],
+    "targets.test.cache": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
     "targets.test.parallelism": [
       "nx.json",
       "nx/target-defaults"
     ],
     "targets.lint.inputs": [
+      "nx.json",
+      "nx/target-defaults"
+    ],
+    "targets.lint.cache": [
       "nx.json",
       "nx/target-defaults"
     ],
