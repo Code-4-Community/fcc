@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export enum DonationType {
   ONE_TIME = 'one_time',
@@ -60,9 +66,9 @@ export class Donation {
   @Column({ nullable: true })
   transactionId: string | null;
 
-  @Column()
+  @CreateDateColumn({ type: 'timestamp', default: () => 'now()' })
   createdAt: Date;
 
-  @Column()
+  @UpdateDateColumn({ type: 'timestamp', default: () => 'now()' })
   updatedAt: Date;
 }
