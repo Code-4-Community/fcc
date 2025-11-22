@@ -10,4 +10,16 @@ export class AppController {
   getData() {
     return this.appService.getData();
   }
+
+  @Get('health')
+  getHealth() {
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      service: 'fcc-backend',
+      message: 'Real-time hot reload test!',
+      version: '3.0',
+      test: 'live-update',
+    };
+  }
 }

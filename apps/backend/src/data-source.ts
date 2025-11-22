@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
-import { PluralNamingStrategy } from './strategies/plural-naming.strategy';
-import { Task } from './task/types/task.entity';
+import { Donation } from './donations/donation.entity';
+import { User } from './users/user.entity';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -12,11 +12,11 @@ const AppDataSource = new DataSource({
   username: process.env.NX_DB_USERNAME,
   password: process.env.NX_DB_PASSWORD,
   database: process.env.NX_DB_DATABASE,
-  entities: [Task],
-  migrations: ['apps/backend/src/migrations/*.js'],
+  entities: [User, Donation],
+  migrations: ['apps/backend/src/migrations/*.ts'],
   // Setting synchronize: true shouldn't be used in production - otherwise you can lose production data
   synchronize: false,
-  namingStrategy: new PluralNamingStrategy(),
+  // Removed PluralNamingStrategy - use explicit @Entity('table_name') instead
 });
 
 export default AppDataSource;
