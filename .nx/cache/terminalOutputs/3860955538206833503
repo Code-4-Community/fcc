@@ -1,0 +1,446 @@
+
+[Nx Vite TsPaths] Found tsconfig at C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] first parsed tsconfig:  {
+  resultType: [32m'success'[39m,
+  configFileAbsolutePath: [32m'C:\\Users\\gauri\\Documents\\GitHub\\fcc\\apps\\frontend\\tsconfig.app.json'[39m,
+  baseUrl: [32m'src'[39m,
+  absoluteBaseUrl: [32m'C:\\Users\\gauri\\Documents\\GitHub\\fcc\\apps\\frontend\\src'[39m,
+  paths: {
+    [32m'@api/*'[39m: [ [32m'api/*'[39m ],
+    [32m'@components/*'[39m: [ [32m'components/*'[39m ],
+    [32m'@containers/*'[39m: [ [32m'containers/*'[39m ],
+    [32m'@public/*'[39m: [ [32m'../public/*'[39m ],
+    [32m'@shared/*'[39m: [ [32m'../../../shared/*'[39m ],
+    [32m'@utils/*'[39m: [ [32m'utils/*'[39m ]
+  },
+  addMatchAll: [33mtrue[39m
+}
+
+[Nx Vite TsPaths] Found tsconfig at C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] fallback parsed tsconfig:  {
+  resultType: [32m'success'[39m,
+  configFileAbsolutePath: [32m'C:\\Users\\gauri\\Documents\\GitHub\\fcc\\tsconfig.base.json'[39m,
+  baseUrl: [32m'.'[39m,
+  absoluteBaseUrl: [32m'C:\\Users\\gauri\\Documents\\GitHub\\fcc'[39m,
+  paths: {},
+  addMatchAll: [33mtrue[39m
+}
+[33m[7m[33m Vitest [33m[27m "cache.dir" is deprecated, use Vite's "cacheDir" instead if you want to change the cache director. Note caches will be written to "cacheDir/vitest"[39m
+
+[Nx Vite TsPaths] Unable to resolve vitest with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved vitest to undefined
+
+[Nx Vite TsPaths] Unable to resolve vitest with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved vitest to undefined
+
+[Nx Vite TsPaths] Unable to resolve /@fs/C:/Users/gauri/Documents/GitHub/fcc/node_modules/vitest/node_modules/vite/dist/client/env.mjs with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved /@fs/C:/Users/gauri/Documents/GitHub/fcc/node_modules/vitest/node_modules/vite/dist/client/env.mjs to undefined
+
+[Nx Vite TsPaths] Unable to resolve /@fs/C:/Users/gauri/Documents/GitHub/fcc/node_modules/vitest/node_modules/vite/dist/client/env.mjs with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved /@fs/C:/Users/gauri/Documents/GitHub/fcc/node_modules/vitest/node_modules/vite/dist/client/env.mjs to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:/Users/gauri/Documents/GitHub/fcc/node_modules/vitest/dist/spy.js with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:/Users/gauri/Documents/GitHub/fcc/node_modules/vitest/dist/spy.js to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:/Users/gauri/Documents/GitHub/fcc/node_modules/vitest/dist/spy.js with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:/Users/gauri/Documents/GitHub/fcc/node_modules/vitest/dist/spy.js to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:/Users/gauri/Documents/GitHub/fcc/node_modules/vitest/dist/spy.js with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:/Users/gauri/Documents/GitHub/fcc/node_modules/vitest/dist/spy.js to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:/Users/gauri/Documents/GitHub/fcc/apps/frontend/src/containers/donations/DonationForm.spec.tsx with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:/Users/gauri/Documents/GitHub/fcc/apps/frontend/src/containers/donations/DonationForm.spec.tsx to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:/Users/gauri/Documents/GitHub/fcc/apps/frontend/src/containers/donations/DonationForm.spec.tsx with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:/Users/gauri/Documents/GitHub/fcc/apps/frontend/src/containers/donations/DonationForm.spec.tsx to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:/Users/gauri/Documents/GitHub/fcc/apps/frontend/src/app.spec.tsx with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:/Users/gauri/Documents/GitHub/fcc/apps/frontend/src/app.spec.tsx to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:/Users/gauri/Documents/GitHub/fcc/apps/frontend/src/app.spec.tsx with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:/Users/gauri/Documents/GitHub/fcc/apps/frontend/src/app.spec.tsx to undefined
+
+[Nx Vite TsPaths] Unable to resolve react/jsx-dev-runtime with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react/jsx-dev-runtime to undefined
+
+[Nx Vite TsPaths] Unable to resolve vitest with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved vitest to undefined
+
+[Nx Vite TsPaths] Unable to resolve @testing-library/react with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved @testing-library/react to undefined
+
+[Nx Vite TsPaths] Unable to resolve ../../api/apiClient with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved ../../api/apiClient to undefined
+
+[Nx Vite TsPaths] Unable to resolve ./DonationForm with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved ./DonationForm to undefined
+
+[Nx Vite TsPaths] Unable to resolve vitest with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved vitest to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:/Users/gauri/Documents/GitHub/fcc/apps/frontend/src/containers/donations/DonationSummary.spec.tsx with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:/Users/gauri/Documents/GitHub/fcc/apps/frontend/src/containers/donations/DonationSummary.spec.tsx to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:/Users/gauri/Documents/GitHub/fcc/apps/frontend/src/containers/donations/DonationSummary.spec.tsx with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:/Users/gauri/Documents/GitHub/fcc/apps/frontend/src/containers/donations/DonationSummary.spec.tsx to undefined
+
+[Nx Vite TsPaths] Unable to resolve react/jsx-dev-runtime with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react/jsx-dev-runtime to undefined
+
+[Nx Vite TsPaths] Unable to resolve @testing-library/react with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved @testing-library/react to undefined
+
+[Nx Vite TsPaths] Unable to resolve ./app with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved ./app to undefined
+
+[Nx Vite TsPaths] Unable to resolve react/jsx-dev-runtime with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react/jsx-dev-runtime to undefined
+
+[Nx Vite TsPaths] Unable to resolve vitest with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved vitest to undefined
+
+[Nx Vite TsPaths] Unable to resolve @testing-library/react with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved @testing-library/react to undefined
+
+[Nx Vite TsPaths] Unable to resolve ./DonationSummary with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved ./DonationSummary to undefined
+
+[Nx Vite TsPaths] Unable to resolve ./DonationSummary with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved ./DonationSummary to undefined
+
+[Nx Vite TsPaths] Unable to resolve vitest with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved vitest to undefined
+
+[Nx Vite TsPaths] Unable to resolve react/jsx-dev-runtime with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react/jsx-dev-runtime to undefined
+
+[Nx Vite TsPaths] Unable to resolve react with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react to undefined
+
+[Nx Vite TsPaths] Unable to resolve react-router-dom with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react-router-dom to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\src\api/apiClient with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\src\api/apiClient to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\src\containers/root with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\src\containers/root to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\src\containers/404 with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\src\containers/404 to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\src\containers/test with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\src\containers/test to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\src\containers/donations/DonationForm with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\src\containers/donations/DonationForm to undefined
+
+[Nx Vite TsPaths] Unable to resolve react/jsx-dev-runtime with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react/jsx-dev-runtime to undefined
+
+[Nx Vite TsPaths] Unable to resolve react with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react to undefined
+
+[Nx Vite TsPaths] Unable to resolve ./donations.css with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved ./donations.css to undefined
+
+[Nx Vite TsPaths] Unable to resolve axios with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved axios to undefined
+
+[Nx Vite TsPaths] Unable to resolve react/jsx-dev-runtime with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react/jsx-dev-runtime to undefined
+
+[Nx Vite TsPaths] Unable to resolve ../../api/apiClient with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved ../../api/apiClient to undefined
+
+[Nx Vite TsPaths] Unable to resolve react with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react to undefined
+
+[Nx Vite TsPaths] Unable to resolve ./donations.css with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved ./donations.css to undefined
+
+[Nx Vite TsPaths] Unable to resolve ./DonationSummary with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved ./DonationSummary to undefined
+
+[Nx Vite TsPaths] Unable to resolve react/jsx-dev-runtime with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react/jsx-dev-runtime to undefined
+
+[Nx Vite TsPaths] Unable to resolve ./donations/DonationForm with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved ./donations/DonationForm to undefined
+
+[Nx Vite TsPaths] Unable to resolve react/jsx-dev-runtime with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react/jsx-dev-runtime to undefined
+
+[Nx Vite TsPaths] Unable to resolve react-router-dom with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react-router-dom to undefined
+
+[Nx Vite TsPaths] Unable to resolve C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\src\utils/router with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\src\utils/router to undefined
+
+[Nx Vite TsPaths] Unable to resolve react-router-dom with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react-router-dom to undefined
+
+[Nx Vite TsPaths] Unable to resolve react/jsx-dev-runtime with tsconfig paths. Using fallback file matching.
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\apps\frontend\tsconfig.app.json
+
+[Nx Vite TsPaths] Trying to resolve file from config in C:\Users\gauri\Documents\GitHub\fcc\tsconfig.base.json
+
+[Nx Vite TsPaths] Resolved react/jsx-dev-runtime to undefined

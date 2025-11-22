@@ -1,0 +1,1 @@
+[33m[7m[33m Vitest [33m[27m "cache.dir" is deprecated, use Vite's "cacheDir" instead if you want to change the cache director. Note caches will be written to "cacheDir/vitest"[39m

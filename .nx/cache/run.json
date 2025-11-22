@@ -1,0 +1,21 @@
+{
+  "run": {
+    "command": "nx test frontend --skip-nx-cache --output-style=stream --verbose",
+    "startTime": "2025-11-10T19:13:41.833Z",
+    "endTime": "2025-11-10T19:13:45.331Z",
+    "inner": false
+  },
+  "tasks": [
+    {
+      "taskId": "frontend:test",
+      "target": "test",
+      "projectName": "frontend",
+      "hash": "3860955538206833503",
+      "startTime": "2025-11-10T19:13:41.851Z",
+      "endTime": "2025-11-10T19:13:45.328Z",
+      "params": "",
+      "cacheStatus": "cache-miss",
+      "status": 1
+    }
+  ]
+}
