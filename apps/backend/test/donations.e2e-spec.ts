@@ -10,6 +10,9 @@ import { DonationsModule } from '../src/donations/donations.module';
 import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import { Repository, DataSource, QueryRunner } from 'typeorm';
 import { Donation } from '../src/donations/donation.entity'; // adjust path if needed
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 interface TestDonation {
   id: number;
@@ -50,14 +53,15 @@ describe('Donations (e2e) - expanded stubs', () => {
           type: 'postgres',
           host: process.env.NX_DB_HOST || 'localhost',
           port: parseInt(process.env.NX_DB_PORT || '5432', 10),
-          username: 'postgres',
-          password: '12345678',
-          database: 'fcc_dev',
+          username: process.env.NX_DB_USERNAME || 'postgres',
+          password: process.env.NX_DB_PASSWORD || 'postgres',
+          database: process.env.NX_DB_DATABASE || 'fcc_dev',
           entities: [__dirname + '/../src/**/*.entity{.ts,.js}'],
           // Prefer running migrations in tests for parity; set migrationsRun to true
           // if you keep migrations up-to-date. If you want schema auto-sync for
           // a test DB, set `synchronize: true` manually here.
           synchronize: false,
+          dropSchema: true,
           migrationsRun: true,
           migrations: [__dirname + '/../src/migrations/*{.ts,.js}'],
           logging: false,
