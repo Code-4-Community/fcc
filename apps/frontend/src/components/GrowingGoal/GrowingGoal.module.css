@@ -1,0 +1,104 @@
+.goal-container {
+  display: flex;
+  flex-direction: column;
+  width: 33.375rem;
+  flex-shrink: 0;
+  border-radius: 1.25rem;
+  border: 1px solid #cecece;
+  background: #f2f2f2;
+  text-align: center;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.description-label {
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  color: #fff;
+  font-family: Helvetica;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 2.5rem;
+  padding: 2rem;
+  background-color: #650d77;
+  margin-bottom: 2rem;
+}
+
+.sample-donor-profile {
+  width: 3.3125rem;
+  height: 3.3125rem;
+  flex-shrink: 0;
+  border-radius: 25.75rem;
+  display: flex;
+  align-items: center; /* Vertical center */
+  justify-content: center; /* Horizontal center */
+  overflow: hidden;
+}
+
+.sample-donor-amount {
+  color: #fff;
+  font-family: Helvetica;
+  font-size: 1.25rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
+
+.sample-donor-label {
+  display: flex;
+  height: 5.0625rem;
+  padding: 0.5rem 1rem;
+  align-items: center;
+  gap: 1rem;
+  align-self: stretch;
+  border-radius: 1rem;
+  background: #3d3e6e;
+  justify-content: center;
+  margin-right: 3rem;
+  margin-left: 3rem;
+  margin-bottom: 2rem;
+}
+
+.total-donation-label {
+  color: #000;
+  text-align: center;
+  font-family: Helvetica;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 40px;
+  letter-spacing: 0.64px;
+  margin-bottom: 2rem;
+}
+
+.growth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-bottom: 2rem;
+}
+
+.growth-container-solid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 25.75rem;
+  height: 25.75rem;
+  border-radius: 25.75rem;
+  background: #cecece;
+}
+
+.plant-container {
+  display: flex;
+  width: 318px;
+  height: 319px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
