@@ -114,7 +114,8 @@ export class DonationsController {
     },
   })
   async getStats(): Promise<{ total: number; count: number }> {
-    return this.donationsService.getTotalDonations();
+    const stats = await this.donationsService.getTotalDonations();
+    return stats;
   }
 
   @Get()
