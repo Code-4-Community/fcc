@@ -4,6 +4,7 @@ import apiClient, {
 } from '../../api/apiClient';
 import React, { useState, FormEvent } from 'react';
 import './donations.css';
+import { DonationSummary } from './DonationSummary';
 
 type RecurringInterval = 'weekly' | 'bimonthly' | 'monthly' | 'quarterly';
 
@@ -377,6 +378,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
           Show dedication message publicly
         </label>
       </div>
+      <DonationSummary baseAmount={10} />
 
       <button type="submit" className="submit-button" disabled={isSubmitting}>
         {isSubmitting ? 'Processing...' : 'Submit Donation'}

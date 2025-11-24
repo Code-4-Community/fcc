@@ -10,7 +10,7 @@
       "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/frontend",
-        "configFile": "apps/frontend/vite.config.ts"
+        "configFile": "apps/frontend/vite.config.mts"
       },
       "configurations": {
         "development": {
