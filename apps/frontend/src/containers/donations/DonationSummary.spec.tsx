@@ -1,12 +1,16 @@
 /** @vitest-environment jsdom */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { DonationSummary } from './DonationSummary';
 import { DONATION_FEE_RATE, DONATION_FIXED_FEE } from './DonationSummary';
 
 describe('DonationSummary Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   // unit tests for fee calculation
