@@ -1,177 +1,76 @@
+/* Outer card */
 .testimonial-carousel {
-  background: #127a64;
+  width: 1200px;
+  height: 395px;
   border-radius: 10px;
-  width: 579px;         /* rectangle width */
-  height: 132px;        /* rectangle height */
-  margin: 0 auto 2rem;  /* center, keep bottom spacing */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
   position: relative;
-  overflow: visible;
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  box-sizing: border-box;
+
+  /* IMAGE lives here – from your spec */
+  background: url("./TestimonialImages/Dinner_Party.png")
+    lightgray 50% / cover no-repeat;
+
+  display: flex;
+  align-items: center;
+  padding: 40px 64px;
+
+  font-family: "Helvetica Neue LT Std", "Helvetica Neue", Arial, sans-serif;
+  color: #ffffff;
 }
 
-.testimonial-carousel:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
-}
-
-/* This is the 579x132 area we’re laying things out inside */
-.testimonial-content {
-  position: relative;
-  width: 100%;
+/* Brown → transparent overlay on the LEFT side */
+.testimonial-carousel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60%; /* how far the brown extends; tweak to taste */
   height: 100%;
-  color: #ffffff;
-  transition: opacity 0.3s ease-in-out;
+
+  background: linear-gradient(
+    to right,
+    #863b27 0%,
+    #863b27 50%,
+    rgba(134, 59, 39, 0.7) 80%,
+    rgba(134, 59, 39, 0) 100%
+  );
+
+  pointer-events: none;
 }
 
-.testimonial-content.fade-in {
-  opacity: 1;
+/* Text block */
+.testimonial-carousel__text {
+  position: relative; /* so it sits above ::before */
+  z-index: 1;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
 }
 
-.testimonial-content.fade-out {
-  opacity: 0;
-}
-
-/* QUOTE MARK (left + right) – 25×62, IBM Plex Sans, 48px */
-.quote-icon {
-  position: absolute;
-  width: 25px;
-  height: 62px;
-  top: 8px;              /* 297 - 289 */
-  left: 25px;            /* 767 - 742 */
-  font-family: 'IBM Plex Sans';
-  font-weight: 600;
+.testimonial-carousel__title {
+  margin: 0;
   font-size: 48px;
+  font-weight: 700;
   line-height: 100%;
-  letter-spacing: 0;
-  text-align: center;
-  color: #ffffff;
 }
 
-/* Right quote: same size, mirrored to the right edge */
-.quote-icon-end {
-  top: 8px;
-  left: auto;
-  right: 25px;
-  transform: scaleX(-1);
-}
-
-/* MAIN TEXT – 478×62, IBM Plex Sans 24px, centered */
-.testimonial-text {
-  position: absolute;
-  width: 478px;
-  height: 62px;
-  top: 22px;                  /* keep your vertical position */
-  left: 50%;                  /* center horizontally in the 579px card */
-  transform: translateX(-50%);/* shift back by half its own width */
+.testimonial-carousel__body {
   margin: 0;
-  padding: 0;
-  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 
-    sans-serif;
-  font-weight: 600;
-  font-size: 24px;
+  font-size: 20px;
+  font-weight: 500;
   line-height: 100%;
-  letter-spacing: 0;
-  text-align: center;
-  color: #ffffff;
 }
 
-
-/* NAME TEXT – 148×21, IBM Plex Sans 16px, bottom-right-ish */
-.testimonial-author {
-  position: absolute;
-  width: 148px;
-  height: 21px;
-  top: 98px;             /* 387 - 289 */
-  left: 350px;           /* 1129 - 742 */
-  margin: 0;
-  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 
-    sans-serif;
-  font-weight: 600;
-  font-size: 16px;
+.testimonial-carousel__link {
+  font-size: 20px;
+  font-weight: 500;
   line-height: 100%;
-  letter-spacing: 0;
-  font-style: normal;
   color: #ffffff;
-  text-align: right;
-}
-
-/* If you want to hide the dots to match the mock, keep this.
-   If you want them under the card, delete `display: none;`. */
-.carousel-indicators {
-  display: none;
-}
-
-/* Keeping base styles in case you re-enable indicators later */
-.indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.4);
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.indicator:hover {
-  background: rgba(255, 255, 255, 0.6);
-  transform: scale(1.2);
-}
-
-.indicator.active {
-  background: white;
-  width: 12px;
-  height: 12px;
-}
-
-.indicator:focus {
-  outline: 2px solid white;
-  outline-offset: 2px;
-}
-
-/* You can keep or tweak these for smaller screens. They don’t affect
-   the exact 579×132 desktop layout, but will help avoid overflow. */
-@media (max-width: 768px) {
-  .testimonial-carousel {
-    width: 100%;
-    height: auto;
-    padding: 1.75rem 1.5rem;
-  }
-
-  .testimonial-content {
-    position: static;
-  }
-
-  .quote-icon,
-  .quote-icon-end,
-  .testimonial-text,
-  .testimonial-author {
-    position: static;
-  }
-
-  .testimonial-text {
-    width: 100%;
-    font-size: 20px;
-    margin-top: 0.5rem;
-  }
-
-  .testimonial-author {
-    font-size: 14px;
-    margin-top: 0.75rem;
-    text-align: right;
-  }
-}
-
-@media (max-width: 480px) {
-  .testimonial-text {
-    font-size: 18px;
-  }
-
-  .testimonial-author {
-    font-size: 13px;
-  }
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-skip-ink: auto;
+  text-decoration-color: rgba(255, 255, 255, 0.58);
+  text-underline-offset: 5px;
 }
