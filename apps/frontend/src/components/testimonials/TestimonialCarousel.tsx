@@ -14,7 +14,6 @@ interface TestimonialCarouselProps {
 const DEFAULT_TESTIMONIALS: Testimonial[] = [
   {
     text: "The FCC provides so many great services, I'm glad I can contribute!",
-    author: 'Anonymous Donor',
   },
   {
     text: 'Supporting the FCC means supporting our entire community. Every donation makes a real difference.',
@@ -25,7 +24,7 @@ const DEFAULT_TESTIMONIALS: Testimonial[] = [
     author: 'James K.',
   },
   {
-    text: 'The work FCC does is invaluable. It is an honor to give back to an organization that gives so much.',
+    text: 'The work FCC does is invaluable. It is an honor to give back!',
   },
 ];
 
@@ -85,7 +84,7 @@ export const TestimonialCarousel: React.FC<TestimonialCarouselProps> = ({
     >
       <div className={`testimonial-content ${fadeState}`}>
         <div className="quote-icon" aria-hidden="true">
-          "
+          “
         </div>
         <blockquote className="testimonial-text">
           {currentTestimonial.text}
@@ -96,33 +95,9 @@ export const TestimonialCarousel: React.FC<TestimonialCarouselProps> = ({
           </cite>
         )}
         <div className="quote-icon quote-icon-end" aria-hidden="true">
-          "
+          “
         </div>
       </div>
-      {activeTestimonials.length > 1 && (
-        <div
-          className="carousel-indicators"
-          role="tablist"
-          aria-label="Testimonial indicators"
-        >
-          {activeTestimonials.map((_, index) => (
-            <button
-              key={index}
-              className={`indicator ${index === currentIndex ? 'active' : ''}`}
-              onClick={() => {
-                setFadeState('fade-out');
-                setTimeout(() => {
-                  setCurrentIndex(index);
-                  setFadeState('fade-in');
-                }, 300);
-              }}
-              role="tab"
-              aria-selected={index === currentIndex}
-              aria-label={`View testimonial ${index + 1} of ${activeTestimonials.length}`}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };

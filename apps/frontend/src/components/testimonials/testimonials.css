@@ -1,16 +1,12 @@
 .testimonial-carousel {
   background: #127a64;
   border-radius: 10px;
-  padding: 2.5rem 3rem;
-  margin-bottom: 2rem;
+  width: 579px;         /* rectangle width */
+  height: 132px;        /* rectangle height */
+  margin: 0 auto 2rem;  /* center, keep bottom spacing */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
   position: relative;
   overflow: visible;
-  min-height: 132px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   cursor: pointer;
   transition:
     transform 0.2s ease,
@@ -22,14 +18,13 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
 }
 
+/* This is the 579x132 area we’re laying things out inside */
 .testimonial-content {
-  text-align: center;
-  color: white;
   position: relative;
   width: 100%;
-  max-width: 579px;
+  height: 100%;
+  color: #ffffff;
   transition: opacity 0.3s ease-in-out;
-  padding: 0;
 }
 
 .testimonial-content.fade-in {
@@ -40,68 +35,77 @@
   opacity: 0;
 }
 
+/* QUOTE MARK (left + right) – 25×62, IBM Plex Sans, 48px */
 .quote-icon {
-  font-size: 4rem;
-  font-family: Georgia, serif;
-  color: #ffffff;
-  line-height: 0.6;
   position: absolute;
-  top: -20px;
-  left: -40px;
-  font-weight: bold;
-  opacity: 1;
-}
-
-.quote-icon-end {
-  top: -20px;
-  bottom: auto;
-  left: auto;
-  right: -40px;
-}
-
-.testimonial-text {
-  font-family:
-    'IBM Plex Sans',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    sans-serif;
-  font-size: 24px;
+  width: 25px;
+  height: 62px;
+  top: 8px;              /* 297 - 289 */
+  left: 25px;            /* 767 - 742 */
+  font-family: 'IBM Plex Sans';
   font-weight: 600;
+  font-size: 48px;
   line-height: 100%;
   letter-spacing: 0;
-  margin: 0 0 1rem 0;
-  padding: 0;
-  color: #ffffff;
   text-align: center;
+  color: #ffffff;
 }
 
-.testimonial-author {
-  display: block;
-  font-family:
-    'IBM Plex Sans',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
+/* Right quote: same size, mirrored to the right edge */
+.quote-icon-end {
+  top: 8px;
+  left: auto;
+  right: 25px;
+  transform: scaleX(-1);
+}
+
+/* MAIN TEXT – 478×62, IBM Plex Sans 24px, centered */
+.testimonial-text {
+  position: absolute;
+  width: 478px;
+  height: 62px;
+  top: 22px;                  /* keep your vertical position */
+  left: 50%;                  /* center horizontally in the 579px card */
+  transform: translateX(-50%);/* shift back by half its own width */
+  margin: 0;
+  padding: 0;
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 
     sans-serif;
-  font-size: 16px;
   font-weight: 600;
+  font-size: 24px;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
+  color: #ffffff;
+}
+
+
+/* NAME TEXT – 148×21, IBM Plex Sans 16px, bottom-right-ish */
+.testimonial-author {
+  position: absolute;
+  width: 148px;
+  height: 21px;
+  top: 98px;             /* 387 - 289 */
+  left: 350px;           /* 1129 - 742 */
+  margin: 0;
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 
+    sans-serif;
+  font-weight: 600;
+  font-size: 16px;
   line-height: 100%;
   letter-spacing: 0;
   font-style: normal;
   color: #ffffff;
-  margin-top: 1rem;
   text-align: right;
-  padding-right: 0;
 }
 
+/* If you want to hide the dots to match the mock, keep this.
+   If you want them under the card, delete `display: none;`. */
 .carousel-indicators {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  margin-top: 1.5rem;
+  display: none;
 }
 
+/* Keeping base styles in case you re-enable indicators later */
 .indicator {
   width: 10px;
   height: 10px;
@@ -129,64 +133,45 @@
   outline-offset: 2px;
 }
 
-/* Responsive design */
+/* You can keep or tweak these for smaller screens. They don’t affect
+   the exact 579×132 desktop layout, but will help avoid overflow. */
 @media (max-width: 768px) {
   .testimonial-carousel {
-    padding: 2rem 2.5rem;
-    min-height: 140px;
+    width: 100%;
+    height: auto;
+    padding: 1.75rem 1.5rem;
   }
 
   .testimonial-content {
-    max-width: 100%;
+    position: static;
+  }
+
+  .quote-icon,
+  .quote-icon-end,
+  .testimonial-text,
+  .testimonial-author {
+    position: static;
   }
 
   .testimonial-text {
+    width: 100%;
     font-size: 20px;
+    margin-top: 0.5rem;
   }
 
   .testimonial-author {
     font-size: 14px;
-  }
-
-  .quote-icon {
-    font-size: 3rem;
-    left: -30px;
-  }
-
-  .quote-icon-end {
-    right: -30px;
+    margin-top: 0.75rem;
+    text-align: right;
   }
 }
 
 @media (max-width: 480px) {
-  .testimonial-carousel {
-    padding: 1.75rem 1.5rem;
-    border-radius: 8px;
-    min-height: 160px;
-  }
-
-  .testimonial-content {
-    padding: 0 1rem;
-  }
-
   .testimonial-text {
     font-size: 18px;
-    line-height: 120%;
   }
 
   .testimonial-author {
     font-size: 13px;
-    margin-top: 0.75rem;
-  }
-
-  .quote-icon {
-    font-size: 2.5rem;
-    left: -10px;
-    top: -15px;
-  }
-
-  .quote-icon-end {
-    right: -10px;
-    top: -15px;
   }
 }
