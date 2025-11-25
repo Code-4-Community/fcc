@@ -9,7 +9,7 @@ const Plant: React.FC = () => {
           <div
             style={{
               position: 'absolute',
-              height: '45%',
+              height: '28%',
               width: '100%',
               overflow: 'hidden',
               display: 'flex',
@@ -80,7 +80,7 @@ const Sprout: React.FC = () => {
     <div
       style={{
         position: 'absolute',
-        top: '12%',
+        top: '25%',
         left: '30%',
         width: '40%',
         height: 'auto',
