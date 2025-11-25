@@ -17572,6 +17572,11 @@
       },
       {
         "source": "frontend",
+        "target": "npm:vitest",
+        "type": "static"
+      },
+      {
+        "source": "frontend",
         "target": "npm:react-dom",
         "type": "static"
       },
@@ -17650,6 +17655,16 @@
       {
         "source": "backend",
         "target": "npm:@nestjs/core",
+        "type": "static"
+      },
+      {
+        "source": "backend",
+        "target": "npm:@nestjs/config",
+        "type": "static"
+      },
+      {
+        "source": "backend",
+        "target": "npm:stripe",
         "type": "static"
       },
       {
@@ -42633,5 +42648,5 @@
   },
   "version": "6.0",
   "errors": [],
-  "computedAt": 1763920500569
+  "computedAt": 1764058831215
 }

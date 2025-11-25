@@ -1,104 +1,149 @@
 .goal-container {
+  aspect-ratio: 7 / 10;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  width: 33.375rem;
-  flex-shrink: 0;
-  border-radius: 1.25rem;
-  border: 1px solid #cecece;
+  border-radius: 3%;
+  border: 2% solid #cecece;
   background: #f2f2f2;
   text-align: center;
-  justify-content: flex-start;
-  align-items: stretch;
+  justify-content: start;
+  container-type: inline-size;
+  gap: 4%;
 }
 
 .description-label {
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
+  border-top-left-radius: 5%;
+  border-top-right-radius: 5%;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-  color: #fff;
-  font-family: Helvetica;
-  font-size: 1.75rem;
-  font-weight: 700;
-  line-height: 2.5rem;
-  padding: 2rem;
-  background-color: #650d77;
-  margin-bottom: 2rem;
-}
-
-.sample-donor-profile {
-  width: 3.3125rem;
-  height: 3.3125rem;
-  flex-shrink: 0;
-  border-radius: 25.75rem;
-  display: flex;
-  align-items: center; /* Vertical center */
-  justify-content: center; /* Horizontal center */
-  overflow: hidden;
-}
-
-.sample-donor-amount {
-  color: #fff;
-  font-family: Helvetica;
-  font-size: 1.25rem;
-  font-style: normal;
-  font-weight: 700;
-  line-height: normal;
-}
-
-.sample-donor-label {
-  display: flex;
-  height: 5.0625rem;
-  padding: 0.5rem 1rem;
   align-items: center;
-  gap: 1rem;
-  align-self: stretch;
-  border-radius: 1rem;
-  background: #3d3e6e;
   justify-content: center;
-  margin-right: 3rem;
-  margin-left: 3rem;
-  margin-bottom: 2rem;
+  flex-shrink: 0;
+  color: #fff;
+  font-family: Helvetica;
+  font-weight: 700;
+  white-space: nowrap;
+  height: 12%;
+  padding: 2%;
+  background-color: #127a64;
+  font-size: 5cqw;
+}
+
+.growth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.growth-container-solid-grey {
+  position: relative;
+  width: 73%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #cecece;
 }
 
 .total-donation-label {
   color: #000;
   text-align: center;
   font-family: Helvetica;
-  font-size: 32px;
-  font-style: normal;
+  font-size: 5cqw;
   font-weight: 400;
-  line-height: 40px;
-  letter-spacing: 0.64px;
-  margin-bottom: 2rem;
 }
 
-.growth-container {
+.sample-donor-container {
+  overflow: hidden;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  margin-bottom: 2rem;
 }
 
-.growth-container-solid {
+.sample-donor-label {
+  width: 65%;
+  aspect-ratio: 9 / 2;
+  overflow: hidden;
+  border-radius: 2px;
+  padding: 2%;
+  background: #127a64;
   display: flex;
-  justify-content: center;
   align-items: center;
-  width: 25.75rem;
-  height: 25.75rem;
-  border-radius: 25.75rem;
-  background: #cecece;
+  justify-content: center;
 }
 
-.plant-container {
+.sample-donor-amount {
+  color: #fff;
+  font-family: Helvetica;
+  font-size: 4cqw;
+  overflow: hidden;
+}
+
+.growth-container-solid-white {
+  z-index: 10;
   display: flex;
-  width: 318px;
-  height: 319px;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  flex-shrink: 0;
+  width: 90%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.growth-container-solid-grey-inner {
+  z-index: 11;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: #55565a;
+}
+
+.growth-container-solid-teal {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: 90%;
+  border-radius: 50%;
+  background: #0c7962;
+}
+
+.growth-container-gradient {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 180deg at 50% 50%,
+    #c6be3b 0deg,
+    #863b27 90deg,
+    #650d77 180deg,
+    #0c7962 270deg,
+    #c6be3b 360deg,
+    transparent 180deg 360deg
+  );
+}
+
+.soil-base {
+  background-color: #211504;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+}
+
+.soil-top {
+  position: absolute;
+  background-color: #332308;
+  width: 100%;
+  height: 20%;
+  border-radius: 50%;
+  bottom: 35%;
 }

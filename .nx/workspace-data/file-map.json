@@ -11,12 +11,16 @@
           "hash": "13800677001662881425"
         },
         {
+          "file": "apps/backend/Dockerfile",
+          "hash": "603295317280125606"
+        },
+        {
           "file": "apps/backend/jest.config.ts",
           "hash": "7785676649933630854"
         },
         {
           "file": "apps/backend/project.json",
-          "hash": "28908331742320224"
+          "hash": "2968713109004255714"
         },
         {
           "file": "apps/backend/src/app.controller.spec.ts",
@@ -27,14 +31,14 @@
         },
         {
           "file": "apps/backend/src/app.controller.ts",
-          "hash": "9005150069945785676",
+          "hash": "14098563604172861942",
           "deps": [
             "npm:@nestjs/common"
           ]
         },
         {
           "file": "apps/backend/src/app.module.ts",
-          "hash": "13144493354976039935",
+          "hash": "18200950717438598129",
           "deps": [
             "npm:@nestjs/common",
             "npm:@nestjs/typeorm"
@@ -60,14 +64,14 @@
         },
         {
           "file": "apps/backend/src/auth/auth.controller.spec.ts",
-          "hash": "14239920491639202077",
+          "hash": "17388661827993267168",
           "deps": [
             "npm:@nestjs/testing"
           ]
         },
         {
           "file": "apps/backend/src/auth/auth.controller.ts",
-          "hash": "9097318327402964302",
+          "hash": "14016681989902543137",
           "deps": [
             "npm:@nestjs/common",
             "npm:@nestjs/swagger"
@@ -166,11 +170,116 @@
         },
         {
           "file": "apps/backend/src/data-source.ts",
-          "hash": "14561681342134806594",
+          "hash": "8276891265205277359",
           "deps": [
             "npm:typeorm",
             "npm:dotenv"
           ]
+        },
+        {
+          "file": "apps/backend/src/donations/donation.entity.ts",
+          "hash": "16189535135019007697",
+          "deps": [
+            "npm:typeorm"
+          ]
+        },
+        {
+          "file": "apps/backend/src/donations/donations.controller.spec.ts",
+          "hash": "9168059004589497192",
+          "deps": [
+            "npm:@nestjs/testing"
+          ]
+        },
+        {
+          "file": "apps/backend/src/donations/donations.controller.ts",
+          "hash": "4206560879319248419",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/swagger",
+            "npm:@nestjs/passport"
+          ]
+        },
+        {
+          "file": "apps/backend/src/donations/donations.module.ts",
+          "hash": "14269123476684152647",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/typeorm"
+          ]
+        },
+        {
+          "file": "apps/backend/src/donations/donations.repository.spec.ts",
+          "hash": "5593464630714538305",
+          "deps": [
+            "npm:@nestjs/testing",
+            "npm:@nestjs/typeorm",
+            "npm:typeorm"
+          ]
+        },
+        {
+          "file": "apps/backend/src/donations/donations.repository.ts",
+          "hash": "12841023618773938419",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/typeorm",
+            "npm:typeorm"
+          ]
+        },
+        {
+          "file": "apps/backend/src/donations/donations.service.spec.ts",
+          "hash": "17638725168341814642",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/testing",
+            "npm:@nestjs/typeorm",
+            "npm:typeorm"
+          ]
+        },
+        {
+          "file": "apps/backend/src/donations/donations.service.ts",
+          "hash": "8031483612805905329",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/typeorm",
+            "npm:typeorm"
+          ]
+        },
+        {
+          "file": "apps/backend/src/donations/dtos/create-donation-dto.ts",
+          "hash": "10491414534849029008",
+          "deps": [
+            "npm:@nestjs/swagger",
+            "npm:class-validator"
+          ]
+        },
+        {
+          "file": "apps/backend/src/donations/dtos/donation-response-dto.ts",
+          "hash": "1767093548795896146",
+          "deps": [
+            "npm:@nestjs/swagger"
+          ]
+        },
+        {
+          "file": "apps/backend/src/donations/dtos/index.ts",
+          "hash": "10254170887572783186"
+        },
+        {
+          "file": "apps/backend/src/donations/dtos/public-donation-dto.ts",
+          "hash": "2089881549298768264",
+          "deps": [
+            "npm:@nestjs/swagger"
+          ]
+        },
+        {
+          "file": "apps/backend/src/donations/mappers.spec.ts",
+          "hash": "10008266696759633100",
+          "deps": [
+            "npm:class-validator"
+          ]
+        },
+        {
+          "file": "apps/backend/src/donations/mappers.ts",
+          "hash": "17102446608688126227"
         },
         {
           "file": "apps/backend/src/interceptors/current-user.interceptor.ts",
@@ -196,8 +305,50 @@
           ]
         },
         {
+          "file": "apps/backend/src/migrations/1759151412730-add_users.ts",
+          "hash": "6266970700627081375",
+          "deps": [
+            "npm:typeorm"
+          ]
+        },
+        {
+          "file": "apps/backend/src/migrations/1759151447065-add_donations.ts",
+          "hash": "11985070935072395656",
+          "deps": [
+            "npm:typeorm"
+          ]
+        },
+        {
+          "file": "apps/backend/src/payments/STRIPE.MD",
+          "hash": "11675812764726517727"
+        },
+        {
+          "file": "apps/backend/src/payments/payments.module.ts",
+          "hash": "2667047588054309715",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:@nestjs/config",
+            "npm:stripe"
+          ]
+        },
+        {
+          "file": "apps/backend/src/payments/payments.service.spec.ts",
+          "hash": "6935667851883208500",
+          "deps": [
+            "npm:stripe"
+          ]
+        },
+        {
+          "file": "apps/backend/src/payments/payments.service.ts",
+          "hash": "12737613255907367994",
+          "deps": [
+            "npm:@nestjs/common",
+            "npm:stripe"
+          ]
+        },
+        {
           "file": "apps/backend/src/strategies/plural-naming.strategy.ts",
-          "hash": "13759603940614672424",
+          "hash": "16654251107197956065",
           "deps": [
             "npm:typeorm"
           ]
@@ -208,7 +359,7 @@
         },
         {
           "file": "apps/backend/src/users/user.entity.ts",
-          "hash": "13062090594584510154",
+          "hash": "15488602006002922416",
           "deps": [
             "npm:typeorm"
           ]
@@ -240,6 +391,10 @@
           ]
         },
         {
+          "file": "apps/backend/src/util/donations/donations.util.ts",
+          "hash": "6348181608580258686"
+        },
+        {
           "file": "apps/backend/tsconfig.app.json",
           "hash": "3171572500325445971"
         },
@@ -262,19 +417,19 @@
       "frontend": [
         {
           "file": "apps/frontend/.eslintrc.json",
-          "hash": "14830867113928387670"
+          "hash": "2876935653855518630"
         },
         {
           "file": "apps/frontend/index.html",
-          "hash": "15865628558909587485"
+          "hash": "5612849566114081647"
         },
         {
           "file": "apps/frontend/project.json",
-          "hash": "9242714680806845410"
+          "hash": "1236015907005134147"
         },
         {
           "file": "apps/frontend/proxy.conf.json",
-          "hash": "2514318380189041036"
+          "hash": "18193920538391635562"
         },
         {
           "file": "apps/frontend/public/favicon.ico",
@@ -282,7 +437,7 @@
         },
         {
           "file": "apps/frontend/src/api/apiClient.ts",
-          "hash": "731659272403751870",
+          "hash": "12839675191424870028",
           "deps": [
             "npm:axios"
           ]
@@ -296,7 +451,7 @@
         },
         {
           "file": "apps/frontend/src/app.tsx",
-          "hash": "7047361431182166026",
+          "hash": "124564945631338179",
           "deps": [
             "npm:react",
             "npm:react-router-dom"
@@ -307,6 +462,29 @@
           "hash": "3244421341483603138"
         },
         {
+          "file": "apps/frontend/src/components/GrowingGoal/AnimatedGrowth.tsx",
+          "hash": "14352108775646700474"
+        },
+        {
+          "file": "apps/frontend/src/components/GrowingGoal/GrowingGoal.module.css",
+          "hash": "12990721018176076385"
+        },
+        {
+          "file": "apps/frontend/src/components/GrowingGoal/GrowingGoal.tsx",
+          "hash": "3238184863083062381"
+        },
+        {
+          "file": "apps/frontend/src/components/GrowingGoal/Plant.tsx",
+          "hash": "6818293988479633290",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/frontend/src/components/ImpactCarousel/ImpactTile.tsx",
+          "hash": "4699369805220075699"
+        },
+        {
           "file": "apps/frontend/src/containers/404.tsx",
           "hash": "6818008100962500247",
           "deps": [
@@ -314,8 +492,28 @@
           ]
         },
         {
+          "file": "apps/frontend/src/containers/donations/DonationForm.spec.tsx",
+          "hash": "16751616211204542431",
+          "deps": [
+            "npm:vitest",
+            "npm:react",
+            "npm:@testing-library/react"
+          ]
+        },
+        {
+          "file": "apps/frontend/src/containers/donations/DonationForm.tsx",
+          "hash": "18443191116455222932",
+          "deps": [
+            "npm:react"
+          ]
+        },
+        {
+          "file": "apps/frontend/src/containers/donations/donations.css",
+          "hash": "16818960486949187479"
+        },
+        {
           "file": "apps/frontend/src/containers/root.tsx",
-          "hash": "17560208078483401424"
+          "hash": "15421090226465709767"
         },
         {
           "file": "apps/frontend/src/containers/test.tsx",
@@ -354,7 +552,7 @@
         },
         {
           "file": "apps/frontend/vite.config.ts",
-          "hash": "3793149223002691640",
+          "hash": "14350048995643197852",
           "deps": [
             "npm:vite",
             "npm:@vitejs/plugin-react",
@@ -364,6 +562,10 @@
       ]
     },
     "nonProjectFiles": [
+      {
+        "file": ".dockerignore",
+        "hash": "4699040610668941659"
+      },
       {
         "file": ".editorconfig",
         "hash": "11532813898455409296"
@@ -378,19 +580,19 @@
       },
       {
         "file": ".github/ISSUE_TEMPLATE/feature_request.md",
-        "hash": "7335114847464643603"
+        "hash": "2352777429746245407"
       },
       {
         "file": ".github/pull_request_template.md",
-        "hash": "16014598782020493539"
+        "hash": "13719339480197294574"
       },
       {
         "file": ".github/workflows/ci-cd.yml",
-        "hash": "8680473485169633137"
+        "hash": "8188386073081702603"
       },
       {
         "file": ".gitignore",
-        "hash": "5996497706346008585"
+        "hash": "4699685393713129734"
       },
       {
         "file": ".gitmodules",
@@ -406,7 +608,7 @@
       },
       {
         "file": ".prettierignore",
-        "hash": "2667183413816308602"
+        "hash": "17085498363870782104"
       },
       {
         "file": ".prettierrc",
@@ -417,12 +619,12 @@
         "hash": "4637156562308165301"
       },
       {
-        "file": ".yarn/releases/yarn-1.22.19.cjs",
-        "hash": "1324123219646460987"
+        "file": ".yarnrc",
+        "hash": "8702269106630288460"
       },
       {
-        "file": ".yarnrc",
-        "hash": "6406645819353544239"
+        "file": "DOCKER.md",
+        "hash": "16450631890999246973"
       },
       {
         "file": "README.md",
@@ -433,12 +635,12 @@
         "hash": "16043271374566152874"
       },
       {
-        "file": "example.env",
-        "hash": "11596300374648305934"
+        "file": "docker-compose.dev.yml",
+        "hash": "13267355215492339517"
       },
       {
         "file": "jest.config.ts",
-        "hash": "3407785570333453138"
+        "hash": "7544409015863045561"
       },
       {
         "file": "jest.preset.js",
@@ -446,15 +648,31 @@
       },
       {
         "file": "lint-staged.config.js",
-        "hash": "17518426121933542434"
+        "hash": "6967762738242250392"
+      },
+      {
+        "file": "migrations.json",
+        "hash": "9182222924308088842"
       },
       {
         "file": "nx.json",
-        "hash": "9169795206546805336"
+        "hash": "1150400275950410959"
       },
       {
         "file": "package.json",
-        "hash": "1888292843044092753"
+        "hash": "202964300158940597"
+      },
+      {
+        "file": "scripts/docker-dev.bat",
+        "hash": "8941997897559186164"
+      },
+      {
+        "file": "scripts/docker-dev.sh",
+        "hash": "5160838781733529448"
+      },
+      {
+        "file": "scripts/init-db.sql",
+        "hash": "14690072245046119214"
       },
       {
         "file": "shared/.eslintrc.cjs",
@@ -518,7 +736,7 @@
       },
       {
         "file": "yarn.lock",
-        "hash": "6422697041623983649"
+        "hash": "12636129764456090549"
       }
     ]
   },
