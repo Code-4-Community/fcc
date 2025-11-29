@@ -4,6 +4,7 @@
 dist
 tmp
 /out-tsc
+.nx\workspace-data
 
 # dependencies
 node_modules
