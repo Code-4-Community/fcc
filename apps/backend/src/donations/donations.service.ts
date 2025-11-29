@@ -1,7 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DonationResponseDto } from './dtos/donation-response-dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Donation, DonationType, RecurringInterval } from './donation.entity';
+import {
+  Donation,
+  DonationType,
+  RecurringInterval,
+  DonationStatus,
+} from './donation.entity';
 import { Repository } from 'typeorm';
 import { CreateDonationRequest, Donation as DomainDonation } from './mappers';
 
@@ -62,33 +67,39 @@ export class DonationsService {
       showDedicationPublicly: createDonationRequest.showDedicationPublicly,
     });
 
+    // Reload from database so any DB-side defaults are reflected
     const savedDonation = await this.donationRepository.save(donation);
+    const reloaded = await this.donationRepository.findOne({
+      where: { id: savedDonation.id },
+    });
+
+    const finalDonation = reloaded ?? savedDonation;
 
     return {
-      id: savedDonation.id,
-      firstName: savedDonation.firstName,
-      lastName: savedDonation.lastName,
-      email: savedDonation.email,
-      amount: savedDonation.amount,
-      isAnonymous: savedDonation.isAnonymous,
-      donationType: savedDonation.donationType as 'one_time' | 'recurring',
-      recurringInterval: savedDonation.recurringInterval as
+      id: finalDonation.id,
+      firstName: finalDonation.firstName,
+      lastName: finalDonation.lastName,
+      email: finalDonation.email,
+      amount: finalDonation.amount,
+      isAnonymous: finalDonation.isAnonymous,
+      donationType: finalDonation.donationType as 'one_time' | 'recurring',
+      recurringInterval: finalDonation.recurringInterval as
         | 'weekly'
         | 'monthly'
         | 'bimonthly'
         | 'quarterly'
         | 'annually'
         | undefined,
-      dedicationMessage: savedDonation.dedicationMessage || undefined,
-      showDedicationPublicly: savedDonation.showDedicationPublicly,
-      status: savedDonation.status as
+      dedicationMessage: finalDonation.dedicationMessage || undefined,
+      showDedicationPublicly: finalDonation.showDedicationPublicly,
+      status: finalDonation.status as
         | 'pending'
         | 'succeeded'
         | 'failed'
         | 'cancelled',
-      createdAt: savedDonation.createdAt,
-      updatedAt: savedDonation.updatedAt,
-      transactionId: savedDonation.transactionId || undefined,
+      createdAt: finalDonation.createdAt,
+      updatedAt: finalDonation.updatedAt,
+      transactionId: finalDonation.transactionId || undefined,
     };
   }
 
@@ -120,7 +131,9 @@ export class DonationsService {
   }
 
   async findPublic(limit = 50): Promise<DomainDonation[]> {
+    // Return only non-anonymous, succeeded donations for public display
     const donations: Donation[] = await this.donationRepository.find({
+      where: { isAnonymous: false, status: DonationStatus.SUCCEEDED },
       take: limit,
       order: { createdAt: 'DESC' },
     });
@@ -185,6 +198,16 @@ export class DonationsService {
       `SELECT COUNT(amount) AS count, SUM(amount) AS total FROM donations`,
     );
 
-    return { total: donations.total, count: donations.count };
+    // SQL SUM returns null when no rows exist; coerce to numbers with sensible defaults
+    const total =
+      donations.total !== null && donations.total !== undefined
+        ? Number(donations.total)
+        : 0;
+    const count =
+      donations.count !== null && donations.count !== undefined
+        ? Number(donations.count)
+        : 0;
+
+    return { total, count };
   }
 }
