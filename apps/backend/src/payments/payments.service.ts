@@ -4,6 +4,7 @@ import {
   DonationStatus,
   RecurringInterval,
 } from '../donations/donation.entity';
+import { CreatePaymentIntentRequest } from './mappers';
 
 /**
  * Flexible definition for metadata, may want to change to be stricter later
@@ -30,7 +31,7 @@ export type PaymentIntentMetadata = Record<string, string>;
  * type - The error type, mapped from paymentIntent.last_payment_error.type
  * canceledAt - Unix timestamp representing when the PaymentIntent was canceled (if applicable), equivalent to what Stripe API returns
  */
-interface PaymentIntentResponse {
+export type PaymentIntentResponse = {
   id: string;
   clientSecret: string;
   amount: number;
@@ -48,7 +49,7 @@ interface PaymentIntentResponse {
     type: string;
   };
   canceledAt?: number;
-}
+};
 
 @Injectable()
 export class PaymentsService {
@@ -67,7 +68,7 @@ export class PaymentsService {
   private validateCreatePaymentIntentParams(
     amount: number,
     currency: string,
-    metadata?: PaymentIntentMetadata,
+    metadata?: Stripe.MetadataParam,
   ): string {
     if (typeof amount === 'undefined') {
       this.logger.warn(
@@ -110,12 +111,41 @@ export class PaymentsService {
       return 'Invalid currency format; expected 3-letter ISO code like "usd"';
     }
 
-    if (metadata !== undefined && typeof metadata !== 'object') {
+    if (
+      metadata !== undefined &&
+      !PaymentsService.isValidStripeMetadata(metadata)
+    ) {
       this.logger.warn('createPaymentIntent called with invalid metadata');
       return 'Invalid metadata';
     }
 
     return '';
+  }
+
+  /**
+   * Runtime check to ensure metadata is a valid Stripe.MetadataParam-like object
+   * (an object whose keys are strings and whose values are strings).
+   * Also enforces common Stripe limits: max 50 keys, key length <= 40, value length <= 500.
+   */
+  private static isValidStripeMetadata(metadata?: unknown): boolean {
+    if (metadata === undefined || metadata === null) return true;
+    if (typeof metadata !== 'object') return false;
+    if (Array.isArray(metadata)) return false;
+
+    const obj = metadata as Record<string, unknown>;
+    const keys = Object.keys(obj);
+    if (keys.length > 50) return false;
+
+    for (const key of keys) {
+      if (typeof key !== 'string') return false;
+      if (key.length === 0 || key.length > 40) return false;
+      const val = obj[key];
+      if (val === undefined || val === null) return false;
+      if (typeof val !== 'string') return false;
+      if ((val as string).length > 500) return false;
+    }
+
+    return true;
   }
 
   /**
@@ -127,17 +157,15 @@ export class PaymentsService {
    * @returns Promise resolving to a PaymentIntent-like object
    */
   async createPaymentIntent(
-    amount: number,
-    currency: string,
-    metadata?: PaymentIntentMetadata,
+    request: CreatePaymentIntentRequest,
   ): Promise<PaymentIntentResponse> {
-    if (currency) {
-      currency = currency.toLowerCase();
+    if (request.currency) {
+      request.currency = request.currency.toLowerCase();
     }
     const errorMsg = this.validateCreatePaymentIntentParams(
-      amount,
-      currency,
-      metadata,
+      request.amount,
+      request.currency,
+      request.metadata,
     );
     if (errorMsg !== '') {
       throw new Error(errorMsg);
@@ -146,14 +174,14 @@ export class PaymentsService {
     try {
       const paymentIntent: Stripe.PaymentIntent =
         await this.stripe.paymentIntents.create({
-          amount,
-          currency,
-          metadata,
+          amount: request.amount,
+          currency: request.currency,
+          metadata: request.metadata,
           payment_method_types: ['card', 'us_bank_accounts'],
         });
 
       this.logger.debug(
-        `createPaymentIntent (${amount}, ${currency}, ${metadata}) -> ${paymentIntent.id}`,
+        `createPaymentIntent (${request.amount}, ${request.currency}, ${request.metadata}) -> ${paymentIntent.id}`,
       );
 
       return this.mapPaymentIntentToResponse(paymentIntent);
