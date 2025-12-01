@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { DonationStatus } from '../donation.entity';
 
-export class CreatePaymentIntentDto {
+export class PaymentIntentResponseDto {
   @ApiProperty({
     description: 'The unique identifier for the PaymentIntent, equivalent to what Stripe API returns',
     example: 'pi_1J2aBcD3eF4GhIjKlmnoPqr',
