@@ -265,7 +265,27 @@ export const DonationForm: React.FC<DonationFormProps> = ({
       onSubmit={(e) => e.preventDefault()}
       noValidate
     >
-      <h2>Make a Donation</h2>
+      {currentStep == 1 && (
+        <div className="progress-bar-container">
+          <div className="progress-bar-purple"></div>
+          <div className="progress-bar-grey"></div>
+          <div className="progress-bar-grey"></div>
+        </div>
+      )}
+      {currentStep == 2 && (
+        <div className="progress-bar-container">
+          <div className="progress-bar-grey"></div>
+          <div className="progress-bar-purple"></div>
+          <div className="progress-bar-grey"></div>
+        </div>
+      )}
+      {currentStep == 3 && (
+        <div className="progress-bar-container">
+          <div className="progress-bar-grey"></div>
+          <div className="progress-bar-grey"></div>
+          <div className="progress-bar-purple"></div>
+        </div>
+      )}
 
       {submitError && (
         <div className="error-banner" role="alert" aria-live="assertive">
@@ -275,15 +295,15 @@ export const DonationForm: React.FC<DonationFormProps> = ({
 
       {renderStep()}
 
-      <div className="step-actions">
+      <div className="step-actions-container">
         {showBackButton && (
-          <button type="button" className="secondary" onClick={handleBack}>
+          <button type="button" className="step-actions" onClick={handleBack}>
             Back
           </button>
         )}
 
         {showNextButton && (
-          <button type="button" className="primary" onClick={handleNext}>
+          <button type="button" className="step-actions" onClick={handleNext}>
             Next
           </button>
         )}

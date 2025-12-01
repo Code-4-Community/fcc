@@ -3,6 +3,7 @@ import './donations.css';
 
 interface DonationSummaryData {
   baseAmount: number;
+  setCurrentAmount: React.Dispatch<React.SetStateAction<number>>;
   feeRate?: number;
   fixedFee?: number;
 }
@@ -12,11 +13,11 @@ export const DONATION_FIXED_FEE = 0.3;
 
 export const DonationSummary: React.FC<DonationSummaryData> = ({
   baseAmount,
+  setCurrentAmount,
   feeRate,
   fixedFee,
 }) => {
   const [feeApplied, setFeeApplied] = useState<boolean>(false);
-  const [amount, setAmount] = useState<number>(baseAmount);
 
   const rate = feeRate ?? DONATION_FEE_RATE;
   const fee = fixedFee ?? DONATION_FIXED_FEE;
@@ -24,19 +25,16 @@ export const DonationSummary: React.FC<DonationSummaryData> = ({
 
   return (
     <div className="donation-summary">
-      <div style={{ fontSize: '1rem' }}>
-        <b>Total:</b> ${amount.toFixed(2)}
-      </div>
       <div
         data-testid="fee-toggle"
         className="toggle-container"
         onClick={() => {
           if (feeApplied) {
-            setAmount(baseAmount);
+            setCurrentAmount(baseAmount);
           }
           // fee is applied
           else {
-            setAmount(baseAmount + feeTotal);
+            setCurrentAmount(baseAmount + feeTotal);
           }
           setFeeApplied(!feeApplied);
         }}

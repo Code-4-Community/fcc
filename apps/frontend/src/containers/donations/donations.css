@@ -6,6 +6,12 @@
   border-radius: 8px;
   background-color: #fff;
   font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  align-self: stretch;
+  gap: 6%;
 }
 
 .donation-form h2 {
@@ -18,20 +24,21 @@
   margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .form-group label {
   margin-bottom: 0.25rem;
-  font-weight: 600;
+  font-size: 14px;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
   padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
+  border: 1px solid #000000;
+  border-radius: 10px;
+  font-size: 12px;
 }
 
 .form-group input.error,
@@ -151,9 +158,124 @@
   flex-direction: column;
   flex-wrap: wrap;
   text-align: center;
-  border: 1px solid #ddd;
+  border: 1px solid #000000;
   border-radius: 8px;
   padding: 0.75rem;
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+
+.step-actions-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4%;
+}
+
+.step-actions {
+  border-color: transparent;
+  display: flex;
+  width: 91%;
+  aspect-ratio: 32 / 3;
+  padding: 1% 7%;
+  justify-content: center;
+  align-items: center;
+  align-self: stretch;
+  background: #127a64;
+  color: #fff;
+  text-align: center;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  border-radius: 8px;
+}
+
+.progress-bar-container {
+  height: 8%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 2%;
+  margin-bottom: 6%;
+}
+
+.progress-bar-grey {
+  width: 31%;
+  aspect-ratio: 14 / 1;
+  border-radius: 10px;
+  background: #b3b3b3;
+}
+
+.progress-bar-purple {
+  width: 31%;
+  aspect-ratio: 14 / 1;
+  border-radius: 10px;
+  background: #650d77;
+}
+
+.step2-container {
+  font-size: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  align-self: stretch;
+}
+
+.step2-total-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 6%;
+}
+
+.step2-total {
+  color: #6b6b6b;
+  font-style: normal;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.step2-total-amount {
+  color: #000;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.payment-details-label {
+  align-self: stretch;
+  color: #000;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  font-size: 1.25em;
+  margin-bottom: 6%;
+}
+
+.name-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
+  gap: 8%;
+  color: #000;
+  font-size: 16px;
+  font-style: normal;
+  line-height: normal;
+}
+
+.card-info-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 10px;
+  border: 1px solid #000;
+  color: #b3b3b3;
+  font-family: 'Helvetica LT Std';
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }
