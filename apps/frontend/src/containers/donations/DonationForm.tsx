@@ -30,6 +30,8 @@ export const DonationForm: React.FC<DonationFormProps> = ({
     dedicationMessage: '',
     showDedicationPublicly: false,
     recurringInterval: 'monthly',
+    isDedicated: false,
+    dedicationKind: null,
     cardNumber: '',
     cardExpiry: '',
     cardCvc: '',

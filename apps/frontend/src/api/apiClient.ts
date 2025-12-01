@@ -12,7 +12,7 @@ export type DonationCreateRequest = {
   donationType: 'one_time' | 'recurring';
   dedicationMessage: string; // allow '' from ui
   showDedicationPublicly: boolean;
-  recurringInterval?: 'weekly' | 'bimonthly' | 'monthly' | 'quarterly';
+  recurringInterval?: 'weekly' | 'monthly' | 'yearly';
 };
 
 export type CreateDonationResponse = { id: string };
