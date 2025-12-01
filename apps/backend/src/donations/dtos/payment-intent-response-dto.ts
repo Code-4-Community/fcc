@@ -13,7 +13,8 @@ import { DonationStatus } from '../donation.entity';
 
 export class PaymentIntentResponseDto {
   @ApiProperty({
-    description: 'The unique identifier for the PaymentIntent, equivalent to what Stripe API returns',
+    description:
+      'The unique identifier for the PaymentIntent, equivalent to what Stripe API returns',
     example: 'pi_1J2aBcD3eF4GhIjKlmnoPqr',
   })
   @IsString()
@@ -21,7 +22,8 @@ export class PaymentIntentResponseDto {
   id: string;
 
   @ApiProperty({
-    description: 'The client secret used for client-side confirmation, equivalent to what Stripe API returns',
+    description:
+      'The client secret used for client-side confirmation, equivalent to what Stripe API returns',
     example: 'pi_1J2aBcD3eF4GhIjKlmnoPqr_secret_AbCdEfGhIjKlMnOp',
   })
   @IsString()
@@ -29,7 +31,8 @@ export class PaymentIntentResponseDto {
   clientSecret: string;
 
   @ApiProperty({
-    description: 'The payment amount in smallest currency unit (e.g., cents), equivalent to what Stripe API returns',
+    description:
+      'The payment amount in smallest currency unit (e.g., cents), equivalent to what Stripe API returns',
     example: 1099,
   })
   @IsNumber()
@@ -37,7 +40,8 @@ export class PaymentIntentResponseDto {
   amount: number;
 
   @ApiProperty({
-    description: 'The three-letter ISO currency code, equivalent to what Stripe API returns',
+    description:
+      'The three-letter ISO currency code, equivalent to what Stripe API returns',
     example: 'usd',
   })
   @IsString()
@@ -45,21 +49,24 @@ export class PaymentIntentResponseDto {
   currency: string;
 
   @ApiProperty({
-    description: 'An enum value from DonationStatus mapped from Stripe\'s status to these four statuses',
+    description:
+      "An enum value from DonationStatus mapped from Stripe's status to these four statuses",
     example: DonationStatus.PENDING,
   })
   @IsEnum(DonationStatus)
   status: DonationStatus;
 
   @ApiProperty({
-    description: 'Optional key-value pairs attached to the payment, equivalent to what Stripe API returns',
+    description:
+      'Optional key-value pairs attached to the payment, equivalent to what Stripe API returns',
     example: { orderId: '123' },
   })
   @IsOptional()
   metadata?: Record<string, unknown>;
 
   @ApiProperty({
-    description: 'The ID of the payment method used, mapped from paymentIntent.payment_method cast as a string',
+    description:
+      'The ID of the payment method used, mapped from paymentIntent.payment_method cast as a string',
     example: 'pm_1F4aBcD3eF4GhIjKlmnoPq',
   })
   @IsString()
@@ -67,14 +74,16 @@ export class PaymentIntentResponseDto {
   paymentMethodId?: string;
 
   @ApiProperty({
-    description: 'Array of payment method types enabled for this PaymentIntent, equivalent to what Stripe API returns',
+    description:
+      'Array of payment method types enabled for this PaymentIntent, equivalent to what Stripe API returns',
     example: ['card'],
   })
   @IsArray()
   paymentMethodTypes: string[];
 
   @ApiProperty({
-    description: 'Unix timestamp representing when the PaymentIntent was created, equivalent to what Stripe API returns',
+    description:
+      'Unix timestamp representing when the PaymentIntent was created, equivalent to what Stripe API returns',
     example: 1762000000,
   })
   @IsNumber()
@@ -82,14 +91,16 @@ export class PaymentIntentResponseDto {
   created: number;
 
   @ApiProperty({
-    description: "Boolean indicating if the payment requires customer action, determined by checking if paymentIntent.status === 'requires_action'",
+    description:
+      "Boolean indicating if the payment requires customer action, determined by checking if paymentIntent.status === 'requires_action'",
     example: false,
   })
   @IsBoolean()
   requiresAction: boolean;
 
   @ApiProperty({
-    description: 'Details about the required next action (if any), equivalent to what Stripe API returns',
+    description:
+      'Details about the required next action (if any), equivalent to what Stripe API returns',
     example: {
       type: 'redirect_to_url',
       redirect_to_url: {
@@ -102,8 +113,13 @@ export class PaymentIntentResponseDto {
   nextAction?: any;
 
   @ApiProperty({
-    description: "Object containing error details if the payment failed. Contains properties 'code', 'message', and 'type' mapped from Stripe's paymentIntent.last_payment_error",
-    example: { code: 'card_declined', message: 'Your card was declined.', type: 'card_error' },
+    description:
+      "Object containing error details if the payment failed. Contains properties 'code', 'message', and 'type' mapped from Stripe's paymentIntent.last_payment_error",
+    example: {
+      code: 'card_declined',
+      message: 'Your card was declined.',
+      type: 'card_error',
+    },
   })
   @IsOptional()
   lastPaymentError?: {
@@ -113,7 +129,8 @@ export class PaymentIntentResponseDto {
   };
 
   @ApiProperty({
-    description: 'Unix timestamp representing when the PaymentIntent was canceled (if applicable), equivalent to what Stripe API returns',
+    description:
+      'Unix timestamp representing when the PaymentIntent was canceled (if applicable), equivalent to what Stripe API returns',
     example: 1762000000,
   })
   @IsOptional()
