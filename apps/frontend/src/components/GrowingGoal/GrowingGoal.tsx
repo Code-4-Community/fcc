@@ -5,6 +5,7 @@ import Plant from './Plant';
 export type SampleDonation = {
   name: string;
   amount: number;
+  profile?: string; //base64 string
 };
 
 export type GrowingGoalProps = {
@@ -122,16 +123,27 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
         </div>
       </div>
       <div className={styles['total-donation-label']}>
-        ${total.toFixed(0)} <span style={{ fontSize: '4cqw' }}>raised of</span>{' '}
-        ${goal.toFixed(0)}
+        <span style={{ fontWeight: '700' }}>${total.toFixed(0)}</span>{' '}
+        <span style={{ fontSize: '4cqw' }}>raised of</span> ${goal.toFixed(0)}
       </div>
       <div className={styles['sample-donor-container']}>
         {props.sampleDonation && (
           <div className={styles['sample-donor-label']}>
+            {props.sampleDonation.profile ? (
+              <div
+                style={{
+                  backgroundImage: `url("${props.sampleDonation.profile}")`,
+                  backgroundSize: 'cover',
+                }}
+                className={styles['sample-donor-profile']}
+              ></div>
+            ) : (
+              <div className={styles['sample-donor-profile']}></div>
+            )}
             <div className={styles['sample-donor-amount']}>
               <b>
-                {props.sampleDonation.name.length > 10
-                  ? props.sampleDonation.name.slice(0, 10) + '...'
+                {props.sampleDonation.name.length > 8
+                  ? props.sampleDonation.name.slice(0,8) + '...'
                   : props.sampleDonation.name}
               </b>
               {' donated $'}

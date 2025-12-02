@@ -26,7 +26,7 @@
   white-space: nowrap;
   height: 12%;
   padding: 2%;
-  background-color: #127a64;
+  background-color: #3d3e6e;
   font-size: 5cqw;
 }
 
@@ -40,7 +40,7 @@
 
 .growth-container-solid-grey {
   position: relative;
-  width: 73%;
+  width: 70%;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   display: flex;
@@ -53,27 +53,41 @@
   color: #000;
   text-align: center;
   font-family: Helvetica;
-  font-size: 5cqw;
+  font-size: 6cqw;
   font-weight: 400;
 }
 
 .sample-donor-container {
+  width: 100%;
+  aspect-ratio: 5 / 1;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: center;
+}
+
+.sample-donor-profile {
+  display: flex;
+  width: 12%;
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  justify-content: center;
+  align-items: center;
+  background: #d9d9d9;
 }
 
 .sample-donor-label {
-  width: 65%;
-  aspect-ratio: 9 / 2;
+  width: 70%;
   overflow: hidden;
   border-radius: 4px;
   padding: 2%;
-  background: #127a64;
+  background: #3d3e6e;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: start;
+  gap: 6%;
+  padding: 4%;
 }
 
 .sample-donor-amount {
