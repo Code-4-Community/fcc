@@ -9,7 +9,7 @@ import {
   IsArray,
   IsBoolean,
 } from 'class-validator';
-import { DonationStatus } from '../donation.entity';
+import { DonationStatus } from '../../donations/donation.entity';
 
 export class PaymentIntentResponseDto {
   @ApiProperty({

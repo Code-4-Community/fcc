@@ -6,7 +6,7 @@ import {
   Min,
   IsNotEmpty,
 } from 'class-validator';
-import { PaymentIntentMetadata } from '../../payments/payments.service';
+import { PaymentIntentMetadata } from '../payments.service';
 
 export class CreatePaymentIntentDto {
   @ApiProperty({
