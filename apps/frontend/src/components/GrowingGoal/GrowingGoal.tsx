@@ -23,7 +23,7 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
     top: 0,
     left: 0,
   });
-  const progress = Math.floor((total / goal) * 360);
+  const progress = Math.min(360, Math.floor((total / goal) * 360));
 
   // calculate gradient color of growth container handles
   const getGradientColor = (degree: number): string => {
@@ -99,6 +99,7 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
       <div className={styles['description-label']}>{message}</div>
       <div className={styles['growth-container']}>
         <div
+          style={{ width: props.sampleDonation ? '70%' : '80%', marginBottom: props.sampleDonation ? '0%' : '5%' }}
           ref={growthContainerRef}
           className={styles['growth-container-solid-grey']}
         >
@@ -122,9 +123,15 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
           ></div>
         </div>
       </div>
-      <div className={styles['total-donation-label']}>
+      <div
+        style={{ fontSize: props.sampleDonation ? '6cqw' : '7cqw' }}
+        className={styles['total-donation-label']}
+      >
         <span style={{ fontWeight: '700' }}>${total.toFixed(0)}</span>{' '}
-        <span style={{ fontSize: '4cqw' }}>raised of</span> ${goal.toFixed(0)}
+        <span style={{ fontSize: props.sampleDonation ? '4cqw' : '5cqw' }}>
+          raised of
+        </span>{' '}
+        ${goal.toFixed(0)}
       </div>
       <div className={styles['sample-donor-container']}>
         {props.sampleDonation && (
@@ -143,10 +150,10 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
             <div className={styles['sample-donor-amount']}>
               <b>
                 {props.sampleDonation.name.length > 8
-                  ? props.sampleDonation.name.slice(0,8) + '...'
+                  ? props.sampleDonation.name.slice(0, 8) + '...'
                   : props.sampleDonation.name}
               </b>
-              {' donated $'}
+              {' has donated $'}
               <b>{props.sampleDonation.amount.toFixed(2)}</b>!
             </div>
           </div>

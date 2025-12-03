@@ -19,9 +19,8 @@ const Root: React.FC = () => {
       <div style={{ width: '40%' }}>
         <GrowingGoal
           message={'Donate to FCC!'}
-          total={3000}
+          total={14000}
           goal={10000}
-          sampleDonation={{ name: 'C4C', amount: 500}}
         />
       </div>
     </div>

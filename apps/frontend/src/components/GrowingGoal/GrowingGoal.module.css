@@ -81,13 +81,38 @@
   width: 70%;
   overflow: hidden;
   border-radius: 4px;
-  padding: 2%;
   background: #3d3e6e;
   display: flex;
   align-items: center;
   justify-content: start;
   gap: 6%;
   padding: 4%;
+}
+
+.shine-container {
+  position: absolute;
+  top: 5%;
+  left: 64%;
+  width: 40%;
+  height: auto;
+}
+
+.sprout-container {
+  position: absolute;
+  top: 25%;
+  left: 30%;
+  width: 40%;
+  height: auto;
+}
+
+.soil-container {
+  position: absolute;
+  height: 28%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  bottom: 0%;
 }
 
 .sample-donor-amount {

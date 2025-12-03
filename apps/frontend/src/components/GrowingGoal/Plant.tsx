@@ -6,17 +6,7 @@ const Plant: React.FC = () => {
     <div className={styles['growth-container-solid-white']}>
       <div className={styles['growth-container-solid-grey-inner']}>
         <div className={styles['growth-container-solid-teal']}>
-          <div
-            style={{
-              position: 'absolute',
-              height: '28%',
-              width: '100%',
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'flex-end',
-              bottom: '0%',
-            }}
-          >
+          <div className={styles['soil-container']}>
             <div className={styles['soil-base']}></div>
           </div>
           <div className={styles['soil-top']}></div>
@@ -30,15 +20,7 @@ const Plant: React.FC = () => {
 
 const Shine: React.FC = () => {
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: '5%',
-        left: '64%',
-        width: '40%',
-        height: 'auto',
-      }}
-    >
+    <div className={styles['shine-container']}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 107 129"
@@ -77,15 +59,7 @@ const Shine: React.FC = () => {
 
 const Sprout: React.FC = () => {
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: '25%',
-        left: '30%',
-        width: '40%',
-        height: 'auto',
-      }}
-    >
+    <div className={styles['sprout-container']}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 107 129"
