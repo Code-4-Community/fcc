@@ -10,6 +10,7 @@ import {
   IsBoolean,
 } from 'class-validator';
 import { DonationStatus } from '../../donations/donation.entity';
+import Stripe from 'stripe';
 
 export class PaymentIntentResponseDto {
   @ApiProperty({
@@ -110,7 +111,7 @@ export class PaymentIntentResponseDto {
     },
   })
   @IsOptional()
-  nextAction?: any;
+  nextAction?: Stripe.PaymentIntent.NextAction;
 
   @ApiProperty({
     description:

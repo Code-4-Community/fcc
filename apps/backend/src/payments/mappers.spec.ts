@@ -1,4 +1,3 @@
-import { validate } from 'class-validator';
 import { CreatePaymentIntentDto } from './dtos/create-payment-intent-dto';
 import { CreatePaymentIntentRequest, PaymentMappers } from './mappers';
 import { DonationStatus } from '../donations/donation.entity';

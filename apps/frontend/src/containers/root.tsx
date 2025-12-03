@@ -3,16 +3,14 @@ import { DonationForm } from './donations/DonationForm';
 
 const Root: React.FC = () => {
   return (
-    <>
-      <DonationForm
-        onSuccess={function (donationId: string): void {
-          throw new Error('Function not implemented.');
-        }}
-        onError={function (error: Error): void {
-          throw new Error('Function not implemented.');
-        }}
-      />
-    </>
+    <DonationForm
+      onSuccess={function (donationId: string): void {
+        throw new Error('Function not implemented.');
+      }}
+      onError={function (error: Error): void {
+        throw new Error('Function not implemented.');
+      }}
+    />
   );
 };
 

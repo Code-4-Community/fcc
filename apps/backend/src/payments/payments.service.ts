@@ -42,7 +42,7 @@ export type PaymentIntentResponse = {
   paymentMethodTypes: string[];
   created: number;
   requiresAction: boolean;
-  nextAction?: unknown;
+  nextAction?: Stripe.PaymentIntent.NextAction;
   lastPaymentError?: {
     code: string;
     message: string;
