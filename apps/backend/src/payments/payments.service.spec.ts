@@ -122,6 +122,41 @@ const paymentIntentMock2 = {
   transfer_group: null,
 };
 
+const paymentIntentCanceledMock = {
+  ...paymentIntentMock2,
+  status: 'canceled',
+};
+
+const paymentIntentFailedMock = {
+  ...paymentIntentMock2,
+  status: 'requires_payment_method',
+};
+
+const paymentIntentProcessingMock = {
+  ...paymentIntentMock2,
+  status: 'processing',
+};
+
+const paymentIntentRequiresConfirmationMock = {
+  ...paymentIntentMock2,
+  status: 'requires_confirmation',
+};
+
+const paymentIntentRequiresActionMock = {
+  ...paymentIntentMock2,
+  status: 'requires_action',
+};
+
+const paymentIntentRequiresCaptureMock = {
+  ...paymentIntentMock2,
+  status: 'requires_capture',
+};
+
+const paymentIntentOtherStatusMock = {
+  ...paymentIntentMock2,
+  status: 'unknown',
+};
+
 const subscriptionMock1 = {
   id: 'sub_1234567890abcdef',
   object: 'subscription',
@@ -546,6 +581,87 @@ describe('PaymentsService', () => {
       await expect(
         svc.retrievePaymentIntent(paymentIntentId),
       ).rejects.toMatchObject(noSuchPaymentIntent);
+    });
+
+    describe('stripe to DonationStatus values map correctly', () => {
+      it("maps stripe status 'succeeded' to DonationStatus.SUCCEEDED", async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentMock2,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.SUCCEEDED); // Specific check for status mapping
+      });
+
+      it("maps stripe status 'canceled' to DonationStatus.CANCELLED", async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentCanceledMock,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.CANCELLED); // Specific check for status mapping
+      });
+      it("maps stripe status 'requires_payment_method' to DonationStatus.FAILED", async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentFailedMock,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.FAILED); // Specific check for status mapping
+      });
+
+      it("maps stripe status 'processing' to DonationStatus.PENDING", async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentProcessingMock,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.PENDING); // Specific check for status mapping
+      });
+
+      it("maps stripe status 'requires_confirmation' to DonationStatus.PENDING", async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentRequiresConfirmationMock,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.PENDING); // Specific check for status mapping
+      });
+
+      it("maps stripe status 'requires_action' to DonationStatus.PENDING", async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentRequiresActionMock,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.PENDING); // Specific check for status mapping
+      });
+
+      it("maps stripe status 'requires_capture' to DonationStatus.PENDING", async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentRequiresCaptureMock,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.PENDING); // Specific check for status mapping
+      });
+
+      it('maps any other stripe status to DonationStatus.PENDING', async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentOtherStatusMock,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.PENDING); // Specific check for status mapping
+      });
     });
   });
 });
