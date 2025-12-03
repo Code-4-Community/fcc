@@ -8,8 +8,8 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
-import { PaymentIntentResponseDto } from '../donations/dtos/payment-intent-response-dto';
-import { CreatePaymentIntentDto } from '../donations/dtos/create-payment-intent-dto';
+import { PaymentIntentResponseDto } from './dtos/payment-intent-response-dto';
+import { CreatePaymentIntentDto } from './dtos/create-payment-intent-dto';
 import { PaymentMappers } from './mappers';
 
 @ApiTags('Payments')

@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
-import { PaymentIntentResponseDto } from '../donations/dtos/payment-intent-response-dto';
+import { PaymentIntentResponseDto } from './dtos/payment-intent-response-dto';
 import { PaymentIntentResponse } from './payments.service';
-import { CreatePaymentIntentDto } from '../donations/dtos/create-payment-intent-dto';
+import { CreatePaymentIntentDto } from './dtos/create-payment-intent-dto';
 
 export interface CreatePaymentIntentRequest {
   amount: number;
