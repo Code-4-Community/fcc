@@ -16,7 +16,10 @@ export class PaymentMappers {
     return {
       amount: dto.amount,
       currency: dto.currency,
-      metadata: PaymentMappers.normalizeMetadata(dto.metadata),
+      metadata:
+        dto.metadata == undefined
+          ? undefined
+          : PaymentMappers.normalizeMetadata(dto.metadata),
     };
   }
 

@@ -4,12 +4,18 @@ import { DonationStatus } from '../donations/donation.entity';
 import { PaymentIntentResponseDto } from './dtos/payment-intent-response-dto';
 import { PaymentIntentResponse } from './payments.service';
 describe('PaymentMappers', () => {
-  const mockCreateDto: CreatePaymentIntentDto = {
+  const mockCreateDtoAllOptionalParams: CreatePaymentIntentDto = {
     amount: 1099,
     currency: 'usd',
     metadata: { orderId: '123' },
   };
-  const mockPaymentIntentResponse: PaymentIntentResponse = {
+
+  const mockCreateDtoNoOptionalParams: CreatePaymentIntentDto = {
+    amount: 1099,
+    currency: 'usd',
+  };
+
+  const mockPaymentIntentResponseAllOptionalParams: PaymentIntentResponse = {
     id: 'pi_1J2aBcD3eF4GhIjKlmnoPqr',
     clientSecret: 'pi_1J2aBcD3eF4GhIjKlmnoPqr_secret_AbCdEfGhIjKlMnOp',
     amount: 1099,
@@ -34,9 +40,22 @@ describe('PaymentMappers', () => {
     },
     canceledAt: 1762000001,
   };
+
+  const mockPaymentIntentResponseNoOptionalParams: PaymentIntentResponse = {
+    id: 'pi_1J2aBcD3eF4GhIjKlmnoPqr',
+    clientSecret: 'pi_1J2aBcD3eF4GhIjKlmnoPqr_secret_AbCdEfGhIjKlMnOp',
+    amount: 1099,
+    currency: 'usd',
+    status: DonationStatus.SUCCEEDED,
+    paymentMethodTypes: ['card'],
+    created: 1762000000,
+    requiresAction: false,
+  };
   describe('toCreatePaymentIntentRequest', () => {
-    it('should map CreatePaymentIntentDto to CreatePaymentIntentRequest correctly', () => {
-      const result = PaymentMappers.toCreatePaymentIntentRequest(mockCreateDto);
+    it('should map CreatePaymentIntentDto to CreatePaymentIntentRequest correctly with all optional params', () => {
+      const result = PaymentMappers.toCreatePaymentIntentRequest(
+        mockCreateDtoAllOptionalParams,
+      );
       const expected: CreatePaymentIntentRequest = {
         amount: 1099,
         currency: 'usd',
@@ -44,12 +63,24 @@ describe('PaymentMappers', () => {
       };
       expect(result).toEqual(expected);
     });
+
+    it('should map CreatePaymentIntentDto to CreatePaymentIntentRequest correctly with no optional params', () => {
+      const result = PaymentMappers.toCreatePaymentIntentRequest(
+        mockCreateDtoNoOptionalParams,
+      );
+      const expected: CreatePaymentIntentRequest = {
+        amount: 1099,
+        currency: 'usd',
+        metadata: undefined,
+      };
+      expect(result).toEqual(expected);
+    });
   });
 
   describe('toPaymentIntentResponseDto', () => {
-    it('should map PaymentIntentResponse to PaymentIntentResponseDto correctly', () => {
+    it('should map PaymentIntentResponse to PaymentIntentResponseDto correctly with all optional params', () => {
       const result = PaymentMappers.toPaymentIntentResponseDto(
-        mockPaymentIntentResponse,
+        mockPaymentIntentResponseAllOptionalParams,
       );
       const expected: PaymentIntentResponseDto = {
         id: 'pi_1J2aBcD3eF4GhIjKlmnoPqr',
@@ -78,5 +109,27 @@ describe('PaymentMappers', () => {
       };
       expect(result).toEqual(expected);
     });
+  });
+
+  it('should map PaymentIntentResponse to PaymentIntentResponseDto correctly with no optional params', () => {
+    const result = PaymentMappers.toPaymentIntentResponseDto(
+      mockPaymentIntentResponseNoOptionalParams,
+    );
+    const expected: PaymentIntentResponseDto = {
+      id: 'pi_1J2aBcD3eF4GhIjKlmnoPqr',
+      clientSecret: 'pi_1J2aBcD3eF4GhIjKlmnoPqr_secret_AbCdEfGhIjKlMnOp',
+      amount: 1099,
+      currency: 'usd',
+      status: DonationStatus.SUCCEEDED,
+      metadata: undefined,
+      paymentMethodId: undefined,
+      paymentMethodTypes: ['card'],
+      created: 1762000000,
+      requiresAction: false,
+      nextAction: undefined,
+      lastPaymentError: undefined,
+      canceledAt: undefined,
+    };
+    expect(result).toEqual(expected);
   });
 });
