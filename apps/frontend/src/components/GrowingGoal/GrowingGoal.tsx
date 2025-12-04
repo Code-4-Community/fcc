@@ -143,7 +143,7 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
             <div className={styles['sample-donor-amount']}>
               <b>
                 {props.sampleDonation.name.length > 8
-                  ? props.sampleDonation.name.slice(0,8) + '...'
+                  ? props.sampleDonation.name.slice(0, 8) + '...'
                   : props.sampleDonation.name}
               </b>
               {' donated $'}

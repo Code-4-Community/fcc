@@ -8,22 +8,14 @@ const Root: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'row', gap: '4%' }}>
-      <div style={{ width: '40%' }}>
-        <GrowingGoal
-          message={'Donate to FCC!'}
-          total={3000}
-          goal={10000}
-          sampleDonation={{ name: 'C4C', amount: 500, profile: base64Profile }}
-        />
-      </div>
-      <div style={{ width: '40%' }}>
-        <GrowingGoal
-          message={'Donate to FCC!'}
-          total={3000}
-          goal={10000}
-          sampleDonation={{ name: 'C4C', amount: 500}}
-        />
-      </div>
+      <DonationForm
+        onSuccess={function (donationId: string): void {
+          throw new Error('Function not implemented.');
+        }}
+        onError={function (error: Error): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
     </div>
   );
 };

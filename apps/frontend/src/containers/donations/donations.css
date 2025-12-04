@@ -165,6 +165,95 @@
   margin-bottom: 1rem;
 }
 
+.recurrence-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.recurrence-option {
+  padding: 0.4rem 0.8rem;
+  border-radius: 9999px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.recurrence-option.selected {
+  border-color: #2a7a73;
+  background-color: #e0f2f1;
+  font-weight: 600;
+}
+
+.recurrence-option:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.amount-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.amount-button {
+  flex: 1 1 20%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.amount-button.selected {
+  border-color: #2a7a73;
+  background-color: #e0f2f1;
+  font-weight: 600;
+}
+
+.amount-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.amount-custom-row {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.amount-custom-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.amount-custom-input {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.amount-custom-input input {
+  flex: 1;
+}
+
+.amount-currency-prefix,
+.amount-currency-suffix {
+  font-size: 0.85rem;
+  color: #555;
+}
+
 .step-actions-container {
   display: flex;
   align-items: center;

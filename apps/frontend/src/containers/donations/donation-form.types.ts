@@ -1,8 +1,6 @@
-export type RecurringInterval =
-  | 'weekly'
-  | 'bimonthly'
-  | 'monthly'
-  | 'quarterly';
+export type RecurringInterval = 'weekly' | 'monthly' | 'yearly';
+
+export type DedicationKind = 'honor' | 'memory';
 
 export type DonationStep = 1 | 2 | 3 | 4;
 
@@ -13,6 +11,8 @@ export interface DonationFormData {
   amount: string;
   donationType: 'one_time' | 'recurring';
   recurringInterval: RecurringInterval;
+  isDedicated?: boolean;
+  dedicationKind?: DedicationKind | null;
   isAnonymous: boolean;
   dedicationMessage: string;
   showDedicationPublicly: boolean;
