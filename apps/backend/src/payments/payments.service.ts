@@ -317,6 +317,18 @@ export class PaymentsService {
     }
   }
 
+  constructWebhookEvent(
+    payload: Buffer | string,
+    signature: string,
+    webhookSecret: string,
+  ): Stripe.Event {
+    return this.stripe.webhooks.constructEvent(
+      payload,
+      signature,
+      webhookSecret,
+    );
+  }
+
   /**
    * Maps a Stripe PaymentIntent status to one of the four DonationStatus enum values
    *
@@ -353,7 +365,7 @@ export class PaymentsService {
    * @param paymentIntent the payment intent object returned directly by the stripe api
    * @returns A PaymentIntentResponse object that is closer to data used in backend
    */
-  private mapPaymentIntentToResponse(
+  public mapPaymentIntentToResponse(
     paymentIntent: Stripe.PaymentIntent,
   ): PaymentIntentResponse {
     return {

@@ -2,9 +2,12 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { PaymentsService } from './payments.service';
+import { PaymentsController } from './payments.controller';
+import { DonationsModule } from '../donations/donations.module';
 
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, DonationsModule],
+  controllers: [PaymentsController],
   providers: [
     {
       provide: 'STRIPE_CLIENT',
