@@ -5,7 +5,6 @@
   background-color: #fff;
   font-family: sans-serif;
   container-type: size;
-  border: 1px solid #ccc;
 }
 
 .donation-form h2 {
@@ -366,12 +365,12 @@
 }
 
 .step2-total-label {
-  font-size: 3 cqh;
+  font-size: clamp(3cqh, 3cqh, 20px);
   color: #6b6b6b;
 }
 
 .step2-total-amount-label {
-  font-size: 4cqh;
+  font-size: clamp(4cqh, 4cqh, 32px);
   font-weight: 700;
 }
 
