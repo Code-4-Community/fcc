@@ -61,8 +61,10 @@ describe('DonationSummary Component', () => {
     // initial rendering does not include fee in total donation calculation
     render(<DonationSummary baseAmount={baseAmount} />);
     expect(
-      screen.queryByText(new RegExp(`\\$${baseAmount.toFixed(2)}`)),
-    ).not.toBeNull();
+      screen
+        .getByTestId('donation-total')
+        .textContent?.includes(baseAmount.toFixed(2)),
+    ).toBeTruthy();
   });
 
   // donation total calculation includes fee when toggle activated
@@ -78,16 +80,18 @@ describe('DonationSummary Component', () => {
 
     // donation total calculation should include fee
     expect(
-      screen.queryByText(
-        new RegExp(`\\$${(baseAmount + feeTotal).toFixed(2)}`),
-      ),
-    ).not.toBeNull();
+      screen
+        .getByTestId('donation-total')
+        .textContent?.includes((baseAmount + feeTotal).toFixed(2)),
+    ).toBeTruthy();
 
     fireEvent.click(feeToggle[0]);
 
     // donation total calculation should not include fee
     expect(
-      screen.queryByText(new RegExp(`\\$${baseAmount.toFixed(2)}`)),
-    ).not.toBeNull();
+      screen
+        .getByTestId('donation-total')
+        .textContent?.includes(baseAmount.toFixed(2)),
+    ).toBeTruthy();
   });
 });

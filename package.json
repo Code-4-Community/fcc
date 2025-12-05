@@ -59,8 +59,8 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "sqlite3": "^5.1.7",
-    "supertest": "^7.1.4",
     "stripe": "^19.1.0",
+    "supertest": "^7.1.4",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typeorm": "^0.3.17"
@@ -76,6 +76,7 @@
     "@nx/webpack": "22.0.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "16.1.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/jest": "30.0.0",
     "@types/node": "^20.19.0",
     "@types/react": "^18.2.14",
