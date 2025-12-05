@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { DonationResponseDto } from './dtos/donation-response-dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -10,8 +10,16 @@ import {
 import { Repository } from 'typeorm';
 import { CreateDonationRequest, Donation as DomainDonation } from './mappers';
 
+interface PaymentIntentSyncPayload {
+  donationId?: number;
+  transactionId?: string;
+  status: DonationStatus;
+}
+
 @Injectable()
 export class DonationsService {
+  private readonly logger = new Logger(DonationsService.name);
+
   constructor(
     @InjectRepository(Donation)
     private donationRepository: Repository<Donation>,
@@ -65,6 +73,7 @@ export class DonationsService {
         createDonationRequest.recurringInterval as RecurringInterval | null,
       dedicationMessage: createDonationRequest.dedicationMessage || null,
       showDedicationPublicly: createDonationRequest.showDedicationPublicly,
+      transactionId: createDonationRequest.paymentIntentId || null,
     });
 
     // Reload from database so any DB-side defaults are reflected
@@ -209,5 +218,44 @@ export class DonationsService {
         : 0;
 
     return { total, count };
+  }
+
+  async syncPaymentIntentStatus(
+    payload: PaymentIntentSyncPayload,
+  ): Promise<void> {
+    const { donationId, transactionId, status } = payload;
+
+    if (!donationId && !transactionId) {
+      this.logger.warn('Unable to sync donation without identifiers');
+      return;
+    }
+
+    let donation: Donation | null = null;
+
+    if (donationId !== undefined) {
+      donation = await this.donationRepository.findOne({
+        where: { id: donationId },
+      });
+    }
+
+    if (!donation && transactionId) {
+      donation = await this.donationRepository.findOne({
+        where: { transactionId },
+      });
+    }
+
+    if (!donation) {
+      this.logger.warn(
+        `No donation found to sync for payment intent ${transactionId ?? 'unknown'}`,
+      );
+      return;
+    }
+
+    donation.status = status;
+    if (transactionId) {
+      donation.transactionId = transactionId;
+    }
+
+    await this.donationRepository.save(donation);
   }
 }

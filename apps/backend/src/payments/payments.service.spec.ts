@@ -1,6 +1,7 @@
 import { PaymentsService } from './payments.service';
 import { DonationStatus } from '../donations/donation.entity';
 import Stripe from 'stripe';
+import { CreatePaymentIntentRequest } from './mappers';
 
 const stripeMock = {
   paymentIntents: {
@@ -121,6 +122,41 @@ const paymentIntentMock2 = {
   transfer_group: null,
 };
 
+const paymentIntentCanceledMock = {
+  ...paymentIntentMock2,
+  status: 'canceled',
+};
+
+const paymentIntentFailedMock = {
+  ...paymentIntentMock2,
+  status: 'requires_payment_method',
+};
+
+const paymentIntentProcessingMock = {
+  ...paymentIntentMock2,
+  status: 'processing',
+};
+
+const paymentIntentRequiresConfirmationMock = {
+  ...paymentIntentMock2,
+  status: 'requires_confirmation',
+};
+
+const paymentIntentRequiresActionMock = {
+  ...paymentIntentMock2,
+  status: 'requires_action',
+};
+
+const paymentIntentRequiresCaptureMock = {
+  ...paymentIntentMock2,
+  status: 'requires_capture',
+};
+
+const paymentIntentOtherStatusMock = {
+  ...paymentIntentMock2,
+  status: 'unknown',
+};
+
 const subscriptionMock1 = {
   id: 'sub_1234567890abcdef',
   object: 'subscription',
@@ -227,15 +263,21 @@ describe('PaymentsService', () => {
 
   describe('createPaymentIntent', () => {
     it('throws for invalid (negative) amount', async () => {
-      await expect(svc.createPaymentIntent(-1, 'usd')).rejects.toThrow(
-        'Invalid amount: must be a number >= 0',
-      );
+      await expect(
+        svc.createPaymentIntent({
+          amount: -1,
+          currency: 'usd',
+        } as CreatePaymentIntentRequest),
+      ).rejects.toThrow('Invalid amount: must be a number >= 0');
     });
 
     it('throws for invalid amount (negative value) where currency is not usd', async () => {
-      await expect(svc.createPaymentIntent(-1, 'eur')).rejects.toThrow(
-        'Invalid amount: must be a number >= 0',
-      );
+      await expect(
+        svc.createPaymentIntent({
+          amount: -1,
+          currency: 'eur',
+        } as CreatePaymentIntentRequest),
+      ).rejects.toThrow('Invalid amount: must be a number >= 0');
     });
 
     it('returns a well-formed payment intent for valid input (amount=0) where currency is not usd', async () => {
@@ -281,7 +323,11 @@ describe('PaymentsService', () => {
         transfer_group: null,
       });
 
-      const pi = await svc.createPaymentIntent(0, 'eur', { orderId: '123' });
+      const pi = await svc.createPaymentIntent({
+        amount: 0,
+        currency: 'eur',
+        metadata: { orderId: '123' },
+      } as CreatePaymentIntentRequest);
 
       expect(pi).toHaveProperty('id');
       expect(pi).toHaveProperty('clientSecret');
@@ -292,19 +338,33 @@ describe('PaymentsService', () => {
     });
 
     it('throws for invalid (currency that has decimals) amount', async () => {
-      await expect(svc.createPaymentIntent(50.01, 'usd')).rejects.toThrow(
+      await expect(
+        svc.createPaymentIntent({
+          amount: 50.01,
+          currency: 'usd',
+        } as CreatePaymentIntentRequest),
+      ).rejects.toThrow(
         'Invalid amount: amount is already in lowest currency unit, so there should be no decimals',
       );
     });
 
     it('throws for invalid usd of amount < 50 cents', async () => {
-      await expect(svc.createPaymentIntent(24, 'usd')).rejects.toThrow(
+      await expect(
+        svc.createPaymentIntent({
+          amount: 24,
+          currency: 'usd',
+        } as CreatePaymentIntentRequest),
+      ).rejects.toThrow(
         'Invalid amount, US currency donations must be at least 50 cents',
       );
     });
 
     it('returns a well-formed payment intent for valid input (amount=50) where currency is usd', async () => {
-      const pi = await svc.createPaymentIntent(50, 'usd', {});
+      const pi = await svc.createPaymentIntent({
+        amount: 50,
+        currency: 'usd',
+        metadata: {},
+      } as CreatePaymentIntentRequest);
       expect(pi).toHaveProperty('id');
       expect(pi).toHaveProperty('clientSecret');
       expect(pi.amount).toBe(50);
@@ -314,38 +374,57 @@ describe('PaymentsService', () => {
     });
 
     it('throws for null currency', async () => {
-      await expect(svc.createPaymentIntent(10, null)).rejects.toThrow(
-        /Invalid currency/i,
-      );
+      await expect(
+        svc.createPaymentIntent({
+          amount: 10,
+          currency: null,
+        } as CreatePaymentIntentRequest),
+      ).rejects.toThrow(/Invalid currency/i);
     });
 
     it('throws for undefined currency', async () => {
-      await expect(svc.createPaymentIntent(10, null)).rejects.toThrow(
-        /Invalid currency/i,
-      );
+      await expect(
+        svc.createPaymentIntent({
+          amount: 10,
+          currency: null,
+        } as CreatePaymentIntentRequest),
+      ).rejects.toThrow(/Invalid currency/i);
     });
 
     it('throws for non-string currency', async () => {
       await expect(
-        svc.createPaymentIntent(10, 0 as unknown as string),
+        svc.createPaymentIntent({
+          amount: 10,
+          currency: 0 as unknown as string,
+        } as CreatePaymentIntentRequest),
       ).rejects.toThrow(/Invalid currency/i);
     });
 
     it('throws for currency length < 3', async () => {
-      await expect(svc.createPaymentIntent(10, 'a')).rejects.toThrow(
-        /Invalid currency/i,
-      );
+      await expect(
+        svc.createPaymentIntent({
+          amount: 10,
+          currency: 'a',
+        } as CreatePaymentIntentRequest),
+      ).rejects.toThrow(/Invalid currency/i);
     });
 
     it('throws for currency length > 3', async () => {
-      await expect(svc.createPaymentIntent(10, 'aaaa')).rejects.toThrow(
-        /Invalid currency/i,
-      );
+      await expect(
+        svc.createPaymentIntent({
+          amount: 10,
+          currency: 'aaaa',
+        } as CreatePaymentIntentRequest),
+      ).rejects.toThrow(/Invalid currency/i);
     });
 
     it('returns a well-formed payment intent for valid input', async () => {
       // Update the expected return shape to match the new PaymentIntentResponse format
-      const pi = await svc.createPaymentIntent(50, 'usd', { orderId: '123' });
+      const pi = await svc.createPaymentIntent({
+        amount: 50,
+        currency: 'usd',
+        metadata: { orderId: '123' },
+      } as CreatePaymentIntentRequest);
 
       // Check the returned object has all expected properties from PaymentIntentResponse
       expect(pi).toHaveProperty('id');
@@ -374,9 +453,12 @@ describe('PaymentsService', () => {
 
       stripeMock.paymentIntents.create.mockRejectedValueOnce(cardDeclinedError);
 
-      await expect(svc.createPaymentIntent(2550, 'usd')).rejects.toMatchObject(
-        cardDeclinedError,
-      );
+      await expect(
+        svc.createPaymentIntent({
+          amount: 2550,
+          currency: 'usd',
+        } as CreatePaymentIntentRequest),
+      ).rejects.toMatchObject(cardDeclinedError);
     });
   });
 
@@ -499,6 +581,87 @@ describe('PaymentsService', () => {
       await expect(
         svc.retrievePaymentIntent(paymentIntentId),
       ).rejects.toMatchObject(noSuchPaymentIntent);
+    });
+
+    describe('stripe to DonationStatus values map correctly', () => {
+      it("maps stripe status 'succeeded' to DonationStatus.SUCCEEDED", async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentMock2,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.SUCCEEDED); // Specific check for status mapping
+      });
+
+      it("maps stripe status 'canceled' to DonationStatus.CANCELLED", async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentCanceledMock,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.CANCELLED); // Specific check for status mapping
+      });
+      it("maps stripe status 'requires_payment_method' to DonationStatus.FAILED", async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentFailedMock,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.FAILED); // Specific check for status mapping
+      });
+
+      it("maps stripe status 'processing' to DonationStatus.PENDING", async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentProcessingMock,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.PENDING); // Specific check for status mapping
+      });
+
+      it("maps stripe status 'requires_confirmation' to DonationStatus.PENDING", async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentRequiresConfirmationMock,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.PENDING); // Specific check for status mapping
+      });
+
+      it("maps stripe status 'requires_action' to DonationStatus.PENDING", async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentRequiresActionMock,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.PENDING); // Specific check for status mapping
+      });
+
+      it("maps stripe status 'requires_capture' to DonationStatus.PENDING", async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentRequiresCaptureMock,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.PENDING); // Specific check for status mapping
+      });
+
+      it('maps any other stripe status to DonationStatus.PENDING', async () => {
+        stripeMock.paymentIntents.retrieve.mockResolvedValue(
+          paymentIntentOtherStatusMock,
+        );
+        const paymentIntentId = 'pi_1234567890abcdefghijklmn';
+        const pi = await svc.retrievePaymentIntent(paymentIntentId);
+        // Verify that status mapping works correctly
+        expect(pi.status).toBe(DonationStatus.PENDING); // Specific check for status mapping
+      });
     });
   });
 });

@@ -21,7 +21,7 @@ const Root: React.FC = () => {
           message={'Donate to FCC!'}
           total={3000}
           goal={10000}
-          sampleDonation={{ name: 'C4C', amount: 500}}
+          sampleDonation={{ name: 'C4C', amount: 500 }}
         />
       </div>
     </div>
