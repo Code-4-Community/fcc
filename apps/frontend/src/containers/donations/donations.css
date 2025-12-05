@@ -2,10 +2,10 @@
   aspect-ratio: 7/10;
   width: 100%;
   margin: 0 auto;
-  border: 1px solid #ddd;
-  border-radius: 8px;
   background-color: #fff;
   font-family: sans-serif;
+  container-type: size;
+  border: 1px solid #ccc;
 }
 
 .donation-form h2 {
@@ -44,6 +44,11 @@
 .error-message {
   margin-top: 0.25rem;
   font-size: 0.875rem;
+  color: #d93025;
+}
+
+.step2-error-message {
+  font-size: 2cqh;
   color: #d93025;
 }
 
@@ -91,20 +96,21 @@
 }
 
 .toggle-container {
+  gap: 4%;
   display: flex;
-  align-items: center;
-  gap: 0.6rem;
+  align-items: start;
   cursor: pointer;
   user-select: none;
   flex-wrap: wrap;
   justify-content: center;
+  padding: 4%;
 }
 
 .toggle-slider {
   position: relative;
   flex-shrink: 0;
-  width: 30px;
-  height: 18px;
+  width: 8%;
+  aspect-ratio: 2/1;
   background-color: #ccc;
   border-radius: 9999px;
   transition:
@@ -117,10 +123,22 @@
   background-color: #2a7a73;
 }
 
+.toggle-fee-edit {
+  display: flex;
+  padding: 2%;
+  justify-content: center;
+  align-items: center;
+  border-radius: 2cqh;
+  background: #efefef;
+  color: #b2b2b2;
+  font-size: 1.5cqh;
+  margin-left: 17.5%;
+}
+
 .toggle-circle {
   position: absolute;
   top: 50%;
-  left: 4px;
+  left: 10%;
   width: 40%;
   height: 70%;
   background-color: white;
@@ -132,30 +150,34 @@
 }
 
 .toggle-slider.on .toggle-circle {
-  left: 55%;
+  left: 50%;
 }
 
 .toggle-label {
-  font-size: 0.8rem;
+  font-size: 2cqh;
   color: #333;
-  line-height: 1.4;
   text-align: left;
-  max-width: 320px;
+  width: 80%;
+}
+
+.donation-summary-container {
+  width: 85%;
+  display: flex;
+  flex-direction: column;
 }
 
 .donation-summary {
-  font-size: 14px;
-  margin: 0 auto;
+  width: 100%;
+  aspect-ratio: 5/1;
+  padding-bottom: 4%;
+  font-size: 2cqh;
   font-family: sans-serif;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   flex-wrap: wrap;
   text-align: center;
   border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 0.75rem;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+  border-radius: 2cqh;
 }
 
 .recurrence-options {
@@ -255,6 +277,7 @@
   justify-content: center;
   align-items: center;
   gap: 3%;
+  margin-bottom: 10%;
 }
 
 .progress-bar-grey {
@@ -269,4 +292,148 @@
   aspect-ratio: 14 / 1;
   border-radius: 10px;
   background: #650d77;
+}
+
+.step2-container {
+  width: 100%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step2-payment-details-container {
+  width: 85%;
+  height: 45%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  align-items: start;
+  gap: 8%;
+}
+
+.step2-payment-details-label {
+  margin-left: 7.5%;
+  font-size: 3cqh;
+  font-weight: 700;
+  align-self: flex-start;
+  margin-bottom: 4%;
+}
+
+.action-button {
+  max-width: 40%;
+  border-radius: 2cqh;
+  background: #007b64;
+  color: white;
+  font-weight: 700;
+  font-style: normal;
+  aspect-ratio: 4/1;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 2.5cqh;
+}
+
+.step2-total-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  gap: 4%;
+  height: 12%;
+  margin-bottom: 4%;
+}
+
+.step2-name-container {
+  display: flex;
+  width: 85%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 7%;
+  align-self: start;
+}
+
+.step-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 7%;
+}
+
+.step2-total-label {
+  font-size: 3 cqh;
+  color: #6b6b6b;
+}
+
+.step2-total-amount-label {
+  font-size: 4cqh;
+  font-weight: 700;
+}
+
+.step2-form-group {
+  display: flex;
+  flex-direction: column;
+  font-size: 2.5cqh;
+}
+
+.step2-card-icon {
+  width: 5%;
+  aspect-ratio: 1/1;
+  object-fit: contain;
+}
+
+.step2-card-info-container {
+  display: flex;
+  padding: 1%;
+  justify-content: center;
+  align-items: center;
+  align-self: stretch;
+  border-radius: 1.5cqh;
+  border: 1px solid #000;
+}
+
+.step2-card-number {
+  width: 40%;
+  margin-right: 12%;
+}
+
+.step2-card-date {
+  width: 20%;
+  margin-right: 2%;
+}
+
+.step2-card-cvc {
+  width: 12%;
+}
+
+.step2-form-group-row-no-border {
+  display: flex;
+  flex-direction: row;
+  gap: 2%;
+  font-size: 2.5cqh;
+  justify-content: start;
+  align-items: center;
+}
+
+.step2-form-group input,
+.step2-form-group select,
+.step2-form-group textarea {
+  border: 1px solid #ccc;
+  border-radius: 1cqh;
+  font-size: 2.5cqh;
+  width: 100%;
+}
+
+.step2-form-group-no-border input,
+.step2-form-group-no-border select,
+.step2-form-group-no-border textarea {
+  display: flex;
+  flex-direction: column;
+  border: 0px;
+  width: 100%;
 }

@@ -294,15 +294,15 @@ export const DonationForm: React.FC<DonationFormProps> = ({
 
       <div className="step-actions">
         {showBackButton && (
-          <button type="button" className="secondary" onClick={handleBack}>
-            Back
-          </button>
+          <div className="action-button" onClick={handleBack}>
+            BACK
+          </div>
         )}
 
         {showNextButton && (
-          <button type="button" className="primary" onClick={handleNext}>
-            Next
-          </button>
+          <div className="action-button" onClick={handleNext}>
+            NEXT
+          </div>
         )}
 
         {currentStep === 3 && (
