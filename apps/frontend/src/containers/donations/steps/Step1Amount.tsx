@@ -1,5 +1,15 @@
 import React from 'react';
-import type { DonationFormData, FormErrors } from '../donation-form.types';
+import type {
+  DonationFormData,
+  FormErrors,
+  DedicationKind,
+} from '../donation-form.types';
+
+import {
+  DONATION_PRESET_AMOUNTS,
+  DONATION_RECURRENCE_OPTIONS,
+  type DonationRecurrenceOption,
+} from '../donation-form.config';
 
 interface Step1AmountProps {
   formData: DonationFormData;
@@ -12,34 +22,151 @@ interface Step1AmountProps {
   ) => void;
 }
 
+// helpers to synthesize events so we can reuse DonationForm.handleInputChange
+
+const triggerTextChange = (
+  onChange: Step1AmountProps['onChange'],
+  name: string,
+  value: string,
+) => {
+  onChange({
+    target: {
+      name,
+      value,
+      type: 'text',
+    },
+  } as React.ChangeEvent<HTMLInputElement>);
+};
+
+const triggerCheckboxToggle = (
+  onChange: Step1AmountProps['onChange'],
+  name: string,
+  checked: boolean,
+) => {
+  onChange({
+    target: {
+      name,
+      type: 'checkbox',
+      checked,
+      value: checked ? 'on' : '',
+    },
+  } as React.ChangeEvent<HTMLInputElement>);
+};
+
 export const Step1Amount: React.FC<Step1AmountProps> = ({
   formData,
   errors,
   isSubmitting,
   onChange,
 }) => {
-  return (
-    <section>
-      <h3>Step 1: Choose amount</h3>
+  // donation amount presets
+  const handlePresetAmountClick = (amount: number) => {
+    triggerTextChange(onChange, 'amount', String(amount));
+  };
 
+  const isAmountSelected = (amount: number) =>
+    formData.amount === String(amount);
+
+  // donation recurrence btns
+  const handleRecurrenceClick = (option: DonationRecurrenceOption) => {
+    // always set donationType
+    triggerTextChange(onChange, 'donationType', option.donationType);
+
+    // for recurring options, also set the recurringInterval field
+    if (option.donationType === 'recurring' && option.recurringInterval) {
+      triggerTextChange(
+        onChange,
+        'recurringInterval',
+        option.recurringInterval,
+      );
+    }
+  };
+
+  const isRecurrenceSelected = (option: DonationRecurrenceOption) => {
+    if (option.donationType === 'one_time') {
+      return formData.donationType === 'one_time';
+    }
+    return (
+      formData.donationType === 'recurring' &&
+      option.recurringInterval === formData.recurringInterval
+    );
+  };
+
+  // dedication btns
+  const handleDedicationKindClick = (kind: DedicationKind) => {
+    triggerTextChange(onChange, 'dedicationKind', kind);
+  };
+
+  const isDedicationKindSelected = (kind: DedicationKind) =>
+    formData.dedicationKind === kind;
+
+  return (
+    <div className="step1-container">
       <div className="form-group">
-        <label htmlFor="amount">
+        <label className="step1-label">Donation Recurrence</label>
+        <div className="recurrence-options">
+          {DONATION_RECURRENCE_OPTIONS.map((option) => (
+            <button
+              key={option.label}
+              type="button"
+              className={
+                'recurrence-option' +
+                (isRecurrenceSelected(option) ? ' selected' : '')
+              }
+              onClick={() => handleRecurrenceClick(option)}
+              disabled={isSubmitting}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        {errors.recurringInterval && (
+          <span className="error-message">{errors.recurringInterval}</span>
+        )}
+      </div>
+      <div className="form-group">
+        <label className="step1-label" htmlFor="amount">
           Donation Amount <span className="required">*</span>
         </label>
-        <input
-          type="text"
-          id="amount"
-          name="amount"
-          inputMode="decimal"
-          pattern="\\d+(\\.\\d{1,2})?"
-          placeholder="0.00"
-          value={formData.amount}
-          onChange={onChange}
-          className={errors.amount ? 'error' : ''}
-          disabled={isSubmitting}
-          aria-invalid={!!errors.amount}
-          aria-describedby={errors.amount ? 'amount-error' : undefined}
-        />
+
+        <div className="amount-grid">
+          {DONATION_PRESET_AMOUNTS.map((amount) => (
+            <button
+              key={amount}
+              type="button"
+              className={
+                'amount-button' + (isAmountSelected(amount) ? ' selected' : '')
+              }
+              onClick={() => handlePresetAmountClick(amount)}
+              disabled={isSubmitting}
+            >
+              ${amount}
+            </button>
+          ))}
+        </div>
+
+        <div className="amount-custom-row">
+          <div className="amount-custom-label">Custom Amount</div>
+          <div className="amount-custom-input">
+            <div className="amount-currency-prefix">$</div>
+            <input
+              type="text"
+              id="amount"
+              name="amount"
+              inputMode="decimal"
+              pattern="\\d+(\\.\\d{1,2})?"
+              placeholder="0.00"
+              value={formData.amount}
+              onChange={onChange}
+              className={errors.amount ? 'error' : ''}
+              disabled={isSubmitting}
+              aria-invalid={!!errors.amount}
+              aria-describedby={errors.amount ? 'amount-error' : undefined}
+            />
+            <span className="amount-currency-suffix">USD</span>
+          </div>
+        </div>
+
         {errors.amount && (
           <span id="amount-error" className="error-message">
             {errors.amount}
@@ -48,89 +175,105 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
       </div>
 
       <div className="form-group">
-        <label htmlFor="donationType">
-          Donation Type <span className="required">*</span>
-        </label>
-        <select
-          id="donationType"
-          name="donationType"
-          value={formData.donationType}
-          onChange={onChange}
-          disabled={isSubmitting}
+        <label className="step1-label">Donation Anonymity</label>
+        <div
+          className="toggle-container toggle-no-padding"
+          role="switch"
+          aria-checked={formData.isAnonymous}
+          onClick={() =>
+            triggerCheckboxToggle(
+              onChange,
+              'isAnonymous',
+              !formData.isAnonymous,
+            )
+          }
         >
-          <option value="one_time">One-time</option>
-          <option value="recurring">Recurring</option>
-        </select>
-      </div>
-
-      {formData.donationType === 'recurring' && (
-        <div className="form-group">
-          <label htmlFor="recurringInterval">
-            Recurring Interval <span className="required">*</span>
-          </label>
-          <select
-            id="recurringInterval"
-            name="recurringInterval"
-            value={formData.recurringInterval}
-            onChange={onChange}
-            className={errors.recurringInterval ? 'error' : ''}
-            disabled={isSubmitting}
-            aria-invalid={!!errors.recurringInterval}
-            aria-describedby={
-              errors.recurringInterval ? 'recurringInterval-error' : undefined
-            }
+          <div
+            className={'toggle-slider ' + (formData.isAnonymous ? 'on' : 'off')}
           >
-            <option value="weekly">Weekly</option>
-            <option value="bimonthly">Bi-monthly</option>
-            <option value="monthly">Monthly</option>
-            <option value="quarterly">Quarterly</option>
-          </select>
-          {errors.recurringInterval && (
-            <span id="recurringInterval-error" className="error-message">
-              {errors.recurringInterval}
-            </span>
-          )}
+            <div className="toggle-circle" />
+          </div>
+          <span className="toggle-label">
+            Display name as anonymous when publicly shown
+          </span>
         </div>
-      )}
-
-      <div className="form-group checkbox-group">
-        <label>
-          <input
-            type="checkbox"
-            name="isAnonymous"
-            checked={formData.isAnonymous}
-            onChange={onChange}
-            disabled={isSubmitting}
-          />
-          Make this donation anonymous
-        </label>
       </div>
 
       <div className="form-group">
-        <label htmlFor="dedicationMessage">Dedication Message (optional)</label>
-        <textarea
-          id="dedicationMessage"
-          name="dedicationMessage"
-          value={formData.dedicationMessage}
-          onChange={onChange}
-          rows={4}
-          disabled={isSubmitting}
-          placeholder="Add a special message or dedication..."
-        />
+        <div className="step1-label">Dedicate This Donation</div>
+        <div
+          className="toggle-no-padding toggle-container"
+          role="switch"
+          aria-checked={!!formData.isDedicated}
+          onClick={() =>
+            triggerCheckboxToggle(
+              onChange,
+              'isDedicated',
+              !formData.isDedicated,
+            )
+          }
+        >
+          <div
+            className={'toggle-slider ' + (formData.isDedicated ? 'on' : 'off')}
+          >
+            <div className="toggle-circle" />
+          </div>
+        </div>
       </div>
 
-      <div className="form-group checkbox-group">
-        <label>
-          <input
-            type="checkbox"
-            name="showDedicationPublicly"
-            checked={formData.showDedicationPublicly}
-            onChange={onChange}
-            disabled={isSubmitting}
-          />
-          Show dedication message publicly
-        </label>
-      </div>
-    </section>
+      {formData.isDedicated && (
+        <>
+          <div className="recurrence-options">
+            <button
+              type="button"
+              className={
+                'recurrence-option' +
+                (isDedicationKindSelected('honor') ? ' selected' : '')
+              }
+              onClick={() => handleDedicationKindClick('honor')}
+              disabled={isSubmitting}
+            >
+              In Honor Of
+            </button>
+            <button
+              type="button"
+              className={
+                'recurrence-option' +
+                (isDedicationKindSelected('memory') ? ' selected' : '')
+              }
+              onClick={() => handleDedicationKindClick('memory')}
+              disabled={isSubmitting}
+            >
+              In Memory Of
+            </button>
+          </div>
+
+          <div className="dedication-message">
+            <textarea
+              id="dedicationMessage"
+              name="dedicationMessage"
+              value={formData.dedicationMessage}
+              onChange={onChange}
+              rows={4}
+              disabled={isSubmitting}
+              placeholder="Write a message.."
+            />
+          </div>
+
+          <div className="checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                name="showDedicationPublicly"
+                checked={formData.showDedicationPublicly}
+                onChange={onChange}
+                disabled={isSubmitting}
+              />
+              Show dedication message publicly
+            </label>
+          </div>
+        </>
+      )}
+    </div>
   );
 };

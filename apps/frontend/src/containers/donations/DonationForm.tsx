@@ -30,6 +30,8 @@ export const DonationForm: React.FC<DonationFormProps> = ({
     dedicationMessage: '',
     showDedicationPublicly: false,
     recurringInterval: 'monthly',
+    isDedicated: false,
+    dedicationKind: null,
     cardNumber: '',
     cardExpiry: '',
     cardCvc: '',
@@ -265,8 +267,23 @@ export const DonationForm: React.FC<DonationFormProps> = ({
       onSubmit={(e) => e.preventDefault()}
       noValidate
     >
-      <h2>Make a Donation</h2>
-
+      <div className="progress-bar-container">
+        <div
+          className={
+            currentStep === 1 ? 'progress-bar-purple' : 'progress-bar-grey'
+          }
+        ></div>
+        <div
+          className={
+            currentStep === 2 ? 'progress-bar-purple' : 'progress-bar-grey'
+          }
+        ></div>
+        <div
+          className={
+            currentStep === 3 ? 'progress-bar-purple' : 'progress-bar-grey'
+          }
+        ></div>
+      </div>
       {submitError && (
         <div className="error-banner" role="alert" aria-live="assertive">
           {submitError}
@@ -277,15 +294,15 @@ export const DonationForm: React.FC<DonationFormProps> = ({
 
       <div className="step-actions">
         {showBackButton && (
-          <button type="button" className="secondary" onClick={handleBack}>
-            Back
-          </button>
+          <div className="action-button" onClick={handleBack}>
+            BACK
+          </div>
         )}
 
         {showNextButton && (
-          <button type="button" className="primary" onClick={handleNext}>
-            Next
-          </button>
+          <div className="action-button" onClick={handleNext}>
+            NEXT
+          </div>
         )}
 
         {currentStep === 3 && (
