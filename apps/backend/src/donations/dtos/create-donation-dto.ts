@@ -91,4 +91,13 @@ export class CreateDonationDto {
   @IsBoolean()
   @IsOptional()
   showDedicationPublicly?: boolean = false;
+
+  @ApiProperty({
+    description: 'optional Stripe payment intent identifier for this donation',
+    example: 'pi_1J2aBcD3eF4GhIjKlmnoPqr',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  paymentIntentId?: string;
 }

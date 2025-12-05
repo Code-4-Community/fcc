@@ -248,12 +248,24 @@ describe('DonationsService', () => {
 
     repo.findOne.mockImplementation(
       async (options?: FindOneOptions<Donation>) => {
-        const where = options?.where;
-        if (where && !Array.isArray(where)) {
-          const id = (where as FindOptionsWhere<Donation>).id;
-          if (id !== undefined && id !== null) {
-            const donation = allDonations.find((d) => d.id === id);
-            return donation ?? null;
+        const where = options?.where as FindOptionsWhere<Donation> | undefined;
+        if (!where) {
+          return null;
+        }
+
+        if (where.id !== undefined && where.id !== null) {
+          const donation = allDonations.find((d) => d.id === where.id);
+          if (donation) {
+            return donation;
+          }
+        }
+
+        if (where.transactionId) {
+          const donation = allDonations.find(
+            (d) => d.transactionId === where.transactionId,
+          );
+          if (donation) {
+            return donation;
           }
         }
 
@@ -355,6 +367,41 @@ describe('DonationsService', () => {
           validDonation1.amount + validDonation2.amount + validDonation3.amount,
         count: 3,
       });
+    });
+  });
+
+  describe('syncPaymentIntentStatus', () => {
+    it('updates donation status when donation id is provided', async () => {
+      const saveSpy = jest.spyOn(repo, 'save');
+      await service.syncPaymentIntentStatus({
+        donationId: validDonation1.id,
+        transactionId: 'pi_sync_123',
+        status: DonationStatus.SUCCEEDED,
+      });
+
+      expect(saveSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: validDonation1.id,
+          transactionId: 'pi_sync_123',
+          status: DonationStatus.SUCCEEDED,
+        }),
+      );
+    });
+
+    it('falls back to transactionId lookup when donation id missing', async () => {
+      validDonation2.transactionId = 'pi_existing_456';
+      const saveSpy = jest.spyOn(repo, 'save');
+      await service.syncPaymentIntentStatus({
+        transactionId: 'pi_existing_456',
+        status: DonationStatus.FAILED,
+      });
+
+      expect(saveSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: validDonation2.id,
+          status: DonationStatus.FAILED,
+        }),
+      );
     });
   });
 });
