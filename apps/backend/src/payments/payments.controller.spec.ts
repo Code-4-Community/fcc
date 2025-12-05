@@ -185,7 +185,7 @@ describe('PaymentsControler', () => {
         paymentMethodTypes: ['card'],
         created: 0,
         requiresAction: false,
-        metadata: { donationId: '55' },
+        metadata: {},
       };
       mockService.constructWebhookEvent.mockReturnValue({
         type: 'payment_intent.succeeded',
