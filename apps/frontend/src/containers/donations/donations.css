@@ -1,11 +1,10 @@
 .donation-form {
-  max-width: 500px;
+  aspect-ratio: 7/10;
+  width: 100%;
   margin: 0 auto;
-  padding: 1.5rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
   background-color: #fff;
   font-family: sans-serif;
+  container-type: size;
 }
 
 .donation-form h2 {
@@ -15,23 +14,21 @@
 }
 
 .form-group {
-  margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
 }
 
 .form-group label {
-  margin-bottom: 0.25rem;
-  font-weight: 600;
+  margin-bottom: 2%;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-  padding: 0.5rem;
+  padding: 1cqh;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: 1cqh;
+  font-size: 2.5cqh;
 }
 
 .form-group input.error,
@@ -42,27 +39,44 @@
 }
 
 .error-message {
-  margin-top: 0.25rem;
-  font-size: 0.875rem;
+  margin-top: 2%;
+  font-size: 2cqh;
+  color: #d93025;
+}
+
+.step2-error-message {
+  font-size: 2cqh;
   color: #d93025;
 }
 
 .error-banner {
-  margin-bottom: 1rem;
-  padding: 0.75rem;
-  border-radius: 4px;
+  margin-bottom: 2%;
+  padding: 2%;
+  border-radius: 2cqh;
   background-color: #fce8e6;
   color: #d93025;
   font-weight: 600;
 }
 
 .checkbox-group {
+  width: 100%;
   flex-direction: row;
+  display: flex;
   align-items: center;
+  justify-content: start;
+  color: #57585c;
+  font-style: normal;
+  font-weight: 100;
+  height: 6%;
+  overflow: hidden;
+  font-size: 2cqh;
 }
 
-.checkbox-group label {
-  font-weight: normal;
+.checkbox-group input[type='checkbox'] {
+  transform: scale(0.5);
+  transform-origin: center;
+  vertical-align: middle;
+  margin-top: 0.5cqh;
 }
 
 .submit-button {
@@ -88,4 +102,403 @@
 
 .required {
   color: #d93025;
+}
+
+.toggle-container {
+  gap: 4%;
+  display: flex;
+  align-items: start;
+  cursor: pointer;
+  user-select: none;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 4%;
+}
+
+.toggle-slider {
+  position: relative;
+  flex-shrink: 0;
+  width: 8%;
+  min-width: 12px;
+  aspect-ratio: 2/1;
+  background-color: #ccc;
+  border-radius: 9999px;
+  transition:
+    background-color 0.3s ease,
+    transform 0.3s ease;
+  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-slider.on {
+  background-color: #2a7a73;
+}
+
+.toggle-fee-edit {
+  display: flex;
+  padding: 2%;
+  justify-content: center;
+  align-items: center;
+  border-radius: 2cqh;
+  background: #efefef;
+  color: #b2b2b2;
+  font-size: 1.5cqh;
+  margin-left: 17.5%;
+}
+
+.toggle-circle {
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  width: 40%;
+  height: 70%;
+  background-color: white;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  transition:
+    left 0.3s ease,
+    transform 0.3s ease;
+}
+
+.toggle-slider.on .toggle-circle {
+  left: 50%;
+}
+
+.toggle-label {
+  font-size: 2cqh;
+  color: #333;
+  text-align: left;
+  width: 80%;
+}
+
+.donation-summary-container {
+  width: 85%;
+  display: flex;
+  flex-direction: column;
+}
+
+.donation-summary {
+  width: 100%;
+  aspect-ratio: 5/1;
+  padding-bottom: 4%;
+  font-size: 2cqh;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 2cqh;
+}
+
+.dedication-message {
+  width: 100%;
+  height: 12%;
+}
+
+.dedication-message textarea {
+  width: 95%;
+  font-size: 2cqh;
+  padding: 2%;
+}
+
+.recurrence-options {
+  display: flex;
+  gap: 2%;
+}
+
+.recurrence-option {
+  padding: 1cqh 2cqh;
+  width: 100%;
+  white-space: nowrap;
+  border-radius: 1cqh;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  font-size: 2cqh;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.recurrence-option.selected {
+  border-color: #2a7a73;
+  background-color: #e0f2f1;
+  font-weight: 600;
+}
+
+.recurrence-option:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.amount-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4%;
+  margin-bottom: 0.5rem;
+}
+
+.amount-button {
+  flex: 1 1 20%;
+  padding: 1cqh 2cqh;
+  width: 100%;
+  border-radius: 1cqh;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  font-size: 2cqh;
+  font-weight: 100;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.amount-button.selected {
+  border-color: #2a7a73;
+  background-color: #e0f2f1;
+  font-weight: 600;
+}
+
+.amount-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.amount-custom-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: start;
+  gap: 4%;
+  width: 100%;
+}
+
+.amount-custom-label {
+  font-size: 2cqh;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.amount-custom-input {
+  display: flex;
+  align-items: center;
+  gap: 1%;
+}
+
+.amount-custom-input input {
+  flex: 1;
+  font-size: 2cqh;
+}
+
+.toggle-no-padding {
+  padding: 0%;
+  justify-content: start;
+  display: flex;
+  align-items: start;
+  cursor: pointer;
+  user-select: none;
+  flex-wrap: wrap;
+}
+
+.amount-currency-prefix,
+.amount-currency-suffix {
+  font-size: 2cqh;
+  color: #555;
+}
+
+.progress-bar-container {
+  height: 2%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 3%;
+  margin-bottom: 10%;
+}
+
+.progress-bar-grey {
+  width: 31%;
+  aspect-ratio: 14 / 1;
+  border-radius: 10px;
+  background: #b3b3b3;
+}
+
+.progress-bar-purple {
+  width: 31%;
+  aspect-ratio: 14 / 1;
+  border-radius: 10px;
+  background: #650d77;
+}
+
+.step2-container {
+  width: 100%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dedication-form-row {
+  display: flex;
+  flex-direction: row;
+  align-items: start;
+  justify-content: start;
+}
+.step1-label {
+  font-size: 3cqh;
+  color: #57585c;
+  font-style: normal;
+  font-weight: 100;
+}
+
+.step1-container {
+  width: 100%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
+  gap: 4%;
+}
+
+.step2-payment-details-container {
+  width: 85%;
+  height: 45%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  align-items: start;
+  gap: 8%;
+}
+
+.step2-payment-details-label {
+  margin-left: 7.5%;
+  font-size: 3cqh;
+  font-weight: 700;
+  align-self: flex-start;
+  margin-bottom: 4%;
+}
+
+.action-button {
+  max-width: 40%;
+  border-radius: 2cqh;
+  background: #007b64;
+  color: white;
+  font-weight: 700;
+  font-style: normal;
+  aspect-ratio: 4/1;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 2.5cqh;
+}
+
+.step2-total-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  gap: 4%;
+  height: 12%;
+  margin-bottom: 4%;
+}
+
+.step2-name-container {
+  display: flex;
+  width: 85%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 7%;
+  align-self: start;
+}
+
+.step-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 7%;
+}
+
+.step2-total-label {
+  font-size: clamp(3cqh, 3cqh, 20px);
+  color: #6b6b6b;
+}
+
+.step2-total-amount-label {
+  font-size: clamp(4cqh, 4cqh, 32px);
+  font-weight: 700;
+}
+
+.email-container {
+  max-width: 85%;
+}
+
+.step2-form-group {
+  display: flex;
+  flex-direction: column;
+  font-size: 2.5cqh;
+  width: 100%;
+}
+
+.step2-card-icon {
+  width: 5%;
+  aspect-ratio: 1/1;
+  object-fit: contain;
+}
+
+.step2-card-info-container {
+  display: flex;
+  padding: 1%;
+  justify-content: center;
+  align-items: center;
+  align-self: stretch;
+  border-radius: 1.5cqh;
+  border: 1px solid #ccc;
+}
+
+.step2-card-number {
+  width: 40%;
+  margin-right: 12%;
+}
+
+.step2-card-date {
+  width: 20%;
+  margin-right: 2%;
+}
+
+.step2-card-cvc {
+  width: 12%;
+}
+
+.step2-form-group-row-no-border {
+  display: flex;
+  flex-direction: row;
+  gap: 2%;
+  font-size: 2.5cqh;
+  justify-content: start;
+  align-items: center;
+}
+
+.step2-form-group input,
+.step2-form-group select,
+.step2-form-group textarea {
+  border: 1px solid #ccc;
+  border-radius: 1cqh;
+  font-size: 2.5cqh;
+  width: 100%;
+}
+
+.step2-form-group-no-border input,
+.step2-form-group-no-border select,
+.step2-form-group-no-border textarea {
+  display: flex;
+  flex-direction: column;
+  border: 0px;
+  width: 100%;
 }

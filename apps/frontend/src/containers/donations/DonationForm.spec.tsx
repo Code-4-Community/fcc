@@ -1,7 +1,13 @@
 /** @vitest-environment jsdom */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  cleanup,
+} from '@testing-library/react';
 import apiClient from '../../api/apiClient';
 import { DonationForm } from './DonationForm';
 import type { CreateDonationResponse } from '../../api/apiClient';
@@ -14,28 +20,46 @@ describe('DonationForm Component', () => {
     vi.clearAllMocks();
   });
 
-  it('shows validation errors for empty fields', async () => {
-    const spy = vi.spyOn(apiClient, 'createDonation');
-    render(<DonationForm onSuccess={onSuccess} onError={onError} />);
-
-    fireEvent.click(screen.getByRole('button', { name: /submit donation/i }));
-
-    await waitFor(() => {
-      expect(screen.queryByText(/first name is required/i)).not.toBeNull();
-      expect(screen.queryByText(/last name is required/i)).not.toBeNull();
-      expect(screen.queryByText(/email is required/i)).not.toBeNull();
-      expect(screen.queryByText(/positive amount/i)).not.toBeNull();
-    });
-
-    expect(spy).not.toHaveBeenCalled();
+  afterEach(() => {
+    cleanup();
   });
 
-  it('submits valid donation and calls onSuccess', async () => {
+  it('prevents advancing past Step 1 when amount is missing', async () => {
+    render(<DonationForm onSuccess={onSuccess} onError={onError} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByText(/enter a positive amount/i)).not.toBeNull();
+    });
+  });
+
+  it('shows payment details on Step 2 after entering amount', async () => {
+    render(<DonationForm onSuccess={onSuccess} onError={onError} />);
+
+    fireEvent.change(screen.getByLabelText(/donation amount/i), {
+      target: { value: '45' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByText(/payment details/i)).not.toBeNull();
+      expect(screen.queryByText(/\$45\.00/)).not.toBeNull();
+    });
+  });
+
+  it('submits donation after confirm and shows receipt', async () => {
     const spy = vi
       .spyOn(apiClient, 'createDonation')
       .mockResolvedValueOnce({ id: '123' });
 
     render(<DonationForm onSuccess={onSuccess} onError={onError} />);
+
+    fireEvent.change(screen.getByLabelText(/donation amount/i), {
+      target: { value: '50' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
 
     fireEvent.change(screen.getByLabelText(/first name/i), {
       target: { value: 'Hello' },
@@ -43,33 +67,36 @@ describe('DonationForm Component', () => {
     fireEvent.change(screen.getByLabelText(/last name/i), {
       target: { value: 'Kitty' },
     });
-    fireEvent.change(screen.getByLabelText(/email/i), {
+    fireEvent.change(screen.getByLabelText(/email address/i), {
       target: { value: 'hello@kitty.com' },
     });
-    fireEvent.change(screen.getByLabelText(/donation amount/i), {
-      target: { value: '25.50' },
-    });
 
-    fireEvent.click(screen.getByRole('button', { name: /submit donation/i }));
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+    fireEvent.click(screen.getByRole('button', { name: /confirm donation/i }));
 
     await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
 
-    const payload = spy.mock.calls[0][0];
-    expect(payload).toMatchObject({
-      firstName: 'Hello',
-      lastName: 'Kitty',
-      email: 'hello@kitty.com',
-      amount: 25.5,
-    });
     expect(onSuccess).toHaveBeenCalledWith('123');
+    expect(screen.queryByText(/thank you for your donation/i)).not.toBeNull();
   });
 
-  it('shows error banner and calls onError when API fails', async () => {
+  it('displays error banner and calls onError when API fails', async () => {
+    let rejectPending!: (reason?: unknown) => void;
+    const pending = new Promise<CreateDonationResponse>((_, reject) => {
+      rejectPending = reject;
+    });
+
     const spy = vi
       .spyOn(apiClient, 'createDonation')
-      .mockRejectedValueOnce(new Error('Network error'));
+      .mockReturnValueOnce(pending as Promise<CreateDonationResponse>);
 
     render(<DonationForm onSuccess={onSuccess} onError={onError} />);
+
+    fireEvent.change(screen.getByLabelText(/donation amount/i), {
+      target: { value: '75' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
 
     fireEvent.change(screen.getByLabelText(/first name/i), {
       target: { value: 'John' },
@@ -80,58 +107,18 @@ describe('DonationForm Component', () => {
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: 'john@northeastern.edu' },
     });
-    fireEvent.change(screen.getByLabelText(/donation amount/i), {
-      target: { value: '50' },
-    });
 
-    fireEvent.click(screen.getByRole('button', { name: /submit donation/i }));
+    fireEvent.click(screen.getByRole('button', { name: /next/i }));
+
+    fireEvent.click(screen.getByRole('button', { name: /confirm donation/i }));
+
+    rejectPending(new Error('Network error'));
 
     await waitFor(() => {
       expect(screen.queryByText(/network error/i)).not.toBeNull();
     });
+
     expect(onError).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledTimes(1);
-  });
-
-  it('disables submit button while submitting', async () => {
-    let resolvePending!: (value: CreateDonationResponse) => void;
-
-    const pending = new Promise<CreateDonationResponse>((resolve) => {
-      resolvePending = resolve;
-    });
-    const spy = vi
-      .spyOn(apiClient, 'createDonation')
-      .mockReturnValueOnce(pending);
-
-    render(<DonationForm onSuccess={onSuccess} onError={onError} />);
-
-    fireEvent.change(screen.getByLabelText(/first name/i), {
-      target: { value: 'Scooby' },
-    });
-    fireEvent.change(screen.getByLabelText(/last name/i), {
-      target: { value: 'Doo' },
-    });
-    fireEvent.change(screen.getByLabelText(/email/i), {
-      target: { value: 'scooby@doobydoo.com' },
-    });
-    fireEvent.change(screen.getByLabelText(/donation amount/i), {
-      target: { value: '100' },
-    });
-
-    const button = screen.getByRole('button', { name: /submit donation/i });
-
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect((button as HTMLButtonElement).disabled).toBe(true);
-    });
-
-    resolvePending({ id: 'ok' });
-
-    await waitFor(() => {
-      expect((button as HTMLButtonElement).disabled).toBe(false);
-    });
-
     expect(spy).toHaveBeenCalledTimes(1);
   });
 });

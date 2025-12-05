@@ -22,6 +22,7 @@ export interface CreateDonationRequest {
     | 'annually';
   dedicationMessage?: string;
   showDedicationPublicly: boolean;
+  paymentIntentId?: string;
 }
 
 export interface Donation {
@@ -66,6 +67,7 @@ export class DonationMappers {
         | undefined,
       dedicationMessage: dto.dedicationMessage,
       showDedicationPublicly: dto.showDedicationPublicly ?? false,
+      paymentIntentId: dto.paymentIntentId,
     };
   }
 
