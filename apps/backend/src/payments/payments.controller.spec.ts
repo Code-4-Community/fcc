@@ -16,7 +16,7 @@ const mockWithAllOptionalParameters: PaymentIntentResponse = {
   amount: 1099,
   currency: 'usd',
   status: DonationStatus.CANCELLED,
-  metadata: { orderId: '123', donationId: '42' },
+  metadata: { orderId: '123' },
   paymentMethodId: 'pm_1F4aBcD3eF4GhIjKlmnoPq',
   paymentMethodTypes: ['card'],
   created: 1764789115,
@@ -131,7 +131,7 @@ describe('PaymentsControler', () => {
       expect(result).toStrictEqual(expected);
       expect(mockDonationsService.syncPaymentIntentStatus).toHaveBeenCalledWith(
         {
-          donationId: 42,
+          donationId: undefined,
           transactionId: 'pi_1J2aBcD3eF4GhIjKlmnoPqr',
           status: DonationStatus.CANCELLED,
         },
@@ -208,7 +208,7 @@ describe('PaymentsControler', () => {
       );
       expect(mockDonationsService.syncPaymentIntentStatus).toHaveBeenCalledWith(
         {
-          donationId: 55,
+          donationId: undefined,
           transactionId: 'pi_webhook_123',
           status: DonationStatus.SUCCEEDED,
         },

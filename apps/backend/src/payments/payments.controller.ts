@@ -115,24 +115,8 @@ export class PaymentsController {
   private extractDonationId(
     metadata?: Record<string, unknown>,
   ): number | undefined {
-    if (!metadata) {
-      return undefined;
-    }
-
-    const rawValue = (metadata['donationId'] ?? metadata['donation_id']) as
-      | string
-      | number
-      | undefined;
-
-    if (typeof rawValue === 'number') {
-      return Number.isFinite(rawValue) ? rawValue : undefined;
-    }
-
-    if (typeof rawValue === 'string') {
-      const parsed = Number(rawValue);
-      return Number.isNaN(parsed) ? undefined : parsed;
-    }
-
+    // Donation is looked up via transactionId (payment intent ID),
+    // so donationId in metadata is not needed
     return undefined;
   }
 }
