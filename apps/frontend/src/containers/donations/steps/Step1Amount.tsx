@@ -101,11 +101,9 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
     formData.dedicationKind === kind;
 
   return (
-    <section>
-      <h3>Step 1: Choose amount &amp; frequency</h3>
-
+    <div className="step1-container">
       <div className="form-group">
-        <label>Donation Recurrence</label>
+        <label className="step1-label">Donation Recurrence</label>
         <div className="recurrence-options">
           {DONATION_RECURRENCE_OPTIONS.map((option) => (
             <button
@@ -126,9 +124,8 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
           <span className="error-message">{errors.recurringInterval}</span>
         )}
       </div>
-
       <div className="form-group">
-        <label htmlFor="amount">
+        <label className="step1-label" htmlFor="amount">
           Donation Amount <span className="required">*</span>
         </label>
 
@@ -149,9 +146,9 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
         </div>
 
         <div className="amount-custom-row">
-          <span className="amount-custom-label">Custom Amount</span>
+          <div className="amount-custom-label">Custom Amount</div>
           <div className="amount-custom-input">
-            <span className="amount-currency-prefix">$</span>
+            <div className="amount-currency-prefix">$</div>
             <input
               type="text"
               id="amount"
@@ -178,9 +175,9 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
       </div>
 
       <div className="form-group">
-        <label>Donation Anonymity</label>
+        <label className="step1-label">Donation Anonymity</label>
         <div
-          className="toggle-container"
+          className="toggle-container toggle-no-padding"
           role="switch"
           aria-checked={formData.isAnonymous}
           onClick={() =>
@@ -203,9 +200,9 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
       </div>
 
       <div className="form-group">
-        <label>Dedicate This Donation</label>
+        <div className="step1-label">Dedicate This Donation</div>
         <div
-          className="toggle-container"
+          className="toggle-no-padding toggle-container"
           role="switch"
           aria-checked={!!formData.isDedicated}
           onClick={() =>
@@ -222,62 +219,61 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
             <div className="toggle-circle" />
           </div>
         </div>
-
-        {formData.isDedicated && (
-          <>
-            <div className="recurrence-options">
-              <button
-                type="button"
-                className={
-                  'recurrence-option' +
-                  (isDedicationKindSelected('honor') ? ' selected' : '')
-                }
-                onClick={() => handleDedicationKindClick('honor')}
-                disabled={isSubmitting}
-              >
-                In Honor Of
-              </button>
-              <button
-                type="button"
-                className={
-                  'recurrence-option' +
-                  (isDedicationKindSelected('memory') ? ' selected' : '')
-                }
-                onClick={() => handleDedicationKindClick('memory')}
-                disabled={isSubmitting}
-              >
-                In Memory Of
-              </button>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="dedicationMessage">Write a message..</label>
-              <textarea
-                id="dedicationMessage"
-                name="dedicationMessage"
-                value={formData.dedicationMessage}
-                onChange={onChange}
-                rows={4}
-                disabled={isSubmitting}
-                placeholder="Write a message.."
-              />
-            </div>
-
-            <div className="form-group checkbox-group">
-              <label>
-                <input
-                  type="checkbox"
-                  name="showDedicationPublicly"
-                  checked={formData.showDedicationPublicly}
-                  onChange={onChange}
-                  disabled={isSubmitting}
-                />
-                Show dedication message publicly
-              </label>
-            </div>
-          </>
-        )}
       </div>
-    </section>
+
+      {formData.isDedicated && (
+        <>
+          <div className="recurrence-options">
+            <button
+              type="button"
+              className={
+                'recurrence-option' +
+                (isDedicationKindSelected('honor') ? ' selected' : '')
+              }
+              onClick={() => handleDedicationKindClick('honor')}
+              disabled={isSubmitting}
+            >
+              In Honor Of
+            </button>
+            <button
+              type="button"
+              className={
+                'recurrence-option' +
+                (isDedicationKindSelected('memory') ? ' selected' : '')
+              }
+              onClick={() => handleDedicationKindClick('memory')}
+              disabled={isSubmitting}
+            >
+              In Memory Of
+            </button>
+          </div>
+
+          <div className="dedication-message">
+            <textarea
+              id="dedicationMessage"
+              name="dedicationMessage"
+              value={formData.dedicationMessage}
+              onChange={onChange}
+              rows={4}
+              disabled={isSubmitting}
+              placeholder="Write a message.."
+            />
+          </div>
+
+          <div className="checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                name="showDedicationPublicly"
+                checked={formData.showDedicationPublicly}
+                onChange={onChange}
+                disabled={isSubmitting}
+              />
+              Show dedication message publicly
+            </label>
+          </div>
+        </>
+      )}
+    </div>
   );
 };

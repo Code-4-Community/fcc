@@ -80,7 +80,7 @@ export const Step2Details: React.FC<Step2DetailsProps> = ({
             )}
           </div>
         </div>
-        <div className="step2-form-group">
+        <div className="step2-form-group email-container">
           <label htmlFor="email">
             Email Address <span className="required">*</span>
           </label>
