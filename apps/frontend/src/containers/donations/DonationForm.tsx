@@ -267,8 +267,23 @@ export const DonationForm: React.FC<DonationFormProps> = ({
       onSubmit={(e) => e.preventDefault()}
       noValidate
     >
-      <h2>Make a Donation</h2>
-
+      <div className="progress-bar-container">
+        <div
+          className={
+            currentStep === 1 ? 'progress-bar-purple' : 'progress-bar-grey'
+          }
+        ></div>
+        <div
+          className={
+            currentStep === 2 ? 'progress-bar-purple' : 'progress-bar-grey'
+          }
+        ></div>
+        <div
+          className={
+            currentStep === 3 ? 'progress-bar-purple' : 'progress-bar-grey'
+          }
+        ></div>
+      </div>
       {submitError && (
         <div className="error-banner" role="alert" aria-live="assertive">
           {submitError}

@@ -1,7 +1,7 @@
 .donation-form {
-  max-width: 500px;
+  aspect-ratio: 7/10;
+  width: 100%;
   margin: 0 auto;
-  padding: 1.5rem;
   border: 1px solid #ddd;
   border-radius: 8px;
   background-color: #fff;
@@ -245,4 +245,28 @@
 .amount-currency-suffix {
   font-size: 0.85rem;
   color: #555;
+}
+
+.progress-bar-container {
+  height: 2%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 3%;
+}
+
+.progress-bar-grey {
+  width: 31%;
+  aspect-ratio: 14 / 1;
+  border-radius: 10px;
+  background: #b3b3b3;
+}
+
+.progress-bar-purple {
+  width: 31%;
+  aspect-ratio: 14 / 1;
+  border-radius: 10px;
+  background: #650d77;
 }
