@@ -45,7 +45,9 @@ describe('DonationForm Component', () => {
 
     await waitFor(() => {
       expect(screen.queryByText(/payment details/i)).not.toBeNull();
-      expect(screen.queryByText(/\$45\.00/)).not.toBeNull();
+      // Use getAllByText since $45.00 appears in multiple places
+      const amounts = screen.getAllByText(/\$45\.00/);
+      expect(amounts.length).toBeGreaterThan(0);
     });
   });
 

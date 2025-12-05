@@ -3,6 +3,7 @@ import apiClient, {
   type CreateDonationRequest,
 } from '../../api/apiClient';
 import React, { useState } from 'react';
+import { TestimonialCarousel } from '../../components/testimonials/TestimonialCarousel';
 import './donations.css';
 import {
   DonationFormData,
@@ -262,66 +263,79 @@ export const DonationForm: React.FC<DonationFormProps> = ({
   const showNextButton = currentStep < 3;
 
   return (
-    <form
-      className="donation-form"
-      onSubmit={(e) => e.preventDefault()}
-      noValidate
-    >
-      <div className="progress-bar-container">
-        <div
-          className={
-            currentStep === 1 ? 'progress-bar-purple' : 'progress-bar-grey'
-          }
-        ></div>
-        <div
-          className={
-            currentStep === 2 ? 'progress-bar-purple' : 'progress-bar-grey'
-          }
-        ></div>
-        <div
-          className={
-            currentStep === 3 ? 'progress-bar-purple' : 'progress-bar-grey'
-          }
-        ></div>
-      </div>
-      {submitError && (
-        <div className="error-banner" role="alert" aria-live="assertive">
-          {submitError}
+    <div className="donation-form-container">
+      {/* Testimonial Carousel */}
+      <TestimonialCarousel />
+
+      <form
+        className="donation-form"
+        onSubmit={(e) => e.preventDefault()}
+        noValidate
+      >
+        <div className="progress-bar-container">
+          <div
+            className={
+              currentStep === 1 ? 'progress-bar-purple' : 'progress-bar-grey'
+            }
+          ></div>
+          <div
+            className={
+              currentStep === 2 ? 'progress-bar-purple' : 'progress-bar-grey'
+            }
+          ></div>
+          <div
+            className={
+              currentStep === 3 ? 'progress-bar-purple' : 'progress-bar-grey'
+            }
+          ></div>
         </div>
-      )}
-
-      {renderStep()}
-
-      <div className="step-actions">
-        {showBackButton && (
-          <div className="action-button" onClick={handleBack}>
-            BACK
+        {submitError && (
+          <div className="error-banner" role="alert" aria-live="assertive">
+            {submitError}
           </div>
         )}
 
-        {showNextButton && (
-          <div className="action-button" onClick={handleNext}>
-            NEXT
-          </div>
-        )}
+        {renderStep()}
 
-        {currentStep === 3 && (
-          <button
-            type="button"
-            className="submit-button"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Processing...' : 'Confirm Donation'}
-          </button>
-        )}
+        <div className="step-actions">
+          {showBackButton && (
+            <button
+              type="button"
+              className="action-button"
+              onClick={handleBack}
+            >
+              BACK
+            </button>
+          )}
 
-        {currentStep === 4 && (
-          <button type="button" className="primary" onClick={resetForm}>
-            Make another donation
-          </button>
-        )}
-      </div>
-    </form>
+          {showNextButton && (
+            <button
+              type="button"
+              className="action-button"
+              onClick={handleNext}
+            >
+              NEXT
+            </button>
+          )}
+
+          {currentStep === 3 && (
+            <button
+              type="button"
+              className="submit-button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Processing...' : 'Confirm Donation'}
+            </button>
+          )}
+
+          {currentStep === 4 && (
+            <button type="button" className="primary" onClick={resetForm}>
+              Make another donation
+            </button>
+          )}
+        </div>
+      </form>
+    </div>
   );
 };

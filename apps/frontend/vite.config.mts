@@ -11,6 +11,12 @@ export default defineConfig({
   server: {
     port: 4200,
     host: 'localhost',
+    fs: {
+      allow: [
+        // Allow serving from project root and above
+        path.resolve(__dirname, '../..'),
+      ],
+    },
   },
 
   preview: {
