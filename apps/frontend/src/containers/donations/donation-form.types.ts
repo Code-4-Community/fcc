@@ -25,6 +25,7 @@ export interface DonationFormData {
 export interface DonationFormProps {
   onSuccess: (donationId: string) => void;
   onError: (error: Error) => void;
+  onAmountChange?: (amount: number) => void;
 }
 
 export interface FormErrors {

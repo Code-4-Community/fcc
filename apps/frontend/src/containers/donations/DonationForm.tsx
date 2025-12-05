@@ -3,7 +3,6 @@ import apiClient, {
   type CreateDonationRequest,
 } from '../../api/apiClient';
 import React, { useState } from 'react';
-import { TestimonialCarousel } from '../../components/testimonials/TestimonialCarousel';
 import './donations.css';
 import {
   DonationFormData,
@@ -19,6 +18,7 @@ import { Step4Receipt } from './steps/Step4Receipt';
 export const DonationForm: React.FC<DonationFormProps> = ({
   onSuccess,
   onError,
+  onAmountChange,
 }) => {
   const [currentStep, setCurrentStep] = useState<DonationStep>(1);
   const [formData, setFormData] = useState<DonationFormData>({
@@ -144,6 +144,13 @@ export const DonationForm: React.FC<DonationFormProps> = ({
       setErrors((prev) => ({ ...prev, recurringInterval: undefined }));
     }
 
+    if (name === 'amount' && onAmountChange) {
+      const amountNum = parseFloat(value);
+      if (!isNaN(amountNum) && amountNum > 0) {
+        onAmountChange(amountNum);
+      }
+    }
+
     setSubmitError(null);
   };
 
@@ -264,9 +271,6 @@ export const DonationForm: React.FC<DonationFormProps> = ({
 
   return (
     <div className="donation-form-container">
-      {/* Testimonial Carousel */}
-      <TestimonialCarousel />
-
       <form
         className="donation-form"
         onSubmit={(e) => e.preventDefault()}
