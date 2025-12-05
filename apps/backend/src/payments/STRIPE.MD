@@ -28,44 +28,43 @@ The PaymentsService class implements methods that call Stripe API and return dat
 The PaymentsService provides the following methods:
 
 async createPaymentIntent(
-  amount: number - Payment amount in the smallest currency unit (e.g., cents for USD)
-  currency: string - Three-letter ISO currency code (e.g., "usd")
-  metadata?: PaymentIntentMetadata - Optional key-value pairs to attach to the payment intent
+amount: number - Payment amount in the smallest currency unit (e.g., cents for USD)
+currency: string - Three-letter ISO currency code (e.g., "usd")
+metadata?: PaymentIntentMetadata - Optional key-value pairs to attach to the payment intent
 ): Promise<PaymentIntentResponse>
 
 async retrievePaymentIntent(
-  paymentIntentId: string - Stripe payment intent ID to retrieve
+paymentIntentId: string - Stripe payment intent ID to retrieve
 ): Promise<PaymentIntentResponse>
 
-
 Where PaymentIntentResponse is:
-  id: string;
-  clientSecret: string;
-  amount: number;
-  currency: string;
-  status: DonationStatus;
-  metadata?: Record<string, unknown>;
-  paymentMethodId?: string;
-  paymentMethodTypes: string[];
-  created: number;
-  requiresAction: boolean;
-  nextAction?: unknown;
-  lastPaymentError?: {
-    code: string;
-    message: string;
-    type: string;
-  };
-  canceledAt?: number;
+id: string;
+clientSecret: string;
+amount: number;
+currency: string;
+status: DonationStatus;
+metadata?: Record<string, unknown>;
+paymentMethodId?: string;
+paymentMethodTypes: string[];
+created: number;
+requiresAction: boolean;
+nextAction?: unknown;
+lastPaymentError?: {
+code: string;
+message: string;
+type: string;
+};
+canceledAt?: number;
 
 async createSubscription(
-  customerId: string - Stripe customer ID (must start with "cus_")
-  priceId: string - Stripe price ID (must start with "price_")
+customerId: string - Stripe customer ID (must start with "cus*")
+priceId: string - Stripe price ID (must start with "price*")
 ): Promise<{
-  id: string;
-  customerId: string;
-  priceId: string;
-  interval: RecurringInterval;
-  status: string;
+id: string;
+customerId: string;
+priceId: string;
+interval: RecurringInterval;
+status: string;
 }>
 
 Testing

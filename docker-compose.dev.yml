@@ -9,14 +9,14 @@ services:
       POSTGRES_DB: fcc_dev
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
     networks:
       - fcc-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d fcc_dev"]
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d fcc_dev']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -34,15 +34,15 @@ services:
       NX_DB_USERNAME: postgres
       NX_DB_PASSWORD: postgres
       NX_DB_DATABASE: fcc_dev
-      
+
       NODE_ENV: development
       PORT: 3000
-      
+
       # JWT and Auth (add secrets in prod)
       JWT_SECRET: dev-secret-change-in-prod
-      
+
     ports:
-      - "3000:3000"
+      - '3000:3000'
     depends_on:
       postgres:
         condition: service_healthy
@@ -74,15 +74,15 @@ services:
       NX_DB_USERNAME: postgres
       NX_DB_PASSWORD: postgres
       NX_DB_DATABASE: fcc_dev
-      
+
       NODE_ENV: development
       PORT: 3001
-      
+
       # JWT and Auth (add secrets in prod)
       JWT_SECRET: dev-secret-change-in-prod
-      
+
     ports:
-      - "3001:3001"
+      - '3001:3001'
     depends_on:
       postgres:
         condition: service_healthy
@@ -101,7 +101,7 @@ services:
     image: adminer:4-standalone
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - '8080:8080'
     depends_on:
       - postgres
     networks:

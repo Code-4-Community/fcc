@@ -8,20 +8,20 @@
   box-sizing: border-box;
 
   /* IMAGE lives here – from your spec */
-  background: url("./TestimonialImages/Dinner_Party.png")
-    lightgray 50% / cover no-repeat;
+  background: url('./TestimonialImages/Dinner_Party.png') lightgray 50% / cover
+    no-repeat;
 
   display: flex;
   align-items: center;
   padding: 40px 64px;
 
-  font-family: "Helvetica Neue LT Std", "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Helvetica Neue LT Std', 'Helvetica Neue', Arial, sans-serif;
   color: #ffffff;
 }
 
 /* Brown → transparent overlay on the LEFT side */
 .testimonial-carousel::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
