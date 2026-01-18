@@ -1,6 +1,6 @@
 import './root.css';
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   GrowingGoal,
   type SampleDonation,
@@ -16,7 +16,7 @@ const SAMPLE_DONATION: SampleDonation = {
 };
 
 const Root: React.FC = () => {
-  const [donationTotal, setDonationTotal] = useState(3000);
+  const donationTotal = 3000;
 
   const handleDonationSuccess = (donationId: string) => {
     console.info(`Donation submitted: ${donationId}`);
@@ -24,10 +24,6 @@ const Root: React.FC = () => {
 
   const handleDonationError = (error: Error) => {
     console.error('Donation failed', error);
-  };
-
-  const handleAmountChange = (amount: number) => {
-    setDonationTotal(3000 + amount);
   };
 
   return (
@@ -49,7 +45,6 @@ const Root: React.FC = () => {
             <DonationForm
               onSuccess={handleDonationSuccess}
               onError={handleDonationError}
-              onAmountChange={handleAmountChange}
             />
           </div>
         </section>
