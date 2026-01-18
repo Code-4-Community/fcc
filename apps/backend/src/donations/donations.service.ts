@@ -140,9 +140,12 @@ export class DonationsService {
   }
 
   async findPublic(limit = 50): Promise<DomainDonation[]> {
-    // Return only non-anonymous, succeeded donations for public display
+    // Return only non-anonymous donations that have succeeded for public display
     const donations: Donation[] = await this.donationRepository.find({
-      where: { isAnonymous: false, status: DonationStatus.SUCCEEDED },
+      where: {
+        isAnonymous: false,
+        status: DonationStatus.SUCCEEDED,
+      },
       take: limit,
       order: { createdAt: 'DESC' },
     });
