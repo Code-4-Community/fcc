@@ -2,8 +2,12 @@
 FROM node:20 AS build
 WORKDIR /app
 
+# Enable Corepack and prepare Yarn 4.x
+RUN corepack enable && corepack prepare yarn@4.5.1 --activate
+
 # Copy package files
-COPY package.json yarn.lock ./
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn/ .yarn/
 COPY apps/backend/package.json* ./apps/backend/
 COPY shared/package.json* ./shared/
 
@@ -12,7 +16,7 @@ RUN yarn install --frozen-lockfile
 
 # Copy source code and build
 COPY . .
-RUN npx nx build backend
+RUN yarn nx build backend
 
 # Production stage
 FROM node:20-slim AS runtime
