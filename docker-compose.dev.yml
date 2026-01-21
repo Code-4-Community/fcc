@@ -81,6 +81,8 @@ services:
       # JWT and Auth (add secrets in prod)
       JWT_SECRET: dev-secret-change-in-prod
 
+      STRIPE_SECRET_KEY: "sk_test_1234567890"
+
     ports:
       - '3001:3001'
     depends_on:
