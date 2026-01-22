@@ -5,15 +5,24 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    assignees:
+      - "aaronashby"
+      - "thaninbew"
 
   # Enable version updates for Docker
   - package-ecosystem: "docker"
     directory: "/apps/backend"
     schedule:
       interval: "weekly"
+    assignees:
+      - "aaronashby"
+      - "thaninbew"
 
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    assignees:
+      - "aaronashby"
+      - "thaninbew"
