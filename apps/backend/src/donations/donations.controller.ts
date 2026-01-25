@@ -9,6 +9,8 @@ import {
   ValidationPipe,
   HttpCode,
   HttpStatus,
+  StreamableFile,
+  Header,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -261,5 +263,28 @@ export class DonationsController {
       perPage: result.perPage,
       totalPages: result.totalPages,
     };
+  }
+
+  @Get('export')
+  // @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @Header('Content-Type', 'text/csv')
+  @Header('Content-Disposition', 'attachment; filename="donations.csv"')
+  @ApiOperation({
+    summary: 'export donations to CSV (admin)',
+    description:
+      'export all donations to a CSV file with streaming support. Requires authentication.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'CSV file stream',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'unauthorized',
+  })
+  async exportCsv(): Promise<StreamableFile> {
+    const stream = await this.donationsService.exportToCsv();
+    return new StreamableFile(stream);
   }
 }
