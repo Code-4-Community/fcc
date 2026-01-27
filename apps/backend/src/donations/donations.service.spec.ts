@@ -404,4 +404,97 @@ describe('DonationsService', () => {
       );
     });
   });
+
+  describe('exportToCsv', () => {
+    it('should include all donation data in CSV rows', async () => {
+      const stream = await service.exportToCsv();
+
+      const chunks: Buffer[] = [];
+      for await (const chunk of stream) {
+        chunks.push(Buffer.from(chunk));
+      }
+      const csvContent = Buffer.concat(chunks).toString('utf-8');
+
+      const lines = csvContent.split('\n');
+      expect(lines.length).toBe(4); // Header + 3 data rows
+
+      // Check that donation data is present
+      expect(csvContent).toContain(validDonation1.firstName);
+      expect(csvContent).toContain(validDonation1.email);
+      expect(csvContent).toContain(String(validDonation1.amount));
+    });
+
+    it('should handle empty donations list', async () => {
+      // Clear the in-memory donations
+      jest.spyOn(repo, 'find').mockResolvedValue([]);
+
+      const stream = await service.exportToCsv();
+
+      const chunks: Buffer[] = [];
+      for await (const chunk of stream) {
+        chunks.push(Buffer.from(chunk));
+      }
+      const csvContent = Buffer.concat(chunks).toString('utf-8');
+
+      const lines = csvContent.split('\n');
+      expect(lines.length).toBe(1); // Should only have header
+      expect(lines[0]).toBe(
+        'ID,First Name,Last Name,Email,Amount,Type,Interval,Date,Transaction ID',
+      );
+    });
+
+    it('should escape CSV fields with commas correctly', async () => {
+      const donationWithComma = {
+        ...validDonation1,
+        id: 999,
+        firstName: 'John, Jr.',
+        lastName: 'Smith, Sr.',
+      };
+
+      jest
+        .spyOn(repo, 'find')
+        .mockResolvedValue([donationWithComma as Donation]);
+
+      const stream = await service.exportToCsv();
+
+      const chunks: Buffer[] = [];
+      for await (const chunk of stream) {
+        chunks.push(Buffer.from(chunk));
+      }
+      const csvContent = Buffer.concat(chunks).toString('utf-8');
+
+      // Fields with commas should be wrapped in quotes
+      expect(csvContent).toContain('"John, Jr."');
+      expect(csvContent).toContain('"Smith, Sr."');
+    });
+
+    it('should handle null/undefined values correctly', async () => {
+      const donationWithNulls = {
+        ...validDonation1,
+        id: 888,
+        recurringInterval: null,
+        transactionId: null,
+      };
+
+      jest
+        .spyOn(repo, 'find')
+        .mockResolvedValue([donationWithNulls as Donation]);
+
+      const stream = await service.exportToCsv();
+
+      const chunks: Buffer[] = [];
+      for await (const chunk of stream) {
+        chunks.push(Buffer.from(chunk));
+      }
+      const csvContent = Buffer.concat(chunks).toString('utf-8');
+
+      const lines = csvContent.split('\n');
+      const dataRow = lines[1];
+      const fields = dataRow.split(',');
+
+      // Null values should be empty strings
+      expect(fields[6]).toBe(''); // recurringInterval
+      expect(fields[8]).toBe(''); // transactionId
+    });
+  });
 });
