@@ -264,9 +264,7 @@ export class DonationsService {
   }
 
   async exportToCsv(): Promise<Readable> {
-    const donations = await this.donationRepository.find({
-      order: { createdAt: 'DESC' },
-    });
+    const donations = await this.donationRepository.find();
     const headers = [
       'ID',
       'First Name',
