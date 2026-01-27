@@ -17,7 +17,7 @@ import AppDataSource from './data-source';
     AuthModule,
     PaymentsModule,
     DonationsModule,
-    // EmailsModule,
+    EmailsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
