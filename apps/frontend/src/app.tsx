@@ -6,6 +6,7 @@ import Root from '@containers/root';
 import NotFound from '@containers/404';
 import TestimonialTester from '@containers/TestimonialTester';
 import { DonationForm } from '@containers/donations/DonationForm';
+import { ShadcnExample } from '@components/ShadcnExample';
 
 const router = createBrowserRouter([
   {
@@ -16,6 +17,10 @@ const router = createBrowserRouter([
   {
     path: '/test',
     element: <TestimonialTester />,
+  },
+  {
+    path: '/shadcn-example',
+    element: <ShadcnExample />,
   },
   {
     path: '/donate',

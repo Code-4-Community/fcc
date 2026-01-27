@@ -31,6 +31,7 @@ export default defineConfig({
   //  plugins: [ nxViteTsPaths() ],
   // },
 
+  // @ts-expect-error
   test: {
     globals: true,
     cache: {
@@ -45,6 +46,7 @@ export default defineConfig({
       '@api': path.resolve(__dirname, './src/api'),
       '@components': path.resolve(__dirname, './src/components'),
       '@containers': path.resolve(__dirname, './src/containers'),
+      '@lib': path.resolve(__dirname, './src/lib'),
       '@public': path.resolve(__dirname, './public'),
       '@shared': path.resolve(__dirname, '../../shared'),
       '@utils': path.resolve(__dirname, './src/utils'),
