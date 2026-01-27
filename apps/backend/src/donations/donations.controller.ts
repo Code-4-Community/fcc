@@ -266,7 +266,7 @@ export class DonationsController {
   }
 
   @Get('export')
-  // @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @Header('Content-Type', 'text/csv')
   @Header('Content-Disposition', 'attachment; filename="donations.csv"')
