@@ -11,6 +11,7 @@
       "@api/*": ["api/*"],
       "@components/*": ["components/*"],
       "@containers/*": ["containers/*"],
+      "@lib/*": ["lib/*"],
       "@public/*": ["../public/*"],
       "@shared/*": ["../../../shared/*"],
       "@utils/*": ["utils/*"]
