@@ -13,7 +13,7 @@ export default function TestimonialTester() {
   return (
     <div className="min-h-screen w-full bg-neutral-100">
       {/* Center the stage like Figma */}
-      <div className="mx-auto flex min-h-screen max-w-[100px] items-center justify-center px-6">
+      <div className="mx-auto flex min-h-screen max-w-[1500px] items-center justify-center px-6">
         {/* Important: allow overlap to be visible */}
         <div className="w-full overflow-visible">
           <TestimonialCarousel slides={slides} />

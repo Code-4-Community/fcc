@@ -80,29 +80,20 @@ export const AutoRotatingTestimonialCarousel: React.FC<Props> = ({
 
     return (
       <div
-        className="relative rounded-[10px] overflow-hidden transition-all ease-in-out flex-shrink-0"
-        style={{
-          width: isCenter ? '193.834px' : '150.065px',
-          height: isCenter ? '193.833px' : '150.065px',
-          boxShadow: isCenter
-            ? '0 4px 10px 0 rgba(0, 0, 0, 0.50)'
-            : '0 4px 8px 0 rgba(0, 0, 0, 0.25)',
-          transitionDuration: `${animMs}ms`,
-          zIndex: isCenter ? 30 : 20,
-        }}
-      >
-        <img
-          src={slide.image}
-          alt={slide.alt ?? ''}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: slide.objectPosition || 'center center',
-          }}
-          draggable={false}
-        />
-      </div>
+  className="relative overflow-hidden transition-all ease-in-out flex-shrink-0"
+  style={{
+    width: isCenter ? '193.834px' : '150.065px',
+    height: isCenter ? '193.833px' : '150.065px',
+    borderRadius: '10px',
+    background: `url(${slide.image}) lightgray -2.207px -1.667px / 102.451% 101.732% no-repeat`,
+    boxShadow: isCenter
+      ? '0 4px 10px 0 rgba(0, 0, 0, 0.50)'
+      : '0 4px 8px 0 rgba(0, 0, 0, 0.25)',
+    transitionDuration: `${animMs}ms`,
+    zIndex: isCenter ? 30 : 10,
+    
+  }}
+/>
     );
   };
 
@@ -116,33 +107,32 @@ export const AutoRotatingTestimonialCarousel: React.FC<Props> = ({
     <button
       onClick={onClick}
       disabled={isAnimating}
-      className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border border-gray-200"
-      aria-label={direction === 'left' ? 'Previous slide' : 'Next slide'}
-    >
-      {/* Right arrow SVG; rotate ONLY for left */}
+      className="w-[40px] h-[40px] flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
+        style={{
+        borderRadius: '80px',
+        background: '#EFEFEF',
+        border: 'none',
+        }}
+        aria-label={direction === 'left' ? 'Previous slide' : 'Next slide'}
+      >
       <ArrowSvgRight className={direction === 'left' ? 'rotate-180' : ''} />
-    </button>
-  );
+     </button>
+    );
 
   return (
     <div className="w-full">
-      <div className="mx-auto w-full max-w-[900px]">
-        {/* Make a "row" with a fixed min height so arrows can center against it */}
-        <div
-          className="grid grid-cols-[auto,1fr,auto] gap-4"
-          style={{ minHeight: '240px' }}
-        >
-          {/* Left arrow column: fill height + center */}
-          <div className="h-full flex items-center justify-start">
-            <ArrowButton
-              direction="left"
-              onClick={() => goTo(activeIndex - 1)}
-            />
-          </div>
+      <div className="mx-auto w-full max-w-[650px]">
+        {/* Flex container with centered items */}
+        <div className="flex items-center justify-between gap-8 sm:gap-16">
+          {/* Left arrow */}
+          <ArrowButton
+            direction="left"
+            onClick={() => goTo(activeIndex + 1)}
+          />
 
-          {/* Center carousel column */}
-          <div className="h-full flex items-center justify-center">
-            <div className="flex flex-row items-center justify-center gap-4 px-6 sm:px-10">
+          {/* Center carousel */}
+          <div className="flex items-center justify-center">
+            <div className="flex flex-row items-center justify-center gap-20 px-6 sm:px-10">
               {len === 1 ? (
                 <Card
                   slide={slides[centerIndex]}
@@ -184,32 +174,15 @@ export const AutoRotatingTestimonialCarousel: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* Right arrow column: fill height + center */}
-          <div className="h-full flex items-center justify-end">
-            <ArrowButton
-              direction="right"
-              onClick={() => goTo(activeIndex + 1)}
-            />
-          </div>
+          {/* Right arrow */}
+          <ArrowButton
+            direction="right"
+            onClick={() => goTo(activeIndex - 1)}
+          />
         </div>
       </div>
 
-      {/* Dots */}
-      <div className="flex justify-center gap-2 mt-6">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goTo(index)}
-            disabled={isAnimating}
-            className={`h-2.5 rounded-full transition-all duration-300 ${
-              index === activeIndex
-                ? 'bg-teal-600 w-8'
-                : 'bg-gray-300 hover:bg-gray-400 w-2.5'
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
+
     </div>
   );
 };
