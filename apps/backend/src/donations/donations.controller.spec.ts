@@ -34,6 +34,7 @@ describe('DonationsController', () => {
     create: jest.fn(),
     findPublic: jest.fn(),
     getTotalDonations: jest.fn(),
+    exportToCsv: jest.fn(),
   };
 
   const mockRepository = {
@@ -293,6 +294,30 @@ describe('DonationsController', () => {
 
       expect(result.rows).toEqual([]);
       expect(result.total).toBe(0);
+    });
+  });
+
+  describe('exportCsv', () => {
+    it('should call service exportToCsv method', async () => {
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          yield 'ID,First Name,Last Name,Email,Amount,Type,Interval,Date,Transaction ID\n';
+          yield '1,John,Doe,john@example.com,100,one_time,,2024-01-01T00:00:00.000Z,txn_123\n';
+        },
+      };
+
+      mockService.exportToCsv = jest.fn().mockResolvedValue(mockStream);
+
+      const mockRequest = {
+        user: {
+          status: 'ADMIN',
+        },
+      };
+
+      const result = await controller.exportCsv(mockRequest);
+
+      expect(service.exportToCsv).toHaveBeenCalled();
+      expect(result).toBeDefined();
     });
   });
 });

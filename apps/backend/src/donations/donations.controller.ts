@@ -9,6 +9,11 @@ import {
   ValidationPipe,
   HttpCode,
   HttpStatus,
+  StreamableFile,
+  Header,
+  UseInterceptors,
+  Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -29,6 +34,8 @@ import {
   RecurringInterval,
   DonationStatus,
 } from './donation.entity';
+import { CurrentUserInterceptor } from '../interceptors/current-user.interceptor';
+import { Status } from '../users/types';
 
 @ApiTags('Donations')
 @Controller('donations')
@@ -261,5 +268,37 @@ export class DonationsController {
       perPage: result.perPage,
       totalPages: result.totalPages,
     };
+  }
+
+  @Get('export')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(CurrentUserInterceptor)
+  @ApiBearerAuth()
+  @Header('Content-Type', 'text/csv')
+  @Header('Content-Disposition', 'attachment; filename="donations.csv"')
+  @ApiOperation({
+    summary: 'export donations to CSV (admin)',
+    description:
+      'export all donations to a CSV file with streaming support. Requires authentication.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'CSV file stream',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'unauthorized',
+  })
+  async exportCsv(@Req() req: any): Promise<StreamableFile> {
+    if (
+      req.user.status !== Status.ADMIN &&
+      req.user.status !== Status.STANDARD
+    ) {
+      throw new UnauthorizedException(
+        'User must have ADMIN or STANDARD status',
+      );
+    }
+    const stream = await this.donationsService.exportToCsv();
+    return new StreamableFile(stream);
   }
 }
