@@ -308,7 +308,13 @@ describe('DonationsController', () => {
 
       mockService.exportToCsv = jest.fn().mockResolvedValue(mockStream);
 
-      const result = await controller.exportCsv();
+      const mockRequest = {
+        user: {
+          status: 'ADMIN',
+        },
+      };
+
+      const result = await controller.exportCsv(mockRequest);
 
       expect(service.exportToCsv).toHaveBeenCalled();
       expect(result).toBeDefined();
