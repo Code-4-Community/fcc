@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 export interface CarouselSlide {
   id: number | string;
@@ -30,6 +30,32 @@ const ArrowSvgRight: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+const CardSlot: React.FC<{
+  slide: CarouselSlide;
+  style: React.CSSProperties;
+  animMs: number;
+}> = ({ slide, style, animMs }) => {
+  return (
+    <div
+      className="absolute top-1/2 left-1/2 overflow-hidden"
+      style={{
+        borderRadius: 10,
+        backgroundColor: '#d3d3d3',
+        backgroundImage: `url(${slide.image})`,
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: '102.5% 102%',
+        backgroundPosition: '-2px -2px',
+        transitionProperty: 'transform, opacity, box-shadow, width, height',
+        transitionTimingFunction: 'ease-in-out',
+        transitionDuration: `${animMs}ms`,
+        willChange: 'transform, opacity',
+        ...style,
+      }}
+      aria-label={slide.alt}
+    />
+  );
+};
+
 export const AutoRotatingTestimonialCarousel: React.FC<Props> = ({
   slides,
   animMs = 500,
@@ -51,51 +77,50 @@ export const AutoRotatingTestimonialCarousel: React.FC<Props> = ({
 
   useEffect(() => {
     if (len <= 1) return;
+
     const t = window.setInterval(() => {
-      setActiveIndex((prev) => {
-        if (isAnimating) return prev;
-        setIsAnimating(true);
-        window.setTimeout(() => setIsAnimating(false), animMs);
-        return (prev + 1) % len;
-      });
+      if (isAnimating) return;
+      setIsAnimating(true);
+      setActiveIndex((prev) => (prev - 1 + len) % len);
+      window.setTimeout(() => setIsAnimating(false), animMs);
     }, autoMs);
 
     return () => window.clearInterval(t);
   }, [autoMs, animMs, isAnimating, len]);
+
+  const slotStyles = useMemo(() => {
+    const base = { width: 193.834, height: 193.833 };
+
+    return {
+      left: {
+        ...base,
+        opacity: 0.85,
+        zIndex: 10,
+        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.25)',
+        transform: `translate(-50%, -50%) translateX(-140px) scale(0.8)`,
+      } as React.CSSProperties,
+      center: {
+        ...base,
+        opacity: 1,
+        zIndex: 30,
+        boxShadow: '0 4px 10px 0 rgba(0,0,0,0.50)',
+        transform: `translate(-50%, -50%) translateX(0px) scale(1)`,
+      } as React.CSSProperties,
+      right: {
+        ...base,
+        opacity: 0.85,
+        zIndex: 10,
+        boxShadow: '0 4px 8px 0 rgba(0,0,0,0.25)',
+        transform: `translate(-50%, -50%) translateX(140px) scale(0.8)`,
+      } as React.CSSProperties,
+    };
+  }, []);
 
   if (!len) return null;
 
   const leftIndex = (activeIndex - 1 + len) % len;
   const centerIndex = activeIndex;
   const rightIndex = (activeIndex + 1) % len;
-
-  const Card = ({
-    slide,
-    position,
-  }: {
-    slide: CarouselSlide;
-    position: 'left' | 'center' | 'right';
-  }) => {
-    const isCenter = position === 'center';
-
-    return (
-      <div
-  className="relative overflow-hidden transition-all ease-in-out flex-shrink-0"
-  style={{
-    width: isCenter ? '193.834px' : '150.065px',
-    height: isCenter ? '193.833px' : '150.065px',
-    borderRadius: '10px',
-    background: `url(${slide.image}) lightgray -2.207px -1.667px / 102.451% 101.732% no-repeat`,
-    boxShadow: isCenter
-      ? '0 4px 10px 0 rgba(0, 0, 0, 0.50)'
-      : '0 4px 8px 0 rgba(0, 0, 0, 0.25)',
-    transitionDuration: `${animMs}ms`,
-    zIndex: isCenter ? 30 : 10,
-    
-  }}
-/>
-    );
-  };
 
   const ArrowButton = ({
     direction,
@@ -108,81 +133,82 @@ export const AutoRotatingTestimonialCarousel: React.FC<Props> = ({
       onClick={onClick}
       disabled={isAnimating}
       className="w-[40px] h-[40px] flex items-center justify-center rounded-full disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none"
-        style={{
+      style={{
         borderRadius: '80px',
         background: '#EFEFEF',
         border: 'none',
-        }}
-        aria-label={direction === 'left' ? 'Previous slide' : 'Next slide'}
-      >
+      }}
+      aria-label={direction === 'left' ? 'Previous slide' : 'Next slide'}
+    >
       <ArrowSvgRight className={direction === 'left' ? 'rotate-180' : ''} />
-     </button>
-    );
+    </button>
+  );
 
   return (
     <div className="w-full">
       <div className="mx-auto w-full max-w-[650px]">
-        {/* Flex container with centered items */}
         <div className="flex items-center justify-between gap-8 sm:gap-16">
-          {/* Left arrow */}
-          <ArrowButton
-            direction="left"
-            onClick={() => goTo(activeIndex + 1)}
-          />
+          {/* Left arrow (previous) */}
+          <ArrowButton direction="left" onClick={() => goTo(activeIndex + 1)} />
 
-          {/* Center carousel */}
-          <div className="flex items-center justify-center">
-            <div className="flex flex-row items-center justify-center gap-20 px-6 sm:px-10">
-              {len === 1 ? (
-                <Card
-                  slide={slides[centerIndex]}
-                  position="center"
-                  key={`center-${centerIndex}`}
+          {/* Overlapping stage */}
+          <div
+            className="relative"
+            style={{
+              width: 420,
+              height: 220,
+            }}
+          >
+            {len === 1 ? (
+              <CardSlot
+                slide={slides[centerIndex]}
+                style={slotStyles.center}
+                animMs={animMs}
+              />
+            ) : len === 2 ? (
+              <>
+                <CardSlot
+                  slide={slides[leftIndex]}
+                  style={slotStyles.left}
+                  animMs={animMs}
                 />
-              ) : len === 2 ? (
-                <>
-                  <Card
-                    slide={slides[leftIndex]}
-                    position="left"
-                    key={`left-${leftIndex}`}
-                  />
-                  <Card
-                    slide={slides[centerIndex]}
-                    position="center"
-                    key={`center-${centerIndex}`}
-                  />
-                </>
-              ) : (
-                <>
-                  <Card
-                    slide={slides[leftIndex]}
-                    position="left"
-                    key={`left-${leftIndex}`}
-                  />
-                  <Card
-                    slide={slides[centerIndex]}
-                    position="center"
-                    key={`center-${centerIndex}`}
-                  />
-                  <Card
-                    slide={slides[rightIndex]}
-                    position="right"
-                    key={`right-${rightIndex}`}
-                  />
-                </>
-              )}
-            </div>
+                <CardSlot
+                  slide={slides[centerIndex]}
+                  style={slotStyles.center}
+                  animMs={animMs}
+                />
+              </>
+            ) : (
+              <>
+                <CardSlot
+                  key="slot-left"
+                  slide={slides[leftIndex]}
+                  style={slotStyles.left}
+                  animMs={animMs}
+                />
+                <CardSlot
+                  key="slot-center"
+                  slide={slides[centerIndex]}
+                  style={slotStyles.center}
+                  animMs={animMs}
+                />
+                <CardSlot
+                  key="slot-right"
+                  slide={slides[rightIndex]}
+                  style={slotStyles.right}
+                  animMs={animMs}
+                />
+              </>
+            )}
           </div>
 
-          {/* Right arrow */}
+          {/* Right arrow (next) */}
           <ArrowButton
             direction="right"
             onClick={() => goTo(activeIndex - 1)}
           />
         </div>
       </div>
-
-
     </div>
   );
 };
