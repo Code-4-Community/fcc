@@ -97,7 +97,7 @@ export const AutoRotatingTestimonialCarousel: React.FC<Props> = ({
         opacity: 0.85,
         zIndex: 10,
         boxShadow: '0 4px 8px 0 rgba(0,0,0,0.25)',
-        transform: `translate(-50%, -50%) translateX(-140px) scale(0.8)`,
+        transform: `translate(-50%, -50%) translateX(-120px) scale(0.8)`,
       } as React.CSSProperties,
       center: {
         ...base,
@@ -111,7 +111,7 @@ export const AutoRotatingTestimonialCarousel: React.FC<Props> = ({
         opacity: 0.85,
         zIndex: 10,
         boxShadow: '0 4px 8px 0 rgba(0,0,0,0.25)',
-        transform: `translate(-50%, -50%) translateX(140px) scale(0.8)`,
+        transform: `translate(-50%, -50%) translateX(120px) scale(0.8)`,
       } as React.CSSProperties,
     };
   }, []);
