@@ -1,5 +1,4 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-// import { AmazonSESWrapper } from './amazon-ses.wrapper';
 import { AMAZON_SES_WRAPPER } from './amazon-ses.wrapper';
 
 @Injectable()
