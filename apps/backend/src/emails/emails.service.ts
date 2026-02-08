@@ -1,10 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { AmazonSESWrapper } from './amazon-ses.wrapper';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+// import { AmazonSESWrapper } from './amazon-ses.wrapper';
+import { AMAZON_SES_WRAPPER } from './amazon-ses.wrapper';
 
 @Injectable()
 export class EmailsService {
   private readonly logger = new Logger(EmailsService.name);
-  constructor(private amazonSESWrapper: AmazonSESWrapper) {}
+  constructor(
+    @Inject(AMAZON_SES_WRAPPER)
+    private readonly amazonSESWrapper: any,
+  ) {}
 
   /**
    * Sends an email.

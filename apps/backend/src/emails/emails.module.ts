@@ -1,10 +1,7 @@
 import { Module } from '@nestjs/common';
 import { EmailsController } from './emails.controller';
 import { EmailsService } from './emails.service';
-import { JwtStrategy } from '../auth/jwt.strategy';
-import { CurrentUserInterceptor } from '../interceptors/current-user.interceptor';
-import { AuthService } from '../auth/auth.service';
-import { AmazonSESWrapper } from './amazon-ses.wrapper';
+import { AmazonSESWrapper, AMAZON_SES_WRAPPER } from './amazon-ses.wrapper';
 import { amazonSESClientFactory } from './amazon-ses-client.factory';
 import { UsersModule } from '../users/users.module';
 
@@ -13,11 +10,11 @@ import { UsersModule } from '../users/users.module';
   controllers: [EmailsController],
   providers: [
     EmailsService,
-    AmazonSESWrapper,
+    {
+      provide: AMAZON_SES_WRAPPER,
+      useClass: AmazonSESWrapper,
+    },
     amazonSESClientFactory,
-    AuthService,
-    JwtStrategy,
-    CurrentUserInterceptor,
   ],
   exports: [EmailsService],
 })

@@ -9,6 +9,7 @@ import MailComposer = require('nodemailer/lib/mail-composer');
 import * as dotenv from 'dotenv';
 import Mail from 'nodemailer/lib/mailer';
 dotenv.config();
+export const AMAZON_SES_WRAPPER = 'AMAZON_SES_WRAPPER';
 
 @Injectable()
 export class AmazonSESWrapper {
