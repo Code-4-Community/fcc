@@ -11,6 +11,7 @@ import { AuthProvider } from '@components/AuthProvider';
 import { ProtectedRoute } from '@components/ProtectedRoute';
 import { LoginPage } from '@containers/auth/LoginPage';
 import { DashboardPage } from '@containers/dashboard/DashboardPage';
+import ShareDialog from '@containers/donations/ShareDialog';
 
 const router = createBrowserRouter([
   {
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
         onError={(err) => console.error('Donation failed:', err)}
       />
     ),
+  },
+  {
+    path: '/share',
+    element: <ShareDialog />,
   },
 ]);
 
