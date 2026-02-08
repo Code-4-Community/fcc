@@ -279,17 +279,17 @@ export const DonationForm: React.FC<DonationFormProps> = ({
         <div className="progress-bar-container">
           <div
             className={
-              currentStep === 1 ? 'progress-bar-purple' : 'progress-bar-grey'
+              currentStep >= 1 ? 'progress-bar-purple' : 'progress-bar-grey'
             }
           ></div>
           <div
             className={
-              currentStep === 2 ? 'progress-bar-purple' : 'progress-bar-grey'
+              currentStep >= 2 ? 'progress-bar-purple' : 'progress-bar-grey'
             }
           ></div>
           <div
             className={
-              currentStep === 3 ? 'progress-bar-purple' : 'progress-bar-grey'
+              currentStep >= 3 ? 'progress-bar-purple' : 'progress-bar-grey'
             }
           ></div>
         </div>
