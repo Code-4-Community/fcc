@@ -1,159 +1,126 @@
+'use client';
+
 import React, { useState } from 'react';
-import { Button } from '../../../components/ui/button';
-import { Share2, ChevronLeft, ChevronRight } from 'lucide-react';
-import fccImg01 from '../../../assets/fcc-img-01.png';
-import fccImg02 from '../../../assets/fcc-img-02.png';
-import fccImg03 from '../../../assets/fcc-img-03.png';
 
 interface Step4ReceiptProps {
-  receiptId: string | null;
+  receiptId?: string | null;
 }
 
-const SHARE_GRAPHICS = [fccImg01, fccImg02, fccImg03];
-
 export const Step4Receipt: React.FC<Step4ReceiptProps> = () => {
-  const [currentSlide, setCurrentSlide] = useState(1);
   const [feedback, setFeedback] = useState('');
 
-  const extendedGraphics = [
-    SHARE_GRAPHICS[SHARE_GRAPHICS.length - 1],
-    ...SHARE_GRAPHICS,
-    SHARE_GRAPHICS[0],
-  ];
-
-  const handlePrevSlide = () => {
-    setCurrentSlide((prev) => {
-      if (prev === 0) {
-        return SHARE_GRAPHICS.length;
-      }
-      return prev - 1;
-    });
-  };
-
-  const handleNextSlide = () => {
-    setCurrentSlide((prev) => {
-      if (prev === SHARE_GRAPHICS.length + 1) {
-        return 1;
-      }
-      return prev + 1;
-    });
-  };
-
-  const handleShare = async () => {
-    const shareData = {
-      title: 'I just donated to FCC!',
-      text: 'Join me in supporting FCC and making a difference in our community.',
-      url: window.location.origin,
-    };
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        console.log('Web Share API not supported');
-      }
-    } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        console.error('Error sharing:', error);
-      }
+  const handleSpreadTheWord = () => {
+    if (navigator.share) {
+      navigator
+        .share({
+          title: 'I just donated to FCC!',
+          text: 'Join me in supporting FCC and making a difference in our community.',
+          url: window.location.origin,
+        })
+        .catch((error) => {
+          if (error.name !== 'AbortError') {
+            console.error('Error sharing:', error);
+          }
+        });
     }
   };
 
   return (
-    <section className="flex flex-col items-center justify-center gap-8 py-12">
-      <div className="text-center space-y-3">
-        <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight text-[#3e4684] leading-none">
+    <div className="mx-auto w-full max-w-[600px] px-4 py-8">
+      <div className="text-center">
+        <h1 className="text-6xl font-black tracking-tight text-[#2d3161] md:text-7xl scale-y-125 scale-x-90 [font-family:'Helvetica_Neue',Helvetica,Arial,sans-serif] [font-weight:900]">
           THANK YOU
         </h1>
-        <p className="text-xl md:text-2xl font-light text-[#3e4684]">
+        <p className="mt-2 text-black text-[32px] leading-[25px] tracking-[0] text-center [font-family:'Helvetica_Neue',Helvetica,Arial,sans-serif] [font-weight:200]">
           For making a difference.
         </p>
       </div>
-
-      <div className="flex items-center gap-4 text-sm text-gray-400">
+      <div className="mt-6 flex items-center justify-center gap-4">
         <div className="h-px w-20 bg-gray-300" />
-        <p>A receipt has been sent to your email.</p>
+        <p className="text-[14px] text-gray-400 whitespace-nowrap">
+          A receipt has been sent to your email.
+        </p>
         <div className="h-px w-20 bg-gray-300" />
       </div>
-
-      <div className="w-full max-w-2xl">
-        <label
-          htmlFor="feedback"
-          className="mb-3 block text-left text-base text-gray-700"
-        >
-          What made you donate to FCC today?{' '}
-          <span className="text-gray-400">(optional)</span>
+      <div className="mt-10">
+        <label className="mb-3 block text-left">
+          <span className="text-black text-[16px] leading-[100%] tracking-[0] font-normal [font-family:Helvetica,Arial,sans-serif]">
+            What made you donate to FCC today?
+          </span>{' '}
+          <span className="text-gray-400 text-[16px] leading-[100%] tracking-[0] font-normal [font-family:Helvetica,Arial,sans-serif]">
+            (optional)
+          </span>
         </label>
         <textarea
-          id="feedback"
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
           placeholder="Share with us here"
-          className="min-h-[120px] w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-400 transition-colors focus:border-[#3e4684] focus:outline-none focus:ring-2 focus:ring-[#3e4684]/20"
+          className="min-h-[120px] w-full rounded-lg border border-black bg-white px-4 py-3 text-black placeholder-gray-400 transition-colors focus:border-black focus:outline-none focus:ring-2 focus:ring-black/20"
           rows={4}
         />
       </div>
-
-      <div className="relative w-full max-w-4xl h-[160px] flex items-center justify-center">
-        <button
-          onClick={handlePrevSlide}
-          className="absolute left-0 z-30 rounded-full bg-white/90 p-3 shadow-lg transition-all hover:bg-white hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#3e4684]/20"
-          aria-label="Previous slide"
-        >
-          <ChevronLeft className="h-6 w-6 text-gray-700" />
-        </button>
-
-        <div className="relative w-full h-full flex items-center justify-center px-16">
-          {extendedGraphics.map((graphic, index) => {
-            const offset = index - currentSlide;
-            const isActive = index === currentSlide;
-            const isVisible = Math.abs(offset) <= 1;
-
-            return (
-              <div
-                key={index}
-                className="absolute transition-all duration-500 ease-out"
-                style={{
-                  transform: `
-                    translateX(${offset * 40}%)
-                    scale(${isActive ? 1 : 0.85})
-                    rotateY(${offset * -15}deg)
-                  `,
-                  zIndex: isActive ? 20 : 10 - Math.abs(offset),
-                  opacity: isVisible ? 1 : 0,
-                  pointerEvents: isActive ? 'auto' : 'none',
-                }}
-              >
-                <img
-                  src={graphic}
-                  alt={`Share graphic ${index + 1}`}
-                  className="w-full h-auto rounded-xl shadow-2xl"
-                  style={{
-                    transformStyle: 'preserve-3d',
-                    maxWidth: '180px',
-                  }}
-                />
-              </div>
-            );
-          })}
+      {/* placeholder for carousel */}
+      <div className="mt-8 mb-8">
+        <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+          <p className="text-gray-400 text-lg">Carousel Placeholder</p>
         </div>
-
-        <button
-          onClick={handleNextSlide}
-          className="absolute right-0 z-30 rounded-full bg-white/90 p-3 shadow-lg transition-all hover:bg-white hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#3e4684]/20"
-          aria-label="Next slide"
+      </div>
+      <div className="flex justify-center gap-10 mb-8">
+        <a
+          href="https://www.facebook.com/sharer/sharer.php"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="transition-opacity hover:opacity-80"
         >
-          <ChevronRight className="h-6 w-6 text-gray-700" />
+          <img
+            src="/src/assets/facebook.png"
+            alt="Share on Facebook"
+            className="w-12 h-12"
+          />
+        </a>
+        <a
+          href="https://twitter.com/intent/tweet"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="transition-opacity hover:opacity-80"
+        >
+          <img src="/src/assets/x.png" alt="Share on X" className="w-12 h-12" />
+        </a>
+        <a
+          href="https://www.linkedin.com/sharing/share-offsite/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="transition-opacity hover:opacity-80"
+        >
+          <img
+            src="/src/assets/linkedin.png"
+            alt="Share on LinkedIn"
+            className="w-12 h-12"
+          />
+        </a>
+      </div>
+      <div className="mt-8 flex justify-center">
+        <button
+          onClick={handleSpreadTheWord}
+          className="flex items-center justify-center gap-2 w-[269px] h-[71px] bg-[#007B64] text-white rounded-[10px] opacity-100 hover:bg-[#006654] transition-colors font-semibold text-lg"
+        >
+          Spread the word!
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+            <polyline points="16 6 12 2 8 6" />
+            <line x1="12" y1="2" x2="12" y2="15" />
+          </svg>
         </button>
       </div>
-
-      <Button
-        onClick={handleShare}
-        className="mt-4 flex items-center gap-2 rounded-lg bg-teal-600 px-8 py-6 text-lg font-semibold text-white transition-colors hover:bg-teal-700 focus:ring-2 focus:ring-teal-600/20"
-        size="lg"
-      >
-        Spread the word! <Share2 className="h-5 w-5" />
-      </Button>
-    </section>
+    </div>
   );
 };
