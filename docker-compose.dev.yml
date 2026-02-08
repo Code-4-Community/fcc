@@ -40,7 +40,10 @@ services:
 
       # JWT and Auth (add secrets in prod)
       JWT_SECRET: dev-secret-change-in-prod
-
+      AWS_SES_REGION: us-east-2
+      AWS_SES_ACCESS_KEY_ID: 
+      AWS_SES_SECRET_ACCESS_KEY: 
+      AWS_SES_SENDER_EMAIL: 
     ports:
       - '3000:3000'
     depends_on:
@@ -82,6 +85,11 @@ services:
       JWT_SECRET: dev-secret-change-in-prod
 
       STRIPE_SECRET_KEY: "sk_test_1234567890"
+
+      AWS_SES_REGION: us-east-2
+      AWS_SES_ACCESS_KEY_ID: 
+      AWS_SES_SECRET_ACCESS_KEY: 
+      AWS_SES_SENDER_EMAIL: 
 
     ports:
       - '3001:3001'
