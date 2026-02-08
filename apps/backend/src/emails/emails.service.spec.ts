@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Logger } from '@nestjs/common';
 import { EmailsService } from './emails.service';
 import { AMAZON_SES_WRAPPER } from './amazon-ses.wrapper';
 
@@ -22,8 +21,6 @@ describe('EmailsService', () => {
         },
       ],
     }).compile();
-    //   loggerErrorSpy = jest.spyOn(Logger.prototype, 'error');
-    //   service = module.get<EmailsService>(EmailsService);
     service = module.get<EmailsService>(EmailsService);
     loggerErrorSpy = jest.spyOn(service['logger'], 'error');
   });
