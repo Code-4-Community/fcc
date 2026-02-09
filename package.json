@@ -75,7 +75,7 @@
   "devDependencies": {
     "@nestjs/schematics": "^10.0.2",
     "@nestjs/testing": "^10.0.2",
-    "@nx/cypress": "22.0.2",
+    "@nx/cypress": "22.4.5",
     "@nx/eslint-plugin": "22.0.2",
     "@nx/jest": "22.4.4",
     "@nx/react": "22.0.2",
