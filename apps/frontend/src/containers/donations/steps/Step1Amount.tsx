@@ -108,7 +108,7 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
     formData.dedicationKind === kind;
 
   return (
-    <div className="w-full h-4/5 flex flex-col items-start justify-start gap-[4%] font-sans">
+    <div className="w-full flex flex-col items-start justify-start gap-6 font-sans">
       <div className="flex flex-col">
         <Label className="text-xl text-[#57585c] font-normal">
           Donation Recurrence

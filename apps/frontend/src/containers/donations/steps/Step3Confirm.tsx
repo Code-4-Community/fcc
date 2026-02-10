@@ -18,9 +18,9 @@ export const Step3Confirm: React.FC<Step3ConfirmProps> = ({ formData }) => {
         </p>
       </div>
 
-      <Card className="bg-[#EFEFEF] border-none shadow-none rounded-none ring-0">
+      <Card className="bg-[#EFEFEF] border-none shadow-none rounded-md ring-0">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+          <CardTitle className="text-sm font-bold tracking-wider text-muted-foreground">
             Transaction Details
           </CardTitle>
         </CardHeader>

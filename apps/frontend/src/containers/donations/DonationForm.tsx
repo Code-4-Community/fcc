@@ -273,12 +273,12 @@ export const DonationForm: React.FC<DonationFormProps> = ({
   return (
     <div className="donation-form-container">
       <form
-        className="donation-form"
+        className="donation-form flex flex-col p-[5%] box-border min-h-fit"
         onSubmit={(e) => e.preventDefault()}
         noValidate
       >
         <div
-          className={`flex h-[2%] w-full flex-row justify-center items-center gap-[3%] mb-[10%] ${currentStep === 1 || currentStep === 3 ? 'font-sans' : ''}`}
+          className={`flex w-full flex-row justify-center items-center gap-[3%] mb-[8%] ${currentStep === 1 || currentStep === 3 ? 'font-sans' : ''}`}
         >
           <div
             className={`w-[31%] aspect-[14/1] rounded-[10px] ${
@@ -305,16 +305,16 @@ export const DonationForm: React.FC<DonationFormProps> = ({
         {renderStep()}
 
         <div
-          className={`flex flex-row items-center justify-center w-full gap-[7%] ${currentStep === 1 || currentStep === 3 ? 'font-sans' : ''}`}
+          className={`flex flex-row items-center justify-center w-full gap-[7%] pt-6 mt-auto ${currentStep === 1 || currentStep === 3 ? 'font-sans' : ''}`}
         >
           {showBackButton && (
             <Button
               variant="unstyled"
               type="button"
-              className="flex-1 rounded-[2cqh] bg-[#007b64] text-white font-semibold h-[2.5rem] flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#006b54]"
+              className="flex-1 rounded-[2cqh] border-[3px] border-[#007b64] bg-white text-[#007b64] font-semibold h-[2.5rem] flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#f0fffb]"
               onClick={handleBack}
             >
-              BACK
+              Back
             </Button>
           )}
 
@@ -325,7 +325,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
               className="flex-1 rounded-[2cqh] bg-[#007b64] text-white font-semibold h-[2.5rem] flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#006b54]"
               onClick={handleNext}
             >
-              NEXT
+              Next
             </Button>
           )}
 
@@ -333,11 +333,11 @@ export const DonationForm: React.FC<DonationFormProps> = ({
             <Button
               variant="unstyled"
               type="button"
-              className="flex-1 rounded-[4px] bg-[#007bff] hover:bg-[#0056b3] text-white h-[2.5rem] px-3 text-base font-semibold disabled:bg-[#aaa]"
+              className="flex-1 rounded-[4px] bg-[#007b64] hover:bg-[#006b54] text-white h-[2.5rem] px-3 text-base font-semibold disabled:bg-[#aaa]"
               onClick={handleSubmit}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Processing...' : 'Confirm Donation'}
+              {isSubmitting ? 'Processing...' : 'Donate'}
             </Button>
           )}
 
