@@ -10,7 +10,7 @@ export const Step3Confirm: React.FC<Step3ConfirmProps> = ({ formData }) => {
   const amount = parseFloat(formData.amount) || 0;
 
   return (
-    <section className="font-['Source_Sans_3']">
+    <section className="font-sans">
       <h1 className="font-semibold text-2xl">Confirm Payment</h1>
       <h3 className="text-[#55565A] font-light">
         Please confirm your information before preceeeding.

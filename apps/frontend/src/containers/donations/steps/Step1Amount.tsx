@@ -107,9 +107,9 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
     formData.dedicationKind === kind;
 
   return (
-    <div className="w-full h-4/5 flex flex-col items-start justify-start gap-[4%] font-['Source_Sans_3']">
+    <div className="w-full h-4/5 flex flex-col items-start justify-start gap-[4%] font-sans">
       <div className="flex flex-col">
-        <Label className="text-xl text-[#57585c] font-thin">
+        <Label className="text-xl text-[#57585c] font-normal">
           Donation Recurrence
         </Label>
         <div className="flex gap-2">
@@ -118,9 +118,9 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
               key={option.label}
               type="button"
               className={
-                'py-1 px-2 whitespace-nowrap rounded border border-gray-300 bg-white text-base cursor-pointer transition-colors duration-150 ease-in-out font-thin disabled:opacity-60 disabled:cursor-not-allowed' +
+                'py-1 px-2 whitespace-nowrap rounded border border-gray-300 bg-white text-base cursor-pointer transition-colors duration-150 ease-in-out font-semibold disabled:opacity-60 disabled:cursor-not-allowed ' +
                 (isRecurrenceSelected(option)
-                  ? 'border-[#2a7a73] bg-[#e0f2f1] font-semibold'
+                  ? 'border-[#2a7a73] bg-[#e0f2f1]'
                   : 'bg-white border-gray-300')
               }
               onClick={() => handleRecurrenceClick(option)}
@@ -137,7 +137,7 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
         )}
       </div>
       <div className="flex flex-col">
-        <Label className="text-lg text-[#57585c] font-thin" htmlFor="amount">
+        <Label className="text-lg text-[#57585c] font-normal" htmlFor="amount">
           Donation Amount <span className="text-[#d93025]">*</span>
         </Label>
 
@@ -147,9 +147,9 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
               key={amount}
               type="button"
               className={
-                'flex-[1_1_20%] py-1 px-2 w-full rounded border border-gray-300 bg-white text-base font-thin cursor-pointer transition-colors duration-150 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed' +
+                'flex-[1_1_20%] py-1 px-2 w-full rounded border border-gray-300 bg-white text-base font-semibold cursor-pointer transition-colors duration-150 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed' +
                 (isAmountSelected(amount)
-                  ? ' border-[#2a7a73] bg-[#e0f2f1] font-semibold'
+                  ? ' border-[#2a7a73] bg-[#e0f2f1]'
                   : '')
               }
               onClick={() => handlePresetAmountClick(amount)}
@@ -161,10 +161,10 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
         </div>
 
         <div className="flex flex-row items-center justify-start gap-[4%] w-full">
-          <div className="text-base font-semibold whitespace-nowrap">
+          <div className="text-base font-normal whitespace-nowrap">
             Custom Amount
           </div>
-          <div className="text-base font-semibold whitespace-nowrap">
+          <div className="text-base font-normal whitespace-nowrap">
             <span className="text-base text-[#555]">$</span>
             <Input
               type="text"
@@ -192,7 +192,7 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
       </div>
 
       <div className="flex flex-col">
-        <Label className="text-lg text-[#57585c] font-thin">
+        <Label className="text-lg text-[#57585c] font-normal">
           Donation Anonymity
         </Label>
         <div
@@ -221,7 +221,7 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
       </div>
 
       <div className="flex flex-col">
-        <div className="text-lg text-[#57585c] font-thin">
+        <div className="text-lg text-[#57585c] font-normal">
           Dedicate This Donation
         </div>
         <div
@@ -252,9 +252,9 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
             <Button
               type="button"
               className={
-                'py-1 px-2 w-full whitespace-nowrap rounded border text-base cursor-pointer transition-colors duration-150 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed' +
+                'py-1 px-2 w-full whitespace-nowrap rounded border text-base cursor-pointer transition-colors duration-150 ease-in-out font-semibold disabled:opacity-60 disabled:cursor-not-allowed' +
                 (isDedicationKindSelected('honor')
-                  ? ' border-[#2a7a73] bg-[#e0f2f1] font-semibold'
+                  ? ' border-[#2a7a73] bg-[#e0f2f1]'
                   : ' border-gray-300 bg-white')
               }
               onClick={() => handleDedicationKindClick('honor')}
@@ -265,9 +265,9 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
             <Button
               type="button"
               className={
-                'py-1 px-2 w-full whitespace-nowrap rounded border text-base cursor-pointer transition-colors duration-150 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed' +
+                'py-1 px-2 w-full whitespace-nowrap rounded border text-base cursor-pointer transition-colors duration-150 ease-in-out font-semibold disabled:opacity-60 disabled:cursor-not-allowed' +
                 (isDedicationKindSelected('memory')
-                  ? ' border-[#2a7a73] bg-[#e0f2f1] font-semibold'
+                  ? ' border-[#2a7a73] bg-[#e0f2f1]'
                   : ' border-gray-300 bg-white')
               }
               onClick={() => handleDedicationKindClick('memory')}
@@ -289,7 +289,7 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
             />
           </div>
 
-          <div className="w-full flex-row flex items-center justify-start text-[#57585c] font-thin h-[6%] overflow-hidden text-base gap-2">
+          <div className="w-full flex-row flex items-center justify-start text-[#57585c] font-normal h-[6%] overflow-hidden text-base gap-2">
             <Label>
               <Checkbox
                 id="showDedicationPublicly"
