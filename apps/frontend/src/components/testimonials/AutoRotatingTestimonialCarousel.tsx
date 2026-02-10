@@ -118,10 +118,6 @@ export const AutoRotatingTestimonialCarousel: React.FC<Props> = ({
 
   if (!len) return null;
 
-  const leftIndex = (activeIndex - 1 + len) % len;
-  const centerIndex = activeIndex;
-  const rightIndex = (activeIndex + 1) % len;
-
   const ArrowButton = ({
     direction,
     onClick,
