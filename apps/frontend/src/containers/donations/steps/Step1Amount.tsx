@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@lib/utils';
 import { Label } from '@components/ui/label';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -164,8 +165,10 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
           <div className="text-base font-normal whitespace-nowrap">
             Custom Amount
           </div>
-          <div className="text-base font-normal whitespace-nowrap">
-            <span className="text-base text-[#555]">$</span>
+          <div className="relative flex items-center w-full">
+            <span className="absolute left-3 text-base text-[#555] font-normal">
+              $
+            </span>
             <Input
               type="text"
               id="amount"
@@ -175,12 +178,17 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
               placeholder="0.00"
               value={formData.amount}
               onChange={onChange}
-              className={errors.amount ? 'border-[#d93025] bg-[#fff6f6]' : ''}
+              className={cn(
+                'pl-7 pr-12 h-10 text-base font-normal',
+                errors.amount ? 'border-[#d93025] bg-[#fff6f6]' : '',
+              )}
               disabled={isSubmitting}
               aria-invalid={!!errors.amount}
               aria-describedby={errors.amount ? 'amount-error' : undefined}
             />
-            <span className="text-base text-[#555]">USD</span>
+            <span className="absolute right-3 text-base text-[#555] font-normal">
+              USD
+            </span>
           </div>
         </div>
 
