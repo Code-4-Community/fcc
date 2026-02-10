@@ -46,7 +46,7 @@ const CardSlot: React.FC<{
         backgroundSize: '102.5% 102%',
         backgroundPosition: '-2px -2px',
         transitionProperty: 'transform, opacity, box-shadow, width, height',
-        transitionTimingFunction: 'ease-in-out',
+        transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
         transitionDuration: `${animMs}ms`,
         willChange: 'transform, opacity',
         ...style,
@@ -159,47 +159,38 @@ export const AutoRotatingTestimonialCarousel: React.FC<Props> = ({
               height: 220,
             }}
           >
-            {len === 1 ? (
-              <CardSlot
-                slide={slides[centerIndex]}
-                style={slotStyles.center}
-                animMs={animMs}
-              />
-            ) : len === 2 ? (
-              <>
+            {slides.map((slide, index) => {
+              const position = (index - activeIndex + len) % len;
+              let style: React.CSSProperties;
+
+              if (position === len - 1) {
+                // Left position
+                style = slotStyles.left;
+              } else if (position === 0) {
+                // Center position
+                style = slotStyles.center;
+              } else if (position === 1) {
+                // Right position
+                style = slotStyles.right;
+              } else {
+                // Hidden - off screen
+                style = {
+                  ...slotStyles.right,
+                  opacity: 0,
+                  transform: `translate(-50%, -50%) translateX(240px) scale(0.6)`,
+                  pointerEvents: 'none',
+                };
+              }
+
+              return (
                 <CardSlot
-                  slide={slides[leftIndex]}
-                  style={slotStyles.left}
+                  key={slide.id}
+                  slide={slide}
+                  style={style}
                   animMs={animMs}
                 />
-                <CardSlot
-                  slide={slides[centerIndex]}
-                  style={slotStyles.center}
-                  animMs={animMs}
-                />
-              </>
-            ) : (
-              <>
-                <CardSlot
-                  key="slot-left"
-                  slide={slides[leftIndex]}
-                  style={slotStyles.left}
-                  animMs={animMs}
-                />
-                <CardSlot
-                  key="slot-center"
-                  slide={slides[centerIndex]}
-                  style={slotStyles.center}
-                  animMs={animMs}
-                />
-                <CardSlot
-                  key="slot-right"
-                  slide={slides[rightIndex]}
-                  style={slotStyles.right}
-                  animMs={animMs}
-                />
-              </>
-            )}
+              );
+            })}
           </div>
 
           {/* Right arrow (next) */}
