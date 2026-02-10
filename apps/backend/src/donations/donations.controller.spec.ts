@@ -11,6 +11,8 @@ import {
 import { Donation as DomainDonation } from './mappers';
 import { INestApplication, BadRequestException } from '@nestjs/common';
 import request from 'supertest';
+import { AuthService } from '../auth/auth.service';
+import { UsersService } from '../users/users.service';
 describe('DonationsController', () => {
   let controller: DonationsController;
   let service: DonationsService;
@@ -34,10 +36,21 @@ describe('DonationsController', () => {
     create: jest.fn(),
     findPublic: jest.fn(),
     getTotalDonations: jest.fn(),
+    exportToCsv: jest.fn(),
   };
 
   const mockRepository = {
     findPaginated: jest.fn(),
+  };
+
+  const mockAuthService = {
+    getUser: jest
+      .fn()
+      .mockResolvedValue([{ Name: 'email', Value: 'test@example.com' }]),
+  };
+
+  const mockUsersService = {
+    find: jest.fn().mockResolvedValue([]),
   };
 
   beforeEach(async () => {
@@ -51,6 +64,14 @@ describe('DonationsController', () => {
         {
           provide: DonationsRepository,
           useValue: mockRepository,
+        },
+        {
+          provide: AuthService,
+          useValue: mockAuthService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
         },
       ],
     }).compile();
@@ -295,6 +316,30 @@ describe('DonationsController', () => {
       expect(result.total).toBe(0);
     });
   });
+
+  describe('exportCsv', () => {
+    it('should call service exportToCsv method', async () => {
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          yield 'ID,First Name,Last Name,Email,Amount,Type,Interval,Date,Transaction ID\n';
+          yield '1,John,Doe,john@example.com,100,one_time,,2024-01-01T00:00:00.000Z,txn_123\n';
+        },
+      };
+
+      mockService.exportToCsv = jest.fn().mockResolvedValue(mockStream);
+
+      const mockRequest = {
+        user: {
+          status: 'ADMIN',
+        },
+      };
+
+      const result = await controller.exportCsv(mockRequest);
+
+      expect(service.exportToCsv).toHaveBeenCalled();
+      expect(result).toBeDefined();
+    });
+  });
 });
 
 interface TestDonation {
@@ -384,11 +429,23 @@ describe('Donation Integration', () => {
       }),
     };
 
+    const mockAuthServiceIntegration = {
+      getUser: jest
+        .fn()
+        .mockResolvedValue([{ Name: 'email', Value: 'test@example.com' }]),
+    };
+
+    const mockUsersServiceIntegration = {
+      find: jest.fn().mockResolvedValue([]),
+    };
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [DonationsController],
       providers: [
         { provide: DonationsService, useValue: mockService },
         { provide: DonationsRepository, useValue: {} },
+        { provide: AuthService, useValue: mockAuthServiceIntegration },
+        { provide: UsersService, useValue: mockUsersServiceIntegration },
       ],
     }).compile();
 

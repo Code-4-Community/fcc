@@ -14,6 +14,7 @@ import { Step1Amount } from './steps/Step1Amount';
 import { Step2Details } from './steps/Step2Details';
 import { Step3Confirm } from './steps/Step3Confirm';
 import { Step4Receipt } from './steps/Step4Receipt';
+import { Button } from '@components/ui/button';
 
 export const DonationForm: React.FC<DonationFormProps> = ({
   onSuccess,
@@ -272,25 +273,27 @@ export const DonationForm: React.FC<DonationFormProps> = ({
   return (
     <div className="donation-form-container">
       <form
-        className="donation-form"
+        className="donation-form flex flex-col p-[5%] box-border min-h-fit"
         onSubmit={(e) => e.preventDefault()}
         noValidate
       >
-        <div className="progress-bar-container">
+        <div
+          className={`flex w-full flex-row justify-center items-center gap-[3%] mb-[8%] ${currentStep === 1 || currentStep === 3 ? 'font-sans' : ''}`}
+        >
           <div
-            className={
-              currentStep === 1 ? 'progress-bar-purple' : 'progress-bar-grey'
-            }
+            className={`w-[31%] aspect-[14/1] rounded-[10px] ${
+              currentStep === 1 ? 'bg-[#650d77]' : 'bg-[#b3b3b3]'
+            }`}
           ></div>
           <div
-            className={
-              currentStep === 2 ? 'progress-bar-purple' : 'progress-bar-grey'
-            }
+            className={`w-[31%] aspect-[14/1] rounded-[10px] ${
+              currentStep === 2 ? 'bg-[#650d77]' : 'bg-[#b3b3b3]'
+            }`}
           ></div>
           <div
-            className={
-              currentStep === 3 ? 'progress-bar-purple' : 'progress-bar-grey'
-            }
+            className={`w-[31%] aspect-[14/1] rounded-[10px] ${
+              currentStep === 3 ? 'bg-[#650d77]' : 'bg-[#b3b3b3]'
+            }`}
           ></div>
         </div>
         {submitError && (
@@ -301,42 +304,52 @@ export const DonationForm: React.FC<DonationFormProps> = ({
 
         {renderStep()}
 
-        <div className="step-actions">
+        <div
+          className={`flex flex-row items-center justify-center w-full gap-[7%] pt-6 mt-auto ${currentStep === 1 || currentStep === 3 ? 'font-sans' : ''}`}
+        >
           {showBackButton && (
-            <button
+            <Button
+              variant="unstyled"
               type="button"
-              className="action-button"
+              className="flex-1 rounded-[2cqh] border-[3px] border-[#007b64] bg-white text-[#007b64] font-semibold h-[2.5rem] flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#f0fffb]"
               onClick={handleBack}
             >
-              BACK
-            </button>
+              Back
+            </Button>
           )}
 
           {showNextButton && (
-            <button
+            <Button
+              variant="unstyled"
               type="button"
-              className="action-button"
+              className="flex-1 rounded-[2cqh] bg-[#007b64] text-white font-semibold h-[2.5rem] flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#006b54]"
               onClick={handleNext}
             >
-              NEXT
-            </button>
+              Next
+            </Button>
           )}
 
           {currentStep === 3 && (
-            <button
+            <Button
+              variant="unstyled"
               type="button"
-              className="submit-button"
+              className="flex-1 rounded-[4px] bg-[#007b64] hover:bg-[#006b54] text-white h-[2.5rem] px-3 text-base font-semibold disabled:bg-[#aaa]"
               onClick={handleSubmit}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Processing...' : 'Confirm Donation'}
-            </button>
+              {isSubmitting ? 'Processing...' : 'Donate'}
+            </Button>
           )}
 
           {currentStep === 4 && (
-            <button type="button" className="primary" onClick={resetForm}>
+            <Button
+              variant="default"
+              type="button"
+              className="primary font-semibold"
+              onClick={resetForm}
+            >
               Make another donation
-            </button>
+            </Button>
           )}
         </div>
       </form>

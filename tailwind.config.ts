@@ -7,7 +7,11 @@ export default {
     './libs/**/*.{js,ts,jsx,tsx,html}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ['"Source Sans Pro"', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 } satisfies Config
