@@ -6,7 +6,11 @@ export default {
     './apps/frontend/src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ['"Source Sans Pro"', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 } satisfies Config

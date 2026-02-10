@@ -1,7 +1,9 @@
 /* Outer card */
 .testimonial-carousel {
-  width: 1200px;
-  height: 395px;
+  max-width: 1200px;
+  width: 100%;
+  min-height: 395px;
+  height: auto;
   border-radius: 10px;
   overflow: hidden;
   position: relative;
@@ -13,7 +15,7 @@
 
   display: flex;
   align-items: center;
-  padding: 40px 64px;
+  padding: clamp(20px, 5vw, 40px) clamp(24px, 8vw, 64px);
 
   font-family: 'Helvetica Neue LT Std', 'Helvetica Neue', Arial, sans-serif;
   color: #ffffff;
@@ -43,30 +45,30 @@
 .testimonial-carousel__text {
   position: relative; /* so it sits above ::before */
   z-index: 1;
-  max-width: 440px;
+  max-width: min(440px, 50%);
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  gap: clamp(24px, 5vw, 48px);
 }
 
 .testimonial-carousel__title {
   margin: 0;
-  font-size: 48px;
+  font-size: clamp(28px, 6vw, 48px);
   font-weight: 700;
-  line-height: 100%;
+  line-height: 110%;
 }
 
 .testimonial-carousel__body {
   margin: 0;
-  font-size: 20px;
+  font-size: clamp(12px, 2.5vw, 20px);
   font-weight: 500;
-  line-height: 100%;
+  line-height: 120%;
 }
 
 .testimonial-carousel__link {
-  font-size: 20px;
+  font-size: clamp(12px, 2.5vw, 20px);
   font-weight: 500;
-  line-height: 100%;
+  line-height: 140%;
   color: #ffffff;
   text-decoration-line: underline;
   text-decoration-style: solid;
