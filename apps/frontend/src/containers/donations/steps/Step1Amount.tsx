@@ -118,12 +118,12 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
             <Button
               key={option.label}
               type="button"
-              className={
-                'py-1 px-2 whitespace-nowrap rounded border border-gray-300 bg-white text-base cursor-pointer transition-colors duration-150 ease-in-out font-semibold disabled:opacity-60 disabled:cursor-not-allowed ' +
-                (isRecurrenceSelected(option)
-                  ? 'border-[#2a7a73] bg-[#e0f2f1]'
-                  : 'bg-white border-gray-300')
-              }
+              className={cn(
+                'h-12 px-4 whitespace-nowrap rounded border text-base cursor-pointer transition-colors duration-150 ease-in-out font-semibold disabled:opacity-60 disabled:cursor-not-allowed',
+                isRecurrenceSelected(option)
+                  ? 'bg-[#007b64] text-white border-[#007b64]'
+                  : 'bg-white text-black border-gray-300',
+              )}
               onClick={() => handleRecurrenceClick(option)}
               disabled={isSubmitting}
             >
@@ -147,12 +147,12 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
             <Button
               key={amount}
               type="button"
-              className={
-                'flex-[1_1_20%] py-1 px-2 w-full rounded border border-gray-300 bg-white text-base font-semibold cursor-pointer transition-colors duration-150 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed' +
-                (isAmountSelected(amount)
-                  ? ' border-[#2a7a73] bg-[#e0f2f1]'
-                  : '')
-              }
+              className={cn(
+                'flex-[1_1_20%] h-12 px-4 w-full rounded border text-base font-semibold cursor-pointer transition-colors duration-150 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed',
+                isAmountSelected(amount)
+                  ? 'bg-[#007b64] text-white border-[#007b64]'
+                  : 'bg-white text-black border-gray-300',
+              )}
               onClick={() => handlePresetAmountClick(amount)}
               disabled={isSubmitting}
             >
@@ -259,12 +259,12 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
           <div className="flex gap-2">
             <Button
               type="button"
-              className={
-                'py-1 px-2 w-full whitespace-nowrap rounded border text-base cursor-pointer transition-colors duration-150 ease-in-out font-semibold disabled:opacity-60 disabled:cursor-not-allowed' +
-                (isDedicationKindSelected('honor')
-                  ? ' border-[#2a7a73] bg-[#e0f2f1]'
-                  : ' border-gray-300 bg-white')
-              }
+              className={cn(
+                'h-12 px-4 w-full whitespace-nowrap rounded border text-base cursor-pointer transition-colors duration-150 ease-in-out font-semibold disabled:opacity-60 disabled:cursor-not-allowed',
+                isDedicationKindSelected('honor')
+                  ? 'bg-[#007b64] text-white border-[#007b64]'
+                  : 'bg-white text-black border-gray-300',
+              )}
               onClick={() => handleDedicationKindClick('honor')}
               disabled={isSubmitting}
             >
@@ -272,12 +272,12 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
             </Button>
             <Button
               type="button"
-              className={
-                'py-1 px-2 w-full whitespace-nowrap rounded border text-base cursor-pointer transition-colors duration-150 ease-in-out font-semibold disabled:opacity-60 disabled:cursor-not-allowed' +
-                (isDedicationKindSelected('memory')
-                  ? ' border-[#2a7a73] bg-[#e0f2f1]'
-                  : ' border-gray-300 bg-white')
-              }
+              className={cn(
+                'h-12 px-4 w-full whitespace-nowrap rounded border text-base cursor-pointer transition-colors duration-150 ease-in-out font-semibold disabled:opacity-60 disabled:cursor-not-allowed',
+                isDedicationKindSelected('memory')
+                  ? 'bg-[#007b64] text-white border-[#007b64]'
+                  : 'bg-white text-black border-gray-300',
+              )}
               onClick={() => handleDedicationKindClick('memory')}
               disabled={isSubmitting}
             >

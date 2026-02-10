@@ -311,7 +311,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
             <Button
               variant="unstyled"
               type="button"
-              className="max-w-[40%] rounded-[2cqh] bg-[#007b64] text-white font-semibold aspect-[4/1] w-full flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#006b54]"
+              className="flex-1 rounded-[2cqh] bg-[#007b64] text-white font-semibold h-[2.5rem] flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#006b54]"
               onClick={handleBack}
             >
               BACK
@@ -322,7 +322,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
             <Button
               variant="unstyled"
               type="button"
-              className="max-w-[40%] rounded-[2cqh] bg-[#007b64] text-white font-semibold aspect-[4/1] w-full flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#006b54]"
+              className="flex-1 rounded-[2cqh] bg-[#007b64] text-white font-semibold h-[2.5rem] flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#006b54]"
               onClick={handleNext}
             >
               NEXT
@@ -333,7 +333,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
             <Button
               variant="unstyled"
               type="button"
-              className="w-full p-3 bg-[#007bff] hover:bg-[#0056b3] text-white rounded-[4px] text-base font-semibold disabled:bg-[#aaa]"
+              className="flex-1 rounded-[4px] bg-[#007bff] hover:bg-[#0056b3] text-white h-[2.5rem] px-3 text-base font-semibold disabled:bg-[#aaa]"
               onClick={handleSubmit}
               disabled={isSubmitting}
             >
