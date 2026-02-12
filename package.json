@@ -81,7 +81,7 @@
     "@nx/jest": "22.4.4",
     "@nx/react": "22.0.2",
     "@nx/vite": "22.0.2",
-    "@nx/webpack": "22.0.2",
+    "@nx/webpack": "22.5.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "16.1.0",
