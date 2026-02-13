@@ -10,6 +10,7 @@ import { DonationForm } from './donations/DonationForm';
 import CarouselImage1 from '@components/testimonials/TestimonialImages/Carousel_image1.png';
 import CarouselImage2 from '@components/testimonials/TestimonialImages/Carousel_image2.png';
 import CarouselImage3 from '@components/testimonials/TestimonialImages/Carousel_image3.png';
+import ShareOptions from './donations/ShareOptions';
 
 const SAMPLE_DONATION: SampleDonation = {
   name: 'C4C',
@@ -52,6 +53,7 @@ const Root: React.FC = () => {
       <div className="root-container">
         <section className="root-testimonial">
           <TestimonialCarousel slides={TESTIMONIAL_SLIDES} />
+          <ShareOptions />
         </section>
         <section className="root-content-grid">
           <div className="root-goal-panel">

@@ -11,7 +11,7 @@ import { AuthProvider } from '@components/AuthProvider';
 import { ProtectedRoute } from '@components/ProtectedRoute';
 import { LoginPage } from '@containers/auth/LoginPage';
 import { DashboardPage } from '@containers/dashboard/DashboardPage';
-import ShareDialog from '@containers/donations/ShareDialog';
+import ShareOptions from '@containers/donations/ShareOptions';
 
 const router = createBrowserRouter([
   {
@@ -52,7 +52,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/share',
-    element: <ShareDialog />,
+    element: <ShareOptions />,
   },
 ]);
 
