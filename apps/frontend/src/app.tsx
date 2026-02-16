@@ -50,10 +50,6 @@ const router = createBrowserRouter([
       />
     ),
   },
-  {
-    path: '/share',
-    element: <ShareOptions />,
-  },
 ]);
 
 export const App: React.FC = () => {

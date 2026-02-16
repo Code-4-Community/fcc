@@ -53,7 +53,6 @@ const Root: React.FC = () => {
       <div className="root-container">
         <section className="root-testimonial">
           <TestimonialCarousel slides={TESTIMONIAL_SLIDES} />
-          <ShareOptions />
         </section>
         <section className="root-content-grid">
           <div className="root-goal-panel">

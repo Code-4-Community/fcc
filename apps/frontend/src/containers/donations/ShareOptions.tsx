@@ -9,7 +9,7 @@ import {
   LinkedinIcon,
 } from 'react-share';
 
-const ShareOptions = () => {
+const ShareOptions = ({ activeSlideUrl }: { activeSlideUrl: string }) => {
   const [isCopying, setIsCopying] = useState(false);
   const message = `Want to support your community? Join me in donating to the Fenway Community Center!\n\n`;
 
