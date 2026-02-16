@@ -1,5 +1,9 @@
 import { Button } from '@components/ui/button';
 import React, { useState } from 'react';
+import ShareIcon from '@containers/ShareIcon';
+import Facebook_icon from '../../components/ShareOptionsImages/Facebook_icon.png';
+import X_icon from '../../components/ShareOptionsImages/X_icon.png';
+import Linkedin_icon from '../../components/ShareOptionsImages/Linkedin_icon.png';
 
 const ShareOptions = () => {
   const [isCopying, setIsCopying] = useState(false);
@@ -26,6 +30,7 @@ const ShareOptions = () => {
           color: 'white',
           padding: '1.5rem',
           fontWeight: 'bold',
+          marginTop: '1.5rem',
         }}
         className="flex-1 gap-3 rounded-[10px] m-auto min-h-[2.5rem] flex justify-center items-center text-center text-[1.3rem] hover:opacity-90 transition-opacity"
         onClick={handleSpreadTheWordClick}
@@ -52,7 +57,11 @@ const ShareOptions = () => {
           />
         </svg>
       </Button>
-      <div></div>
+      <div className="flex justify-center">
+        <ShareIcon icon={Facebook_icon} />
+        <ShareIcon icon={X_icon} />
+        <ShareIcon icon={Linkedin_icon} />
+      </div>
     </div>
   );
 };
