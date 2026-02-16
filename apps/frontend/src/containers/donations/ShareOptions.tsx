@@ -1,18 +1,23 @@
 import { Button } from '@components/ui/button';
 import React, { useState } from 'react';
-import ShareIcon from '@containers/ShareIcon';
-import Facebook_icon from '../../components/ShareOptionsImages/Facebook_icon.png';
-import X_icon from '../../components/ShareOptionsImages/X_icon.png';
-import Linkedin_icon from '../../components/ShareOptionsImages/Linkedin_icon.png';
+import {
+  FacebookShareButton,
+  FacebookIcon,
+  XIcon,
+  TwitterShareButton,
+  LinkedinShareButton,
+  LinkedinIcon,
+} from 'react-share';
 
 const ShareOptions = () => {
   const [isCopying, setIsCopying] = useState(false);
+  const message = `Want to support your community? Join me in donating to the Fenway Community Center!\n\n`;
 
   const handleSpreadTheWordClick = async () => {
-    const message = `Want to support your community? Join me in donating to the Fenway Community Center!\n${window.location.href}`;
+    const linkCopyMessage = message.concat(window.location.href);
     try {
       setIsCopying(true);
-      await navigator.clipboard.writeText(message);
+      await navigator.clipboard.writeText(linkCopyMessage);
       setTimeout(() => setIsCopying(false), 1000);
     } catch (err) {
       console.error('Failed to copy message to clipboard');
@@ -57,10 +62,28 @@ const ShareOptions = () => {
           />
         </svg>
       </Button>
-      <div className="flex justify-center">
-        <ShareIcon icon={Facebook_icon} />
-        <ShareIcon icon={X_icon} />
-        <ShareIcon icon={Linkedin_icon} />
+      <div
+        className="flex justify-center"
+        style={{ gap: '3rem', marginTop: '2rem' }}
+      >
+        <FacebookShareButton url={window.location.href}>
+          <FacebookIcon
+            className="rounded-full"
+            style={{ maxWidth: '2.5rem', height: 'auto' }}
+          />
+        </FacebookShareButton>
+        <TwitterShareButton url={window.location.href}>
+          <XIcon
+            className="rounded-full"
+            style={{ maxWidth: '2.5rem', height: 'auto' }}
+          />
+        </TwitterShareButton>
+        <LinkedinShareButton url={window.location.href}>
+          <LinkedinIcon
+            className="rounded-full"
+            style={{ maxWidth: '2.5rem', height: 'auto' }}
+          />
+        </LinkedinShareButton>
       </div>
     </div>
   );
