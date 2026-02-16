@@ -10,6 +10,7 @@ import {
 import { Repository } from 'typeorm';
 import { CreateDonationRequest, Donation as DomainDonation } from './mappers';
 import { Readable } from 'stream';
+import { DonationsRepository } from './donations.repository';
 
 interface PaymentIntentSyncPayload {
   donationId?: number;
@@ -24,6 +25,7 @@ export class DonationsService {
   constructor(
     @InjectRepository(Donation)
     private donationRepository: Repository<Donation>,
+    private readonly donationsRepository: DonationsRepository,
   ) {}
 
   async create(
@@ -261,6 +263,15 @@ export class DonationsService {
     }
 
     await this.donationRepository.save(donation);
+  }
+
+  async getLapsedDonors(numMonths = 6): Promise<{ emails: string[] }> {
+    if (!Number.isFinite(numMonths) || numMonths <= 0) {
+      throw new BadRequestException('numMonths must be a positive number');
+    }
+
+    const emails = await this.donationsRepository.findLapsedDonors(numMonths);
+    return { emails };
   }
 
   async exportToCsv(): Promise<Readable> {

@@ -189,6 +189,47 @@ export class DonationsRepository {
   }
 
   /**
+   * Find unique donor emails that have not made a successful donation in `numMonths` months,
+   * and do NOT have any recurring donation record.
+   *
+   * - Only considers SUCCEEDED donations for "last donated" logic
+   * - Excludes donors with at least one recurring donation (any status)
+   */
+  async findLapsedDonors(numMonths: number): Promise<string[]> {
+    if (!Number.isFinite(numMonths) || numMonths <= 0) {
+      throw new Error('numMonths must be a positive number');
+    }
+
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - numMonths);
+
+    const qb = this.repository.createQueryBuilder('donation');
+
+    const recurringExistsSubquery = qb
+      .subQuery()
+      .select('1')
+      .from(Donation, 'recurringDonation')
+      .where('LOWER(recurringDonation.email) = LOWER(donation.email)')
+      .andWhere('recurringDonation.donationType = :recurringType')
+      .getQuery();
+
+    const rows = await qb
+      .select('LOWER(donation.email)', 'email')
+      .where('donation.status = :succeededStatus', {
+        succeededStatus: DonationStatus.SUCCEEDED,
+      })
+      .andWhere('donation.email IS NOT NULL')
+      .andWhere("donation.email <> ''")
+      .andWhere(`NOT EXISTS ${recurringExistsSubquery}`)
+      .setParameter('recurringType', DonationType.RECURRING)
+      .groupBy('LOWER(donation.email)')
+      .having('MAX(donation.createdAt) < :cutoff', { cutoff })
+      .getRawMany<{ email: string }>();
+
+    return [...new Set(rows.map((r) => r.email.trim().toLowerCase()))];
+  }
+
+  /**
    * Delete a donation by ID (admin-only destructive operation)
    */
   async deleteById(id: number): Promise<void> {

@@ -32,7 +32,6 @@ describe('DonationsRepository', () => {
   };
 
   beforeEach(async () => {
-    // Create mock query builder with all necessary methods
     const mockSubQueryBuilder = {
       select: jest.fn().mockReturnThis(),
       from: jest.fn().mockReturnThis(),
@@ -40,7 +39,7 @@ describe('DonationsRepository', () => {
       andWhere: jest.fn().mockReturnThis(),
       getQuery: jest.fn().mockReturnValue('(subquery)'),
     } as unknown as jest.Mocked<SelectQueryBuilder<unknown>>;
-
+    // Create mock query builder with all necessary methods
     mockQueryBuilder = {
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
@@ -51,13 +50,18 @@ describe('DonationsRepository', () => {
       limit: jest.fn().mockReturnThis(),
       select: jest.fn().mockReturnThis(),
       addSelect: jest.fn().mockReturnThis(),
+
+      // added for findLapsedDonors
+      groupBy: jest.fn().mockReturnThis(),
+      having: jest.fn().mockReturnThis(),
+      setParameter: jest.fn().mockReturnThis(),
+      subQuery: jest.fn().mockReturnValue(mockSubQueryBuilder),
+
       getManyAndCount: jest.fn(),
       getMany: jest.fn(),
       getRawOne: jest.fn(),
-      subQuery: jest.fn().mockReturnValue(mockSubQueryBuilder),
-      setParameter: jest.fn().mockReturnThis(),
-      groupBy: jest.fn().mockReturnThis(),
-      having: jest.fn().mockReturnThis(),
+
+      // used by findLapsedDonors
       getRawMany: jest.fn(),
     } as unknown as jest.Mocked<SelectQueryBuilder<Donation>>;
 
@@ -453,6 +457,74 @@ describe('DonationsRepository', () => {
       const result = await repository.findRecentPublic(10);
 
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('findLapsedDonors', () => {
+    it('should filter to SUCCEEDED donations and apply cutoff via HAVING MAX(createdAt)', async () => {
+      mockQueryBuilder.getRawMany.mockResolvedValue([
+        { email: 'alice@example.com' },
+      ]);
+
+      const result = await repository.findLapsedDonors(6);
+
+      expect(mockTypeOrmRepo.createQueryBuilder).toHaveBeenCalledWith(
+        'donation',
+      );
+
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'donation.status = :succeededStatus',
+        { succeededStatus: DonationStatus.SUCCEEDED },
+      );
+
+      expect(mockQueryBuilder.having).toHaveBeenCalledWith(
+        'MAX(donation.createdAt) < :cutoff',
+        expect.objectContaining({
+          cutoff: expect.any(Date),
+        }),
+      );
+
+      expect(result).toEqual(['alice@example.com']);
+    });
+
+    it('should return unique, normalized emails (trim + lowercase)', async () => {
+      mockQueryBuilder.getRawMany.mockResolvedValue([
+        { email: 'ALICE@EXAMPLE.COM' },
+        { email: 'alice@example.com' },
+        { email: ' Alice@Example.com ' },
+      ]);
+
+      const result = await repository.findLapsedDonors(6);
+
+      expect(result).toEqual(['alice@example.com']);
+    });
+
+    it('should exclude donors with recurring donations using NOT EXISTS subquery', async () => {
+      mockQueryBuilder.getRawMany.mockResolvedValue([
+        { email: 'x@example.com' },
+      ]);
+
+      await repository.findLapsedDonors(6);
+
+      expect(mockQueryBuilder.subQuery).toHaveBeenCalled();
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        expect.stringContaining('NOT EXISTS'),
+      );
+
+      expect(mockQueryBuilder.setParameter).toHaveBeenCalledWith(
+        'recurringType',
+        DonationType.RECURRING,
+      );
+    });
+
+    it('should throw when numMonths is not positive', async () => {
+      await expect(repository.findLapsedDonors(0)).rejects.toThrow(
+        'numMonths must be a positive number',
+      );
+      await expect(repository.findLapsedDonors(-2)).rejects.toThrow(
+        'numMonths must be a positive number',
+      );
     });
   });
 

@@ -3,6 +3,8 @@ import { DonationsController } from './donations.controller';
 import { DonationsService } from './donations.service';
 import { DonationsRepository } from './donations.repository';
 import { CreateDonationDto } from './dtos/create-donation-dto';
+import { CallHandler, ExecutionContext } from '@nestjs/common';
+import { CurrentUserInterceptor } from '../interceptors/current-user.interceptor';
 import {
   DonationType,
   RecurringInterval,
@@ -35,6 +37,7 @@ describe('DonationsController', () => {
     findPublic: jest.fn(),
     getTotalDonations: jest.fn(),
     exportToCsv: jest.fn(),
+    getLapsedDonors: jest.fn(),
   };
 
   const mockRepository = {
@@ -45,20 +48,20 @@ describe('DonationsController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [DonationsController],
       providers: [
-        {
-          provide: DonationsService,
-          useValue: mockService,
-        },
-        {
-          provide: DonationsRepository,
-          useValue: mockRepository,
-        },
+        { provide: DonationsService, useValue: mockService },
+        { provide: DonationsRepository, useValue: mockRepository },
       ],
-    }).compile();
+    })
+      .overrideInterceptor(CurrentUserInterceptor)
+      .useValue({
+        intercept: (_context: ExecutionContext, next: CallHandler) =>
+          next.handle(),
+      })
+      .compile();
 
-    controller = module.get<DonationsController>(DonationsController);
-    service = module.get<DonationsService>(DonationsService);
-    repository = module.get<DonationsRepository>(DonationsRepository);
+    controller = module.get(DonationsController);
+    service = module.get(DonationsService);
+    repository = module.get(DonationsRepository);
   });
 
   afterEach(() => {
@@ -146,6 +149,28 @@ describe('DonationsController', () => {
 
       expect(result.donationType).toBe(DonationType.RECURRING);
       expect(result.recurringInterval).toBe(RecurringInterval.MONTHLY);
+    });
+  });
+
+  describe('getLapsedDonors', () => {
+    it('should call service.getLapsedDonors with provided numMonths', async () => {
+      mockService.getLapsedDonors.mockResolvedValue({
+        emails: ['a@example.com'],
+      });
+
+      const result = await controller.getLapsedDonors(9);
+
+      expect(service.getLapsedDonors).toHaveBeenCalledWith(9);
+      expect(result).toEqual({ emails: ['a@example.com'] });
+    });
+
+    it('should default numMonths to 6 when not provided', async () => {
+      mockService.getLapsedDonors.mockResolvedValue({ emails: [] });
+
+      const result = await controller.getLapsedDonors(undefined);
+
+      expect(service.getLapsedDonors).toHaveBeenCalledWith(6);
+      expect(result).toEqual({ emails: [] });
     });
   });
 
