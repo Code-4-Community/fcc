@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-
+import './styles.css';
 import apiClient from '@api/apiClient';
 import Root from '@containers/root';
 import NotFound from '@containers/404';
-import Test from '@containers/test';
+import TestimonialTester from '@containers/TestimonialTester';
 import { DonationForm } from '@containers/donations/DonationForm';
 import { ShadcnExample } from '@components/ShadcnExample';
 import { AuthProvider } from '@components/AuthProvider';
@@ -34,7 +34,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/test',
-    element: <Test />,
+    element: <TestimonialTester />,
   },
   {
     path: '/shadcn-example',
