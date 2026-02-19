@@ -13,7 +13,7 @@ import { DonationsModule } from '../donations/donations.module';
       provide: 'STRIPE_CLIENT',
       useFactory: (configService: ConfigService) => {
         return new Stripe(configService.get<string>('STRIPE_SECRET_KEY'), {
-          apiVersion: '2025-12-15.clover',
+          apiVersion: '2026-01-28.clover',
         });
       },
       inject: [ConfigService],
