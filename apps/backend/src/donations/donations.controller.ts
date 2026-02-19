@@ -204,7 +204,9 @@ export class DonationsController {
     status: 401,
     description: 'unauthorized',
   })
+  @UseInterceptors(CurrentUserInterceptor)
   async findAll(
+    @Req() req: any,
     @Query('page', new ParseIntPipe({ optional: true })) page = 1,
     @Query('perPage', new ParseIntPipe({ optional: true }))
     perPage = 20,
@@ -223,6 +225,13 @@ export class DonationsController {
     perPage: number;
     totalPages: number;
   }> {
+    if (
+      req.user.status !== Status.ADMIN &&
+      req.user.status !== Status.STANDARD
+    ) {
+      throw new UnauthorizedException('Admin access required');
+    }
+
     const filters: PaginationFilters = {
       donationType,
       status,
