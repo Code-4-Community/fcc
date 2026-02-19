@@ -11,6 +11,7 @@ import { AuthProvider } from '@components/AuthProvider';
 import { ProtectedRoute } from '@components/ProtectedRoute';
 import { LoginPage } from '@containers/auth/LoginPage';
 import { DashboardPage } from '@containers/dashboard/DashboardPage';
+import { DonorStatsChart } from '@components/DonorStatsChart';
 
 const router = createBrowserRouter([
   {
@@ -39,6 +40,16 @@ const router = createBrowserRouter([
   {
     path: '/shadcn-example',
     element: <ShadcnExample />,
+  },
+  {
+    path: '/chart',
+    element: <ProtectedRoute />,
+    children: [
+      {
+        path: '',
+        element: <DonorStatsChart />,
+      },
+    ],
   },
   {
     path: '/donate',
