@@ -51,7 +51,6 @@ function Button({
   }) {
   const Comp = asChild ? Slot : 'button';
   return (
-    // @ts-expect-error - Slot type compatibility with button element
     <Comp
       data-slot="button"
       data-variant={variant}
