@@ -157,7 +157,7 @@ export function DonorStatsChart() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  // Fetch data whenever activeChart, quantity, or unit changes
+  // Fetch data whenever quantity or unit changes
   React.useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -181,12 +181,6 @@ export function DonorStatsChart() {
 
         setDonationsData(donationsProcessed);
         setRecurringDonorsData(recurringDonorsProcessed);
-
-        if (activeChart === 'donations') {
-          setChartData(donationsProcessed);
-        } else {
-          setChartData(recurringDonorsProcessed);
-        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load data');
         setChartData([]);
@@ -196,7 +190,7 @@ export function DonorStatsChart() {
     };
 
     fetchData();
-  }, [activeChart, quantity, unit]);
+  }, [quantity, unit]);
 
   // Update chart data when activeChart changes
   React.useEffect(() => {
