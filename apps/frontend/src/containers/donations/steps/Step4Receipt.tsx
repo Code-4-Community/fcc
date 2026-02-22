@@ -30,7 +30,7 @@ const TESTIMONIAL_SLIDES = [
   },
 ];
 
-export const Step4Receipt: React.FC<Step4ReceiptProps> = () => {
+export const Step4Receipt: React.FC<Step4ReceiptProps> = ({ receiptId }) => {
   const [feedback, setFeedback] = useState('');
 
   const handleSpreadTheWord = () => {
@@ -66,6 +66,11 @@ export const Step4Receipt: React.FC<Step4ReceiptProps> = () => {
         </p>
         <div className="h-px w-20 bg-gray-300" />
       </div>
+      {receiptId && (
+        <p className="mt-2 text-center text-[12px] text-gray-400">
+          Receipt ID: {receiptId}
+        </p>
+      )}
       <div className="mt-10">
         <label className="mb-3 block text-left">
           <span className="text-black text-[16px] leading-[100%] tracking-[0] font-normal [font-family:Helvetica,Arial,sans-serif]">
