@@ -1,10 +1,34 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Textarea } from '@components/ui/textarea';
+import { Button } from '@components/ui/button';
+import { TestimonialCarousel } from '@components/testimonials/TestimonialCarousel';
+import CarouselImage1 from '@components/testimonials/TestimonialImages/Carousel_image1.png';
+import CarouselImage2 from '@components/testimonials/TestimonialImages/Carousel_image2.png';
+import CarouselImage3 from '@components/testimonials/TestimonialImages/Carousel_image3.png';
 
 interface Step4ReceiptProps {
   receiptId?: string | null;
 }
+
+const TESTIMONIAL_SLIDES = [
+  {
+    id: 1,
+    image: CarouselImage1,
+    alt: 'Testimonial image 1',
+  },
+  {
+    id: 2,
+    image: CarouselImage2,
+    alt: 'Testimonial image 2',
+  },
+  {
+    id: 3,
+    image: CarouselImage3,
+    alt: 'Testimonial image 3',
+  },
+];
 
 export const Step4Receipt: React.FC<Step4ReceiptProps> = () => {
   const [feedback, setFeedback] = useState('');
@@ -28,7 +52,7 @@ export const Step4Receipt: React.FC<Step4ReceiptProps> = () => {
   return (
     <div className="mx-auto w-full max-w-[600px] px-4 py-8">
       <div className="text-center">
-        <h1 className="text-6xl font-black tracking-tight text-[#2d3161] md:text-7xl scale-y-125 scale-x-90 [font-family:'Helvetica_Neue',Helvetica,Arial,sans-serif] [font-weight:900]">
+        <h1 className="text-5xl font-black tracking-tight text-[#2d3161] md:text-6xl scale-y-125 scale-x-90 [font-family:'Helvetica_Neue',Helvetica,Arial,sans-serif] [font-weight:900]">
           THANK YOU
         </h1>
         <p className="mt-2 text-black text-[32px] leading-[25px] tracking-[0] text-center [font-family:'Helvetica_Neue',Helvetica,Arial,sans-serif] [font-weight:200]">
@@ -51,19 +75,16 @@ export const Step4Receipt: React.FC<Step4ReceiptProps> = () => {
             (optional)
           </span>
         </label>
-        <textarea
+        <Textarea
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
           placeholder="Share with us here"
-          className="min-h-[120px] w-full rounded-lg border border-black bg-white px-4 py-3 text-black placeholder-gray-400 transition-colors focus:border-black focus:outline-none focus:ring-2 focus:ring-black/20"
+          className="min-h-[120px]"
           rows={4}
         />
       </div>
-      {/* placeholder for carousel */}
       <div className="mt-8 mb-8">
-        <div className="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-          <p className="text-gray-400 text-lg">Carousel Placeholder</p>
-        </div>
+        <TestimonialCarousel slides={TESTIMONIAL_SLIDES} />
       </div>
       <div className="flex justify-center gap-10 mb-8">
         <a
@@ -100,26 +121,9 @@ export const Step4Receipt: React.FC<Step4ReceiptProps> = () => {
         </a>
       </div>
       <div className="mt-8 flex justify-center">
-        <button
-          onClick={handleSpreadTheWord}
-          className="flex items-center justify-center gap-2 w-[269px] h-[71px] bg-[#007B64] text-white rounded-[10px] opacity-100 hover:bg-[#006654] transition-colors font-semibold text-lg"
-        >
+        <Button variant="share" withShareIcon onClick={handleSpreadTheWord}>
           Spread the word!
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-            <polyline points="16 6 12 2 8 6" />
-            <line x1="12" y1="2" x2="12" y2="15" />
-          </svg>
-        </button>
+        </Button>
       </div>
     </div>
   );
