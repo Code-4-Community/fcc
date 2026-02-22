@@ -14,6 +14,7 @@ import { Step1Amount } from './steps/Step1Amount';
 import { Step2Details } from './steps/Step2Details';
 import { Step3Confirm } from './steps/Step3Confirm';
 import { Step4Receipt } from './steps/Step4Receipt';
+import { StripeProvider } from './StripeProvider';
 
 export const DonationForm: React.FC<DonationFormProps> = ({
   onSuccess,
@@ -251,12 +252,14 @@ export const DonationForm: React.FC<DonationFormProps> = ({
         );
       case 2:
         return (
-          <Step2Details
-            formData={formData}
-            errors={errors}
-            isSubmitting={isSubmitting}
-            onChange={handleInputChange}
-          />
+          <StripeProvider>
+            <Step2Details
+              formData={formData}
+              errors={errors}
+              isSubmitting={isSubmitting}
+              onChange={handleInputChange}
+            />
+          </StripeProvider>
         );
       case 3:
         return <Step3Confirm formData={formData} />;
