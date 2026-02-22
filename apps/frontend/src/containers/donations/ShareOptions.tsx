@@ -65,19 +65,19 @@ const ShareOptions = ({ activeSlideUrl }: { activeSlideUrl: string }) => {
         className="flex justify-center"
         style={{ gap: '3rem', marginTop: '2rem' }}
       >
-        <FacebookShareButton url={window.location.href}>
+        <FacebookShareButton url="https://www.youtube.com/">
           <FacebookIcon
             className="rounded-full"
             style={{ maxWidth: '2.5rem', height: 'auto' }}
           />
         </FacebookShareButton>
-        <TwitterShareButton url={window.location.href}>
+        <TwitterShareButton url="https://www.youtube.com/">
           <XIcon
             className="rounded-full"
             style={{ maxWidth: '2.5rem', height: 'auto' }}
           />
         </TwitterShareButton>
-        <LinkedinShareButton url={window.location.href}>
+        <LinkedinShareButton url="https://www.youtube.com/">
           <LinkedinIcon
             className="rounded-full"
             style={{ maxWidth: '2.5rem', height: 'auto' }}
