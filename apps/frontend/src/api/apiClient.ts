@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance } from 'axios';
 
 const defaultBaseUrl =
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
+  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3001';
 
 export type DonationCreateRequest = {
   firstName: string;
