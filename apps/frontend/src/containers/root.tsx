@@ -7,6 +7,9 @@ import {
 } from '@components/GrowingGoal/GrowingGoal';
 import { TestimonialCarousel } from '@components/testimonials/TestimonialCarousel';
 import { DonationForm } from './donations/DonationForm';
+import CarouselImage1 from '@components/testimonials/TestimonialImages/Carousel_image1.png';
+import CarouselImage2 from '@components/testimonials/TestimonialImages/Carousel_image2.png';
+import CarouselImage3 from '@components/testimonials/TestimonialImages/Carousel_image3.png';
 
 const SAMPLE_DONATION: SampleDonation = {
   name: 'C4C',
@@ -14,6 +17,24 @@ const SAMPLE_DONATION: SampleDonation = {
   profile:
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAALElEQVR42mNgGAWjgLGB4T8DGjBgFiMDw38GphCjEopFY1GNRg0Y1GgAAAD9YB5WfVii1AAAAABJRU5ErkJggg==',
 };
+
+const TESTIMONIAL_SLIDES = [
+  {
+    id: 1,
+    image: CarouselImage1,
+    alt: 'Testimonial image 1',
+  },
+  {
+    id: 2,
+    image: CarouselImage2,
+    alt: 'Testimonial image 2',
+  },
+  {
+    id: 3,
+    image: CarouselImage3,
+    alt: 'Testimonial image 3',
+  },
+];
 
 const Root: React.FC = () => {
   const donationTotal = 3000;
@@ -30,7 +51,7 @@ const Root: React.FC = () => {
     <div className="root-page">
       <div className="root-container">
         <section className="root-testimonial">
-          <TestimonialCarousel />
+          <TestimonialCarousel slides={TESTIMONIAL_SLIDES} />
         </section>
         <section className="root-content-grid">
           <div className="root-goal-panel">
