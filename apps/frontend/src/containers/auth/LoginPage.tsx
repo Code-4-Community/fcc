@@ -5,12 +5,20 @@ import { Button } from '../../components/ui/button';
 import cityBg from '../../assets/city-bg.png';
 import fccMark from '../../assets/fcc-mark.png';
 import { Input } from '@components/ui/input';
+import { Label } from '@components/ui/label';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@components/ui/input-group';
+import { EyeIcon, EyeOffIcon } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const [error, setError] = useState('');
   const [isLogin, setIsLogin] = useState(true);
@@ -57,7 +65,7 @@ export const LoginPage: React.FC = () => {
         className="absolute inset-0 bg-no-repeat bg-cover bg-center opacity-30"
         style={{ backgroundImage: `url(${cityBg})` }}
       ></div>
-      <div className="relative z-10 p-10 max-w-lg m-auto bg-white rounded-[50px]">
+      <div className="relative z-10 p-10 m-auto bg-white rounded-[50px] w-[32rem]">
         <div>
           <img
             src={fccMark}
@@ -65,7 +73,7 @@ export const LoginPage: React.FC = () => {
             className="w-36 h-36 object-contain m-auto"
           />
           <h1 className="font-semibold text-[#007B64] text-4xl text-center">
-            {isLogin ? 'Sign in' : 'Sign up'}
+            {isLogin ? 'Admin Dashboard' : 'New User'}
           </h1>
         </div>
 
@@ -74,40 +82,80 @@ export const LoginPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-10">
           {!isLogin && (
             <>
-              <Input
-                type="text"
-                placeholder="First Name"
-                required
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="w-80 py-5 focus:ring-[#007B64] placeholder:text-black"
-              />
+              <div>
+                <Label
+                  htmlFor="first-name"
+                  className="font-semibold mb-1 text-[#404040]"
+                >
+                  First Name
+                </Label>
+                <Input
+                  type="text"
+                  placeholder="First Name"
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
+                  id="first-name"
+                />
+              </div>
               <Input
                 type="text"
                 placeholder="Last Name"
                 required
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="w-80 py-5 focus:ring-[#007B64] placeholder:text-black"
+                className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
+                id="last-name"
               />
             </>
           )}
-          <Input
-            type="email"
-            placeholder="Email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-80 py-5 focus:ring-[#007B64] placeholder:text-black"
-          />
-          <Input
-            type="password"
-            placeholder="Password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-80 py-5 focus:ring-[#007B64] placeholder:text-black"
-          ></Input>
+          <div>
+            <Label
+              htmlFor="email"
+              className="font-semibold mb-1 text-[#404040]"
+            >
+              Email
+            </Label>
+            <Input
+              type="email"
+              placeholder="Email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
+              id="email"
+            />
+          </div>
+          <div>
+            <Label
+              htmlFor="password"
+              className="font-semibold mb-1 text-[#404040]"
+            >
+              Password
+            </Label>
+            <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
+              <InputGroupInput
+                id="inline-end-input"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="focus:ring-[#007B64]"
+              />
+              <InputGroupAddon
+                align="inline-end"
+                className="hover:cursor-pointer"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeIcon /> : <EyeOffIcon />}
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+
+          <Button className="justify-end p-0 text-[#007B64] font-semibold">
+            Forgot Password?
+          </Button>
 
           <Button
             id="auth-submit-btn"
@@ -128,7 +176,7 @@ export const LoginPage: React.FC = () => {
                 setIsLogin(!isLogin);
                 setError('');
               }}
-              className="text-md font-semibold"
+              className="text-md font-semibold text-[#007B64]"
             >
               {isLogin ? 'Create Account' : 'Sign in'}
             </Button>
