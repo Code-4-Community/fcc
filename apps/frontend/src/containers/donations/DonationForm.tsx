@@ -3,6 +3,7 @@ import apiClient, {
   type CreateDonationRequest,
 } from '../../api/apiClient';
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import './donations.css';
 import {
   DonationFormData,
@@ -21,7 +22,12 @@ export const DonationForm: React.FC<DonationFormProps> = ({
   onError,
   onAmountChange,
 }) => {
-  const [currentStep, setCurrentStep] = useState<DonationStep>(1);
+  const [searchParams] = useSearchParams();
+  const [currentStep, setCurrentStep] = useState<DonationStep>(() => {
+    const stepParam = searchParams.get('step');
+    if (stepParam === '4') return 4;
+    return 1;
+  });
   const [formData, setFormData] = useState<DonationFormData>({
     firstName: '',
     lastName: '',
@@ -43,7 +49,9 @@ export const DonationForm: React.FC<DonationFormProps> = ({
   const [errors, setErrors] = useState<Partial<FormErrors>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [receiptId, setReceiptId] = useState<string | null>(null);
+  const [receiptId, setReceiptId] = useState<string | null>(
+    searchParams.get('receiptId'),
+  );
 
   const clampStep = (value: number): DonationStep =>
     Math.max(1, Math.min(4, value)) as DonationStep;
