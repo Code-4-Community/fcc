@@ -12,13 +12,16 @@ import {
   InputGroupInput,
 } from '@components/ui/input-group';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
+import { PasswordCriterion } from './PasswordCriterion';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [error, setError] = useState('');
   const [isLogin, setIsLogin] = useState(true);
@@ -32,6 +35,23 @@ export const LoginPage: React.FC = () => {
     from?: { pathname: string };
   } | null;
   const from = locationState?.from?.pathname || '/dashboard';
+
+  const hasMinLength = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
+  const passwordsMatch =
+    password.length > 0 &&
+    confirmPassword.length > 0 &&
+    password === confirmPassword;
+  const allCriteriaMet =
+    hasMinLength &&
+    hasUppercase &&
+    hasLowercase &&
+    hasNumber &&
+    hasSpecialChar &&
+    passwordsMatch;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,15 +119,23 @@ export const LoginPage: React.FC = () => {
                   id="first-name"
                 />
               </div>
-              <Input
-                type="text"
-                placeholder="Last Name"
-                required
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
-                id="last-name"
-              />
+              <div>
+                <Label
+                  htmlFor="last-name"
+                  className="font-semibold mb-1 text-[#404040]"
+                >
+                  Last Name
+                </Label>
+                <Input
+                  type="text"
+                  placeholder="Last Name"
+                  required
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
+                  id="last-name"
+                />
+              </div>
             </>
           )}
           <div>
@@ -152,16 +180,67 @@ export const LoginPage: React.FC = () => {
               </InputGroupAddon>
             </InputGroup>
           </div>
+          {!isLogin && (
+            <div>
+              <Label
+                htmlFor="password"
+                className="font-semibold mb-1 text-[#404040]"
+              >
+                Confirm Password
+              </Label>
+              <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
+                <InputGroupInput
+                  id="inline-end-input"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter Password"
+                  className="focus:ring-[#007B64]"
+                />
+                <InputGroupAddon
+                  align="inline-end"
+                  className="hover:cursor-pointer"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeIcon /> : <EyeOffIcon />}
+                </InputGroupAddon>
+              </InputGroup>
+            </div>
+          )}
 
-          <Button className="justify-end p-0 text-[#007B64] font-semibold">
-            Forgot Password?
-          </Button>
+          {!isLogin ? (
+            <div className="flex gap-1 flex-wrap w-full">
+              <PasswordCriterion
+                name="8+ characters"
+                criterionMet={hasMinLength}
+              />
+              <PasswordCriterion name="Uppercase" criterionMet={hasUppercase} />
+              <PasswordCriterion name="Lowercase" criterionMet={hasLowercase} />
+              <PasswordCriterion
+                name="Special character"
+                criterionMet={hasSpecialChar}
+              />
+              <PasswordCriterion name="Number" criterionMet={hasNumber} />
+              <PasswordCriterion
+                name="Matching"
+                criterionMet={passwordsMatch}
+              />
+            </div>
+          ) : (
+            <Button className="justify-end p-0 text-[#007B64] font-semibold">
+              Forgot Password?
+            </Button>
+          )}
 
           <Button
             id="auth-submit-btn"
             type="submit"
-            disabled={isLoading}
-            className="py-5 h-14 rounded-full bg-[#007B64] font-semibold text-xl text-white"
+            disabled={isLoading || (!isLogin && !allCriteriaMet)}
+            className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
+              !isLogin && !allCriteriaMet
+                ? 'bg-[#737373] cursor-not-allowed'
+                : 'bg-[#007B64]'
+            }`}
           >
             {isLoading ? '...' : isLogin ? 'Login' : 'Create Account'}
           </Button>
