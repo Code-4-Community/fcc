@@ -14,6 +14,11 @@ import {
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { PasswordCriterion } from './PasswordCriterion';
 
+enum SignupStep {
+  ONE = 1,
+  TWO = 2,
+}
+
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,6 +27,7 @@ export const LoginPage: React.FC = () => {
   const [lastName, setLastName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [signupStep, setSignupStep] = useState<SignupStep>(SignupStep.ONE);
 
   const [error, setError] = useState('');
   const [isLogin, setIsLogin] = useState(true);
@@ -52,6 +58,16 @@ export const LoginPage: React.FC = () => {
     hasNumber &&
     hasSpecialChar &&
     passwordsMatch;
+
+  const resetFields = () => {
+    setEmail('');
+    setPassword('');
+    setConfirmPassword('');
+    setFirstName('');
+    setLastName('');
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,7 +116,7 @@ export const LoginPage: React.FC = () => {
         {error && <p style={{ color: 'red' }}>{error}</p>}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-10">
-          {!isLogin && (
+          {!isLogin && signupStep === SignupStep.TWO && (
             <>
               <div>
                 <Label
@@ -132,83 +148,90 @@ export const LoginPage: React.FC = () => {
                   required
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
+                  className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64] mb-14"
                   id="last-name"
                 />
               </div>
             </>
           )}
-          <div>
-            <Label
-              htmlFor="email"
-              className="font-semibold mb-1 text-[#404040]"
-            >
-              Email
-            </Label>
-            <Input
-              type="email"
-              placeholder="Email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
-              id="email"
-            />
-          </div>
-          <div>
-            <Label
-              htmlFor="password"
-              className="font-semibold mb-1 text-[#404040]"
-            >
-              Password
-            </Label>
-            <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
-              <InputGroupInput
-                id="inline-end-input"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className="focus:ring-[#007B64]"
-              />
-              <InputGroupAddon
-                align="inline-end"
-                className="hover:cursor-pointer"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeIcon /> : <EyeOffIcon />}
-              </InputGroupAddon>
-            </InputGroup>
-          </div>
-          {!isLogin && (
-            <div>
-              <Label
-                htmlFor="password"
-                className="font-semibold mb-1 text-[#404040]"
-              >
-                Confirm Password
-              </Label>
-              <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
-                <InputGroupInput
-                  id="inline-end-input"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Re-enter Password"
-                  className="focus:ring-[#007B64]"
-                />
-                <InputGroupAddon
-                  align="inline-end"
-                  className="hover:cursor-pointer"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+
+          {(isLogin || (!isLogin && signupStep === SignupStep.ONE)) && (
+            <>
+              <div>
+                <Label
+                  htmlFor="email"
+                  className="font-semibold mb-1 text-[#404040]"
                 >
-                  {showConfirmPassword ? <EyeIcon /> : <EyeOffIcon />}
-                </InputGroupAddon>
-              </InputGroup>
-            </div>
+                  Email
+                </Label>
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
+                  id="email"
+                />
+              </div>
+              <div>
+                <Label
+                  htmlFor="password"
+                  className="font-semibold mb-1 text-[#404040]"
+                >
+                  Password
+                </Label>
+                <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
+                  <InputGroupInput
+                    id="inline-end-input"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="focus:ring-[#007B64]"
+                  />
+                  <InputGroupAddon
+                    align="inline-end"
+                    className="hover:cursor-pointer"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeIcon /> : <EyeOffIcon />}
+                  </InputGroupAddon>
+                </InputGroup>
+              </div>
+              {!isLogin && (
+                <div>
+                  <Label
+                    htmlFor="password"
+                    className="font-semibold mb-1 text-[#404040]"
+                  >
+                    Confirm Password
+                  </Label>
+                  <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
+                    <InputGroupInput
+                      id="inline-end-input"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Re-enter Password"
+                      className="focus:ring-[#007B64]"
+                    />
+                    <InputGroupAddon
+                      align="inline-end"
+                      className="hover:cursor-pointer"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                    >
+                      {showConfirmPassword ? <EyeIcon /> : <EyeOffIcon />}
+                    </InputGroupAddon>
+                  </InputGroup>
+                </div>
+              )}
+            </>
           )}
 
-          {!isLogin ? (
+          {!isLogin && signupStep === SignupStep.ONE ? (
             <div className="flex gap-1 flex-wrap w-full">
               <PasswordCriterion
                 name="8+ characters"
@@ -227,23 +250,53 @@ export const LoginPage: React.FC = () => {
               />
             </div>
           ) : (
-            <Button className="justify-end p-0 text-[#007B64] font-semibold">
-              Forgot Password?
-            </Button>
+            isLogin && (
+              <Button className="justify-end p-0 text-[#007B64] font-semibold">
+                Forgot Password?
+              </Button>
+            )
           )}
 
-          <Button
-            id="auth-submit-btn"
-            type="submit"
-            disabled={isLoading || (!isLogin && !allCriteriaMet)}
-            className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
-              !isLogin && !allCriteriaMet
-                ? 'bg-[#737373] cursor-not-allowed'
-                : 'bg-[#007B64]'
-            }`}
-          >
-            {isLoading ? '...' : isLogin ? 'Login' : 'Create Account'}
-          </Button>
+          {isLogin ? (
+            <Button
+              id="auth-submit-btn"
+              type="submit"
+              className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
+                !email || !password
+                  ? 'bg-[#737373] cursor-not-allowed'
+                  : 'bg-[#007B64]'
+              }`}
+            >
+              {isLoading ? '...' : 'Login'}
+            </Button>
+          ) : signupStep === SignupStep.ONE ? (
+            <Button
+              className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
+                !allCriteriaMet
+                  ? 'bg-[#737373] cursor-not-allowed'
+                  : 'bg-[#007B64]'
+              }`}
+              onClick={(e) => {
+                e.preventDefault();
+                setSignupStep(SignupStep.TWO);
+              }}
+            >
+              Create Account
+            </Button>
+          ) : (
+            <Button
+              id="auth-submit-btn"
+              type="submit"
+              disabled={isLoading || !allCriteriaMet}
+              className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
+                !firstName || !lastName
+                  ? 'bg-[#737373] cursor-not-allowed'
+                  : 'bg-[#007B64]'
+              }`}
+            >
+              {isLoading ? '...' : 'Finish Profile'}
+            </Button>
+          )}
 
           <div className="flex text-gray-500 justify-center items-center">
             <p>
@@ -254,6 +307,8 @@ export const LoginPage: React.FC = () => {
               onClick={() => {
                 setIsLogin(!isLogin);
                 setError('');
+                setSignupStep(SignupStep.ONE);
+                resetFields();
               }}
               className="text-md font-semibold text-[#007B64]"
             >
