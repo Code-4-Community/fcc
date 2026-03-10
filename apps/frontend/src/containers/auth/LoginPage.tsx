@@ -59,6 +59,11 @@ export const LoginPage: React.FC = () => {
     hasSpecialChar &&
     passwordsMatch;
 
+  const showAuthFieldError =
+    isLogin &&
+    !!error &&
+    error !== 'Account created successfully! Please sign in.';
+
   const resetFields = () => {
     setEmail('');
     setPassword('');
@@ -113,9 +118,11 @@ export const LoginPage: React.FC = () => {
           </h1>
         </div>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-10">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4 mt-10"
+          noValidate
+        >
           {!isLogin && signupStep === SignupStep.TWO && (
             <>
               <div>
@@ -168,11 +175,19 @@ export const LoginPage: React.FC = () => {
                   type="email"
                   placeholder="Email"
                   required
+                  pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
+                  className={`w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64] peer invalid:[&:not(:placeholder-shown):not(:focus)]:ring-[2.5px] invalid:[&:not(:placeholder-shown):not(:focus)]:ring-[#B4444D] invalid:[&:not(:placeholder-shown):not(:focus)]:bg-[#FFFAFA] ${
+                    showAuthFieldError
+                      ? 'ring-[2.5px] ring-[#B4444D] bg-[#FFFAFA]'
+                      : ''
+                  }`}
                   id="email"
                 />
+                <span className="mt-2 hidden text-sm text-[#B4444D] peer-[&:not(:placeholder-shown):not(:focus):invalid]:block">
+                  Please enter a valid email address
+                </span>
               </div>
               <div>
                 <Label
@@ -181,14 +196,22 @@ export const LoginPage: React.FC = () => {
                 >
                   Password
                 </Label>
-                <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
+                <InputGroup
+                  className={`w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5 ${
+                    showAuthFieldError
+                      ? 'border-[#B4444D] ring-[2px] ring-[#B4444D]'
+                      : ''
+                  }`}
+                >
                   <InputGroupInput
                     id="inline-end-input"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
-                    className="focus:ring-[#007B64]"
+                    className={`focus:ring-[#007B64] ${
+                      showAuthFieldError ? 'bg-[#FFFAFA]' : ''
+                    }`}
                   />
                   <InputGroupAddon
                     align="inline-end"
@@ -251,9 +274,14 @@ export const LoginPage: React.FC = () => {
             </div>
           ) : (
             isLogin && (
-              <Button className="justify-end p-0 text-[#007B64] font-semibold">
-                Forgot Password?
-              </Button>
+              <div className="flex items-center w-full">
+                {error && (
+                  <p className="text-sm text-[#B4444D] mr-2">{error}</p>
+                )}
+                <Button className="p-0 text-[#007B64] font-semibold ml-auto">
+                  Forgot Password?
+                </Button>
+              </div>
             )
           )}
 
