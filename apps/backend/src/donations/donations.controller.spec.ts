@@ -13,6 +13,8 @@ import {
 import { Donation as DomainDonation } from './mappers';
 import { INestApplication, BadRequestException } from '@nestjs/common';
 import request from 'supertest';
+import { AuthService } from '../auth/auth.service';
+import { UsersService } from '../users/users.service';
 describe('DonationsController', () => {
   let controller: DonationsController;
   let service: DonationsService;
@@ -42,6 +44,16 @@ describe('DonationsController', () => {
 
   const mockRepository = {
     findPaginated: jest.fn(),
+  };
+
+  const mockAuthService = {
+    getUser: jest
+      .fn()
+      .mockResolvedValue([{ Name: 'email', Value: 'test@example.com' }]),
+  };
+
+  const mockUsersService = {
+    find: jest.fn().mockResolvedValue([]),
   };
 
   beforeEach(async () => {
@@ -434,11 +446,23 @@ describe('Donation Integration', () => {
       }),
     };
 
+    const mockAuthServiceIntegration = {
+      getUser: jest
+        .fn()
+        .mockResolvedValue([{ Name: 'email', Value: 'test@example.com' }]),
+    };
+
+    const mockUsersServiceIntegration = {
+      find: jest.fn().mockResolvedValue([]),
+    };
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [DonationsController],
       providers: [
         { provide: DonationsService, useValue: mockService },
         { provide: DonationsRepository, useValue: {} },
+        { provide: AuthService, useValue: mockAuthServiceIntegration },
+        { provide: UsersService, useValue: mockUsersServiceIntegration },
       ],
     }).compile();
 

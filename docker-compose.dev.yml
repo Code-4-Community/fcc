@@ -36,11 +36,14 @@ services:
       NX_DB_DATABASE: fcc_dev
 
       NODE_ENV: development
-      PORT: 3000
+      PORT: 3005
 
       # JWT and Auth (add secrets in prod)
       JWT_SECRET: dev-secret-change-in-prod
-
+      AWS_SES_REGION: us-east-2
+      AWS_SES_ACCESS_KEY_ID: ${SES_AWS_ACCESS_KEY}
+      AWS_SES_SECRET_ACCESS_KEY: ${SES_AWS_SECRET_ACCESS_KEY}
+      AWS_SES_SENDER_EMAIL: ${SENDER_EMAIL}
       COGNITO_USER_POOL_ID: ${COGNITO_USER_POOL_ID}
       COGNITO_CLIENT_ID: ${COGNITO_CLIENT_ID}
       COGNITO_REGION: ${COGNITO_REGION}
@@ -49,7 +52,7 @@ services:
       NX_AWS_SECRET_ACCESS_KEY: ${NX_AWS_SECRET_ACCESS_KEY}
 
     ports:
-      - '3000:3000'
+      - '3005:3005'
     depends_on:
       postgres:
         condition: service_healthy
@@ -83,7 +86,7 @@ services:
       NX_DB_DATABASE: fcc_dev
 
       NODE_ENV: development
-      PORT: 3001
+      PORT: 3000
 
       # JWT and Auth (add secrets in prod)
       JWT_SECRET: dev-secret-change-in-prod
@@ -97,8 +100,13 @@ services:
 
       STRIPE_SECRET_KEY: 'sk_test_1234567890'
 
+      AWS_SES_REGION: us-east-2
+      AWS_SES_ACCESS_KEY_ID: ${SES_AWS_ACCESS_KEY}
+      AWS_SES_SECRET_ACCESS_KEY: ${SES_AWS_SECRET_ACCESS_KEY}
+      AWS_SES_SENDER_EMAIL: ${SENDER_EMAIL}
+
     ports:
-      - '3001:3001'
+      - '3000:3000'
     depends_on:
       postgres:
         condition: service_healthy

@@ -86,6 +86,7 @@ export class AuthController {
 
   @Post('/signup')
   async createUser(@Body() signUpDto: SignUpDto): Promise<User> {
+    console.log(`Signup request received for: ${signUpDto.email}`);
     // By default, creates a standard user
     try {
       await this.authService.signup(signUpDto);
@@ -116,6 +117,7 @@ export class AuthController {
 
   @Post('/signin')
   async signin(@Body() signInDto: SignInDto): Promise<SignInResponseDto> {
+    console.log(`Signin request received for: ${signInDto.email}`);
     try {
       return await this.authService.signin(signInDto);
     } catch (e) {

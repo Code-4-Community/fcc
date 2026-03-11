@@ -1,7 +1,6 @@
 import axios, { type AxiosInstance } from 'axios';
 
-const defaultBaseUrl =
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000';
+const defaultBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
 
 export type DonationCreateRequest = {
   firstName: string;
@@ -108,6 +107,37 @@ export class ApiClient {
         throw new Error(msg);
       }
       throw new Error('Failed to create donation');
+    }
+  }
+
+  public async getDonations(params?: {
+    page?: number;
+    perPage?: number;
+    donationType?: 'one_time' | 'recurring';
+    status?: 'pending' | 'succeeded' | 'failed' | 'cancelled';
+  }): Promise<{
+    rows: Array<{
+      id: number;
+      firstName: string;
+      lastName: string;
+      email: string;
+      amount: number;
+      donationType: 'one_time' | 'recurring';
+      status: string;
+      createdAt: string;
+    }>;
+    total: number;
+    page: number;
+    perPage: number;
+    totalPages: number;
+  }> {
+    try {
+      const res = await this.axiosInstance.get('/api/donations', {
+        params,
+      });
+      return res.data;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to fetch donations');
     }
   }
 
