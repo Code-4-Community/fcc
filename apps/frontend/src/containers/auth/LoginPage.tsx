@@ -14,9 +14,11 @@ import {
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { PasswordCriterion } from './PasswordCriterion';
 
-enum SignupStep {
-  ONE = 1,
-  TWO = 2,
+enum AuthPage {
+  Login,
+  SignupStepOne,
+  SignupStepTwo,
+  ForgotPassword,
 }
 
 export const LoginPage: React.FC = () => {
@@ -27,11 +29,10 @@ export const LoginPage: React.FC = () => {
   const [lastName, setLastName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [signupStep, setSignupStep] = useState<SignupStep>(SignupStep.ONE);
 
   const [error, setError] = useState('');
-  const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [authPage, setAuthPage] = useState<AuthPage>(AuthPage.Login);
 
   const { login, signup } = useAuth();
   const navigate = useNavigate();
@@ -60,9 +61,32 @@ export const LoginPage: React.FC = () => {
     passwordsMatch;
 
   const showAuthFieldError =
-    isLogin &&
+    authPage === AuthPage.Login &&
     !!error &&
     error !== 'Account created successfully! Please sign in.';
+
+  const headerText = (() => {
+    switch (authPage) {
+      case AuthPage.Login:
+        return 'Admin Dashboard';
+        break;
+
+      case AuthPage.SignupStepOne:
+        return 'New User';
+        break;
+
+      case AuthPage.SignupStepTwo:
+        return 'User Details';
+        break;
+
+      case AuthPage.ForgotPassword:
+        return 'Forgot Password';
+        break;
+
+      default:
+        break;
+    }
+  })();
 
   const resetFields = () => {
     setEmail('');
@@ -80,12 +104,12 @@ export const LoginPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      if (isLogin) {
+      if (authPage === AuthPage.Login) {
         await login({ email, password });
         navigate(from, { replace: true });
-      } else {
+      } else if (authPage === AuthPage.SignupStepTwo) {
         await signup({ email, password, firstName, lastName });
-        setIsLogin(true);
+        setAuthPage(AuthPage.Login);
         setError('Account created successfully! Please sign in.');
         setPassword('');
       }
@@ -114,7 +138,7 @@ export const LoginPage: React.FC = () => {
             className="w-36 h-36 object-contain m-auto"
           />
           <h1 className="font-semibold text-[#007B64] text-4xl text-center">
-            {isLogin ? 'Admin Dashboard' : 'New User'}
+            {headerText}
           </h1>
         </div>
 
@@ -123,7 +147,7 @@ export const LoginPage: React.FC = () => {
           className="flex flex-col gap-4 mt-10"
           noValidate
         >
-          {!isLogin && signupStep === SignupStep.TWO && (
+          {authPage === AuthPage.SignupStepTwo && (
             <>
               <div>
                 <Label
@@ -162,7 +186,8 @@ export const LoginPage: React.FC = () => {
             </>
           )}
 
-          {(isLogin || (!isLogin && signupStep === SignupStep.ONE)) && (
+          {(authPage === AuthPage.Login ||
+            authPage === AuthPage.SignupStepOne) && (
             <>
               <div>
                 <Label
@@ -222,7 +247,7 @@ export const LoginPage: React.FC = () => {
                   </InputGroupAddon>
                 </InputGroup>
               </div>
-              {!isLogin && (
+              {authPage === AuthPage.SignupStepOne && (
                 <div>
                   <Label
                     htmlFor="password"
@@ -254,7 +279,7 @@ export const LoginPage: React.FC = () => {
             </>
           )}
 
-          {!isLogin && signupStep === SignupStep.ONE ? (
+          {authPage === AuthPage.SignupStepOne ? (
             <div className="flex gap-1 flex-wrap w-full">
               <PasswordCriterion
                 name="8+ characters"
@@ -273,7 +298,7 @@ export const LoginPage: React.FC = () => {
               />
             </div>
           ) : (
-            isLogin && (
+            authPage === AuthPage.Login && (
               <div className="flex items-center w-full">
                 {error && (
                   <p className="text-sm text-[#B4444D] mr-2">{error}</p>
@@ -285,7 +310,7 @@ export const LoginPage: React.FC = () => {
             )
           )}
 
-          {isLogin ? (
+          {authPage === AuthPage.Login ? (
             <Button
               id="auth-submit-btn"
               type="submit"
@@ -297,7 +322,7 @@ export const LoginPage: React.FC = () => {
             >
               {isLoading ? '...' : 'Login'}
             </Button>
-          ) : signupStep === SignupStep.ONE ? (
+          ) : authPage === AuthPage.SignupStepOne ? (
             <Button
               className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
                 !allCriteriaMet
@@ -306,7 +331,7 @@ export const LoginPage: React.FC = () => {
               }`}
               onClick={(e) => {
                 e.preventDefault();
-                setSignupStep(SignupStep.TWO);
+                setAuthPage(AuthPage.SignupStepTwo);
               }}
             >
               Create Account
@@ -328,19 +353,24 @@ export const LoginPage: React.FC = () => {
 
           <div className="flex text-gray-500 justify-center items-center">
             <p>
-              {isLogin ? "Don't have an account?" : 'Already have an account?'}
+              {authPage === AuthPage.Login
+                ? "Don't have an account?"
+                : 'Already have an account?'}
             </p>
             <Button
               type="button"
               onClick={() => {
-                setIsLogin(!isLogin);
+                setAuthPage(
+                  authPage === AuthPage.Login
+                    ? AuthPage.SignupStepOne
+                    : AuthPage.Login,
+                );
                 setError('');
-                setSignupStep(SignupStep.ONE);
                 resetFields();
               }}
               className="text-md font-semibold text-[#007B64]"
             >
-              {isLogin ? 'Create Account' : 'Sign in'}
+              {authPage === AuthPage.Login ? 'Create Account' : 'Sign in'}
             </Button>
           </div>
         </form>
