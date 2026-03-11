@@ -126,6 +126,8 @@ export class DonationsController {
   }
 
   @Get('lapsed')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'get lapsed donor emails',
     description:

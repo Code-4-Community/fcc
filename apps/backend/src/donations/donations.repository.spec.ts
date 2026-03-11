@@ -39,7 +39,7 @@ describe('DonationsRepository', () => {
       andWhere: jest.fn().mockReturnThis(),
       getQuery: jest.fn().mockReturnValue('(subquery)'),
     } as unknown as jest.Mocked<SelectQueryBuilder<unknown>>;
-    // Create mock query builder with all necessary methods
+
     mockQueryBuilder = {
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),

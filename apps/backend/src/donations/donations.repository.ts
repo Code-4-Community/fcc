@@ -205,7 +205,8 @@ export class DonationsRepository {
 
     const qb = this.repository.createQueryBuilder('donation');
 
-    const recurringExistsSubquery = qb
+    const recurringExistsSubquery = this.repository
+      .createQueryBuilder()
       .subQuery()
       .select('1')
       .from(Donation, 'recurringDonation')
