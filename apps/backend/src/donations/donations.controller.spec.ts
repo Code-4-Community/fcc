@@ -60,8 +60,22 @@ describe('DonationsController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [DonationsController],
       providers: [
-        { provide: DonationsService, useValue: mockService },
-        { provide: DonationsRepository, useValue: mockRepository },
+        {
+          provide: DonationsService,
+          useValue: mockService,
+        },
+        {
+          provide: DonationsRepository,
+          useValue: mockRepository,
+        },
+        {
+          provide: AuthService,
+          useValue: mockAuthService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
       ],
     })
       .overrideInterceptor(CurrentUserInterceptor)
