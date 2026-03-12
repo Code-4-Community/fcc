@@ -112,6 +112,12 @@ export const LoginPage: React.FC = () => {
         setAuthPage(AuthPage.Login);
         setError('Account created successfully! Please sign in.');
         setPassword('');
+      } else if (authPage === AuthPage.ForgotPassword) {
+        // TODO: wire to password reset API when available
+        setAuthPage(AuthPage.Login);
+        setError(
+          'If an account exists for that email, you will receive a reset link.',
+        );
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -187,7 +193,8 @@ export const LoginPage: React.FC = () => {
           )}
 
           {(authPage === AuthPage.Login ||
-            authPage === AuthPage.SignupStepOne) && (
+            authPage === AuthPage.SignupStepOne ||
+            authPage === AuthPage.ForgotPassword) && (
             <>
               <div>
                 <Label
@@ -214,67 +221,72 @@ export const LoginPage: React.FC = () => {
                   Please enter a valid email address
                 </span>
               </div>
-              <div>
-                <Label
-                  htmlFor="password"
-                  className="font-semibold mb-1 text-[#404040]"
-                >
-                  Password
-                </Label>
-                <InputGroup
-                  className={`w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5 ${
-                    showAuthFieldError
-                      ? 'border-[#B4444D] ring-[2px] ring-[#B4444D]'
-                      : ''
-                  }`}
-                >
-                  <InputGroupInput
-                    id="inline-end-input"
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    className={`focus:ring-[#007B64] ${
-                      showAuthFieldError ? 'bg-[#FFFAFA]' : ''
-                    }`}
-                  />
-                  <InputGroupAddon
-                    align="inline-end"
-                    className="hover:cursor-pointer"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeIcon /> : <EyeOffIcon />}
-                  </InputGroupAddon>
-                </InputGroup>
-              </div>
-              {authPage === AuthPage.SignupStepOne && (
-                <div>
-                  <Label
-                    htmlFor="password"
-                    className="font-semibold mb-1 text-[#404040]"
-                  >
-                    Confirm Password
-                  </Label>
-                  <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
-                    <InputGroupInput
-                      id="inline-end-input"
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Re-enter Password"
-                      className="focus:ring-[#007B64]"
-                    />
-                    <InputGroupAddon
-                      align="inline-end"
-                      className="hover:cursor-pointer"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
+              {(authPage === AuthPage.Login ||
+                authPage === AuthPage.SignupStepOne) && (
+                <>
+                  <div>
+                    <Label
+                      htmlFor="password"
+                      className="font-semibold mb-1 text-[#404040]"
                     >
-                      {showConfirmPassword ? <EyeIcon /> : <EyeOffIcon />}
-                    </InputGroupAddon>
-                  </InputGroup>
-                </div>
+                      Password
+                    </Label>
+                    <InputGroup
+                      className={`w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5 ${
+                        showAuthFieldError
+                          ? 'border-[#B4444D] ring-[2px] ring-[#B4444D]'
+                          : ''
+                      }`}
+                    >
+                      <InputGroupInput
+                        id="inline-end-input"
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Password"
+                        className={`focus:ring-[#007B64] ${
+                          showAuthFieldError ? 'bg-[#FFFAFA]' : ''
+                        }`}
+                      />
+                      <InputGroupAddon
+                        align="inline-end"
+                        className="hover:cursor-pointer"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeIcon /> : <EyeOffIcon />}
+                      </InputGroupAddon>
+                    </InputGroup>
+                  </div>
+                  {authPage === AuthPage.SignupStepOne && (
+                    <div>
+                      <Label
+                        htmlFor="password"
+                        className="font-semibold mb-1 text-[#404040]"
+                      >
+                        Confirm Password
+                      </Label>
+                      <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
+                        <InputGroupInput
+                          id="inline-end-input"
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Re-enter Password"
+                          className="focus:ring-[#007B64]"
+                        />
+                        <InputGroupAddon
+                          align="inline-end"
+                          className="hover:cursor-pointer"
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
+                        >
+                          {showConfirmPassword ? <EyeIcon /> : <EyeOffIcon />}
+                        </InputGroupAddon>
+                      </InputGroup>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
@@ -303,7 +315,15 @@ export const LoginPage: React.FC = () => {
                 {error && (
                   <p className="text-sm text-[#B4444D] mr-2">{error}</p>
                 )}
-                <Button className="p-0 text-[#007B64] font-semibold ml-auto">
+                <Button
+                  type="button"
+                  className="p-0 text-[#007B64] font-semibold ml-auto"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    resetFields();
+                    setAuthPage(AuthPage.ForgotPassword);
+                  }}
+                >
                   Forgot Password?
                 </Button>
               </div>
@@ -321,6 +341,17 @@ export const LoginPage: React.FC = () => {
               }`}
             >
               {isLoading ? '...' : 'Login'}
+            </Button>
+          ) : authPage === AuthPage.ForgotPassword ? (
+            <Button
+              id="auth-submit-btn"
+              type="submit"
+              disabled={!email || isLoading}
+              className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
+                !email ? 'bg-[#737373] cursor-not-allowed' : 'bg-[#007B64]'
+              }`}
+            >
+              {isLoading ? '...' : 'Send'}
             </Button>
           ) : authPage === AuthPage.SignupStepOne ? (
             <Button
@@ -352,26 +383,45 @@ export const LoginPage: React.FC = () => {
           )}
 
           <div className="flex text-gray-500 justify-center items-center">
-            <p>
-              {authPage === AuthPage.Login
-                ? "Don't have an account?"
-                : 'Already have an account?'}
-            </p>
-            <Button
-              type="button"
-              onClick={() => {
-                setAuthPage(
-                  authPage === AuthPage.Login
-                    ? AuthPage.SignupStepOne
-                    : AuthPage.Login,
-                );
-                setError('');
-                resetFields();
-              }}
-              className="text-md font-semibold text-[#007B64]"
-            >
-              {authPage === AuthPage.Login ? 'Create Account' : 'Sign in'}
-            </Button>
+            {authPage === AuthPage.ForgotPassword ? (
+              <>
+                <p>Go back to </p>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setAuthPage(AuthPage.Login);
+                    resetFields();
+                    setError('');
+                  }}
+                  className="text-md font-semibold text-[#007B64]"
+                >
+                  Sign in
+                </Button>
+              </>
+            ) : (
+              <>
+                <p>
+                  {authPage === AuthPage.Login
+                    ? "Don't have an account?"
+                    : 'Already have an account?'}
+                </p>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setAuthPage(
+                      authPage === AuthPage.Login
+                        ? AuthPage.SignupStepOne
+                        : AuthPage.Login,
+                    );
+                    setError('');
+                    resetFields();
+                  }}
+                  className="text-md font-semibold text-[#007B64]"
+                >
+                  {authPage === AuthPage.Login ? 'Create Account' : 'Sign in'}
+                </Button>
+              </>
+            )}
           </div>
         </form>
       </div>
