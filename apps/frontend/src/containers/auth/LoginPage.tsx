@@ -113,11 +113,8 @@ export const LoginPage: React.FC = () => {
         setError('Account created successfully! Please sign in.');
         setPassword('');
       } else if (authPage === AuthPage.ForgotPassword) {
-        // TODO: wire to password reset API when available
-        setAuthPage(AuthPage.Login);
-        setError(
-          'If an account exists for that email, you will receive a reset link.',
-        );
+        // TODO: Wire up to email-sending endpoint
+        // TODO: Show view confirming email was sent
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
