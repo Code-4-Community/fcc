@@ -26,7 +26,7 @@ jobs:
     outputs:
       affected: ${{ steps.should-deploy.outputs.affected }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           # We need to fetch all branches and commits so that Nx affected has a base to compare against.
           fetch-depth: 0
@@ -93,7 +93,7 @@ jobs:
     if: (contains(github.event.inputs.manual-deploy, 'c4c-ops-backend') || contains(needs.pre-deploy.outputs.affected, 'scaffolding-backend')) && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Use Node.js 16
         uses: actions/setup-node@v3
         with:
