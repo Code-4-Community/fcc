@@ -16,8 +16,7 @@ import { PasswordCriterion } from './PasswordCriterion';
 
 enum AuthPage {
   Login,
-  SignupStepOne,
-  SignupStepTwo,
+  Signup,
   ForgotPassword,
 }
 
@@ -25,8 +24,7 @@ export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -68,13 +66,10 @@ export const LoginPage: React.FC = () => {
   const headerText = (() => {
     switch (authPage) {
       case AuthPage.Login:
-        return 'Admin Dashboard';
+        return 'Admin Log In';
 
-      case AuthPage.SignupStepOne:
+      case AuthPage.Signup:
         return 'New User';
-
-      case AuthPage.SignupStepTwo:
-        return 'User Details';
 
       case AuthPage.ForgotPassword:
         return 'Forgot Password';
@@ -88,8 +83,7 @@ export const LoginPage: React.FC = () => {
     setEmail('');
     setPassword('');
     setConfirmPassword('');
-    setFirstName('');
-    setLastName('');
+    setUsername('');
     setShowPassword(false);
     setShowConfirmPassword(false);
   };
@@ -104,8 +98,9 @@ export const LoginPage: React.FC = () => {
       if (authPage === AuthPage.Login) {
         await login({ email, password });
         navigate(from, { replace: true });
-      } else if (authPage === AuthPage.SignupStepTwo) {
-        await signup({ email, password, firstName, lastName });
+      } else if (authPage === AuthPage.Signup) {
+        // TODO: signup should take in just email, password, and username
+        // await signup({ email, password, firstName, lastName });
         setAuthPage(AuthPage.Login);
         setError('Account created successfully! Please sign in.');
         setPassword('');
@@ -131,13 +126,25 @@ export const LoginPage: React.FC = () => {
         style={{ backgroundImage: `url(${cityBg})` }}
       ></div>
       <div className="relative z-10 p-10 m-auto bg-white rounded-[50px] w-[32rem]">
-        <div>
+        <div
+          className={
+            authPage === AuthPage.Signup
+              ? 'flex items-center justify-center gap-4'
+              : ''
+          }
+        >
           <img
             src={fccMark}
             alt="FCC Logo"
-            className="w-36 h-36 object-contain m-auto"
+            className={
+              authPage === AuthPage.Signup
+                ? 'w-20 h-20 object-contain shrink-0'
+                : 'w-36 h-36 object-contain m-auto'
+            }
           />
-          <h1 className="font-semibold text-[#007B64] text-4xl text-center">
+          <h1
+            className={`font-semibold text-[#007B64] ${authPage === AuthPage.Signup ? 'text-3xl text-left' : 'text-4xl text-center'}`}
+          >
             {headerText}
           </h1>
         </div>
@@ -147,145 +154,115 @@ export const LoginPage: React.FC = () => {
           className="flex flex-col gap-4 mt-10"
           noValidate
         >
-          {authPage === AuthPage.SignupStepTwo && (
-            <>
-              <div>
-                <Label
-                  htmlFor="first-name"
-                  className="font-semibold mb-1 text-[#404040]"
-                >
-                  First Name
-                </Label>
-                <Input
-                  type="text"
-                  placeholder="First Name"
-                  required
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
-                  id="first-name"
-                />
-              </div>
-              <div>
-                <Label
-                  htmlFor="last-name"
-                  className="font-semibold mb-1 text-[#404040]"
-                >
-                  Last Name
-                </Label>
-                <Input
-                  type="text"
-                  placeholder="Last Name"
-                  required
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64] mb-14"
-                  id="last-name"
-                />
-              </div>
-            </>
+          {authPage === AuthPage.Signup && (
+            <div>
+              <Label
+                htmlFor="username"
+                className="font-semibold mb-1 text-[#404040]"
+              >
+                Username
+              </Label>
+              <Input
+                type="text"
+                placeholder="Username"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
+                id="username"
+              />
+            </div>
           )}
 
-          {(authPage === AuthPage.Login ||
-            authPage === AuthPage.SignupStepOne ||
-            authPage === AuthPage.ForgotPassword) && (
-            <>
-              <div>
-                <Label
-                  htmlFor="email"
-                  className="font-semibold mb-1 text-[#404040]"
-                >
-                  Email
-                </Label>
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  required
-                  pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64] peer invalid:[&:not(:placeholder-shown):not(:focus)]:ring-[2.5px] invalid:[&:not(:placeholder-shown):not(:focus)]:ring-[#B4444D] invalid:[&:not(:placeholder-shown):not(:focus)]:bg-[#FFFAFA] ${
-                    showAuthFieldError
-                      ? 'ring-[2.5px] ring-[#B4444D] bg-[#FFFAFA]'
-                      : ''
-                  }`}
-                  id="email"
+          <div>
+            <Label
+              htmlFor="email"
+              className="font-semibold mb-1 text-[#404040]"
+            >
+              Email
+            </Label>
+            <Input
+              type="email"
+              placeholder="Email"
+              required
+              pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={`w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64] peer invalid:[&:not(:placeholder-shown):not(:focus)]:ring-[2.5px] invalid:[&:not(:placeholder-shown):not(:focus)]:ring-[#B4444D] invalid:[&:not(:placeholder-shown):not(:focus)]:bg-[#FFFAFA] ${
+                showAuthFieldError
+                  ? 'ring-[2.5px] ring-[#B4444D] bg-[#FFFAFA]'
+                  : ''
+              }`}
+              id="email"
+            />
+            <span className="mt-2 hidden text-sm text-[#B4444D] peer-[&:not(:placeholder-shown):not(:focus):invalid]:block">
+              Please enter a valid email address
+            </span>
+          </div>
+
+          <div>
+            <Label
+              htmlFor="password"
+              className="font-semibold mb-1 text-[#404040]"
+            >
+              Password
+            </Label>
+            <InputGroup
+              className={`w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5 ${
+                showAuthFieldError
+                  ? 'border-[#B4444D] ring-[2px] ring-[#B4444D]'
+                  : ''
+              }`}
+            >
+              <InputGroupInput
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className={`focus:ring-[#007B64] ${
+                  showAuthFieldError ? 'bg-[#FFFAFA]' : ''
+                }`}
+              />
+              <InputGroupAddon
+                align="inline-end"
+                className="hover:cursor-pointer"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeIcon /> : <EyeOffIcon />}
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+
+          {authPage === AuthPage.Signup && (
+            <div>
+              <Label
+                htmlFor="confirm-password"
+                className="font-semibold mb-1 text-[#404040]"
+              >
+                Confirm Password
+              </Label>
+              <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
+                <InputGroupInput
+                  id="confirm-password"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter Password"
+                  className="focus:ring-[#007B64]"
                 />
-                <span className="mt-2 hidden text-sm text-[#B4444D] peer-[&:not(:placeholder-shown):not(:focus):invalid]:block">
-                  Please enter a valid email address
-                </span>
-              </div>
-              {(authPage === AuthPage.Login ||
-                authPage === AuthPage.SignupStepOne) && (
-                <>
-                  <div>
-                    <Label
-                      htmlFor="password"
-                      className="font-semibold mb-1 text-[#404040]"
-                    >
-                      Password
-                    </Label>
-                    <InputGroup
-                      className={`w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5 ${
-                        showAuthFieldError
-                          ? 'border-[#B4444D] ring-[2px] ring-[#B4444D]'
-                          : ''
-                      }`}
-                    >
-                      <InputGroupInput
-                        id="password"
-                        type={showPassword ? 'text' : 'password'}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Password"
-                        className={`focus:ring-[#007B64] ${
-                          showAuthFieldError ? 'bg-[#FFFAFA]' : ''
-                        }`}
-                      />
-                      <InputGroupAddon
-                        align="inline-end"
-                        className="hover:cursor-pointer"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <EyeIcon /> : <EyeOffIcon />}
-                      </InputGroupAddon>
-                    </InputGroup>
-                  </div>
-                  {authPage === AuthPage.SignupStepOne && (
-                    <div>
-                      <Label
-                        htmlFor="confirm-password"
-                        className="font-semibold mb-1 text-[#404040]"
-                      >
-                        Confirm Password
-                      </Label>
-                      <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
-                        <InputGroupInput
-                          id="confirm-password"
-                          type={showConfirmPassword ? 'text' : 'password'}
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="Re-enter Password"
-                          className="focus:ring-[#007B64]"
-                        />
-                        <InputGroupAddon
-                          align="inline-end"
-                          className="hover:cursor-pointer"
-                          onClick={() =>
-                            setShowConfirmPassword(!showConfirmPassword)
-                          }
-                        >
-                          {showConfirmPassword ? <EyeIcon /> : <EyeOffIcon />}
-                        </InputGroupAddon>
-                      </InputGroup>
-                    </div>
-                  )}
-                </>
-              )}
-            </>
+                <InputGroupAddon
+                  align="inline-end"
+                  className="hover:cursor-pointer"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeIcon /> : <EyeOffIcon />}
+                </InputGroupAddon>
+              </InputGroup>
+            </div>
           )}
 
-          {authPage === AuthPage.SignupStepOne ? (
+          {authPage === AuthPage.Signup ? (
             <div className="flex gap-1 flex-wrap w-full">
               <PasswordCriterion
                 name="8+ characters"
@@ -350,7 +327,7 @@ export const LoginPage: React.FC = () => {
             >
               {isLoading ? '...' : 'Send'}
             </Button>
-          ) : authPage === AuthPage.SignupStepOne ? (
+          ) : (
             <Button
               className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
                 !email || !allCriteriaMet
@@ -360,23 +337,9 @@ export const LoginPage: React.FC = () => {
               disabled={!email || !allCriteriaMet}
               onClick={(e) => {
                 e.preventDefault();
-                setAuthPage(AuthPage.SignupStepTwo);
               }}
             >
-              Create Account
-            </Button>
-          ) : (
-            <Button
-              id="auth-submit-btn"
-              type="submit"
-              disabled={!firstName || !lastName || isLoading}
-              className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
-                !firstName || !lastName
-                  ? 'bg-[#737373] cursor-not-allowed'
-                  : 'bg-[#007B64]'
-              }`}
-            >
-              {isLoading ? '...' : 'Finish Profile'}
+              Continue
             </Button>
           )}
 
@@ -408,7 +371,7 @@ export const LoginPage: React.FC = () => {
                   onClick={() => {
                     setAuthPage(
                       authPage === AuthPage.Login
-                        ? AuthPage.SignupStepOne
+                        ? AuthPage.Signup
                         : AuthPage.Login,
                     );
                     setError('');
