@@ -69,19 +69,15 @@ export const LoginPage: React.FC = () => {
     switch (authPage) {
       case AuthPage.Login:
         return 'Admin Dashboard';
-        break;
 
       case AuthPage.SignupStepOne:
         return 'New User';
-        break;
 
       case AuthPage.SignupStepTwo:
         return 'User Details';
-        break;
 
       case AuthPage.ForgotPassword:
         return 'Forgot Password';
-        break;
 
       default:
         break;
@@ -102,6 +98,7 @@ export const LoginPage: React.FC = () => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+    console.log('Form submitted');
 
     try {
       if (authPage === AuthPage.Login) {
@@ -236,7 +233,7 @@ export const LoginPage: React.FC = () => {
                       }`}
                     >
                       <InputGroupInput
-                        id="inline-end-input"
+                        id="password"
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -257,14 +254,14 @@ export const LoginPage: React.FC = () => {
                   {authPage === AuthPage.SignupStepOne && (
                     <div>
                       <Label
-                        htmlFor="password"
+                        htmlFor="confirm-password"
                         className="font-semibold mb-1 text-[#404040]"
                       >
                         Confirm Password
                       </Label>
                       <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
                         <InputGroupInput
-                          id="inline-end-input"
+                          id="confirm-password"
                           type={showConfirmPassword ? 'text' : 'password'}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
@@ -331,8 +328,9 @@ export const LoginPage: React.FC = () => {
             <Button
               id="auth-submit-btn"
               type="submit"
+              disabled={!email || !password || showAuthFieldError}
               className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
-                !email || !password
+                !email || !password || showAuthFieldError
                   ? 'bg-[#737373] cursor-not-allowed'
                   : 'bg-[#007B64]'
               }`}
@@ -343,9 +341,11 @@ export const LoginPage: React.FC = () => {
             <Button
               id="auth-submit-btn"
               type="submit"
-              disabled={!email || isLoading}
+              disabled={!email || isLoading || showAuthFieldError}
               className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
-                !email ? 'bg-[#737373] cursor-not-allowed' : 'bg-[#007B64]'
+                !email || isLoading || showAuthFieldError
+                  ? 'bg-[#737373] cursor-not-allowed'
+                  : 'bg-[#007B64]'
               }`}
             >
               {isLoading ? '...' : 'Send'}
@@ -353,10 +353,11 @@ export const LoginPage: React.FC = () => {
           ) : authPage === AuthPage.SignupStepOne ? (
             <Button
               className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
-                !allCriteriaMet
+                !email || !allCriteriaMet
                   ? 'bg-[#737373] cursor-not-allowed'
                   : 'bg-[#007B64]'
               }`}
+              disabled={!email || !allCriteriaMet}
               onClick={(e) => {
                 e.preventDefault();
                 setAuthPage(AuthPage.SignupStepTwo);
@@ -368,7 +369,7 @@ export const LoginPage: React.FC = () => {
             <Button
               id="auth-submit-btn"
               type="submit"
-              disabled={isLoading || !allCriteriaMet}
+              disabled={!firstName || !lastName || isLoading}
               className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
                 !firstName || !lastName
                   ? 'bg-[#737373] cursor-not-allowed'
