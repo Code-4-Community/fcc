@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../components/AuthProvider';
 import { Button } from '../../components/ui/button';
+import { Card, CardContent } from '../../components/ui/card';
 import cityBg from '../../assets/city-bg.png';
 import fccMark from '../../assets/fcc-mark.png';
 import { Input } from '@components/ui/input';
@@ -125,267 +126,275 @@ export const LoginPage: React.FC = () => {
         className="absolute inset-0 bg-no-repeat bg-cover bg-center opacity-30"
         style={{ backgroundImage: `url(${cityBg})` }}
       ></div>
-      <div className="relative z-10 p-10 m-auto bg-white rounded-[50px] w-[32rem]">
-        <div
-          className={
-            authPage === AuthPage.Signup
-              ? 'flex items-center justify-center gap-4'
-              : ''
-          }
-        >
-          <img
-            src={fccMark}
-            alt="FCC Logo"
+      <Card className="relative z-10 p-10 m-auto bg-white rounded-[50px] w-[32rem]">
+        <CardContent className="p-0">
+          <div
             className={
               authPage === AuthPage.Signup
-                ? 'w-20 h-20 object-contain shrink-0'
-                : 'w-36 h-36 object-contain m-auto'
+                ? 'flex items-center justify-center gap-4'
+                : ''
             }
-          />
-          <h1
-            className={`font-semibold text-[#007B64] ${authPage === AuthPage.Signup ? 'text-3xl text-left' : 'text-4xl text-center'}`}
           >
-            {headerText}
-          </h1>
-        </div>
+            <img
+              src={fccMark}
+              alt="FCC Logo"
+              className={
+                authPage === AuthPage.Signup
+                  ? 'w-20 h-20 object-contain shrink-0'
+                  : 'w-36 h-36 object-contain m-auto'
+              }
+            />
+            <h1
+              className={`font-semibold text-[#007B64] ${authPage === AuthPage.Signup ? 'text-3xl text-left' : 'text-4xl text-center'}`}
+            >
+              {headerText}
+            </h1>
+          </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-4 mt-10"
-          noValidate
-        >
-          {authPage === AuthPage.Signup && (
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-4 mt-10"
+            noValidate
+          >
+            {authPage === AuthPage.Signup && (
+              <div>
+                <Label
+                  htmlFor="username"
+                  className="font-semibold mb-1 text-[#404040]"
+                >
+                  Username
+                </Label>
+                <Input
+                  type="text"
+                  placeholder="Username"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
+                  id="username"
+                />
+              </div>
+            )}
+
             <div>
               <Label
-                htmlFor="username"
+                htmlFor="email"
                 className="font-semibold mb-1 text-[#404040]"
               >
-                Username
+                Email
               </Label>
               <Input
-                type="text"
-                placeholder="Username"
+                type="email"
+                placeholder="Email"
                 required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
-                id="username"
-              />
-            </div>
-          )}
-
-          <div>
-            <Label
-              htmlFor="email"
-              className="font-semibold mb-1 text-[#404040]"
-            >
-              Email
-            </Label>
-            <Input
-              type="email"
-              placeholder="Email"
-              required
-              pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={`w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64] peer invalid:[&:not(:placeholder-shown):not(:focus)]:ring-[2.5px] invalid:[&:not(:placeholder-shown):not(:focus)]:ring-[#B4444D] invalid:[&:not(:placeholder-shown):not(:focus)]:bg-[#FFFAFA] ${
-                showAuthFieldError
-                  ? 'ring-[2.5px] ring-[#B4444D] bg-[#FFFAFA]'
-                  : ''
-              }`}
-              id="email"
-            />
-            <span className="mt-2 hidden text-sm text-[#B4444D] peer-[&:not(:placeholder-shown):not(:focus):invalid]:block">
-              Please enter a valid email address
-            </span>
-          </div>
-
-          <div>
-            <Label
-              htmlFor="password"
-              className="font-semibold mb-1 text-[#404040]"
-            >
-              Password
-            </Label>
-            <InputGroup
-              className={`w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5 ${
-                showAuthFieldError
-                  ? 'border-[#B4444D] ring-[2px] ring-[#B4444D]'
-                  : ''
-              }`}
-            >
-              <InputGroupInput
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className={`focus:ring-[#007B64] ${
-                  showAuthFieldError ? 'bg-[#FFFAFA]' : ''
+                pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64] peer invalid:[&:not(:placeholder-shown):not(:focus)]:ring-[2.5px] invalid:[&:not(:placeholder-shown):not(:focus)]:ring-[#B4444D] invalid:[&:not(:placeholder-shown):not(:focus)]:bg-[#FFFAFA] ${
+                  showAuthFieldError
+                    ? 'ring-[2.5px] ring-[#B4444D] bg-[#FFFAFA]'
+                    : ''
                 }`}
+                id="email"
               />
-              <InputGroupAddon
-                align="inline-end"
-                className="hover:cursor-pointer"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeIcon /> : <EyeOffIcon />}
-              </InputGroupAddon>
-            </InputGroup>
-          </div>
+              <span className="mt-2 hidden text-sm text-[#B4444D] peer-[&:not(:placeholder-shown):not(:focus):invalid]:block">
+                Please enter a valid email address
+              </span>
+            </div>
 
-          {authPage === AuthPage.Signup && (
             <div>
               <Label
-                htmlFor="confirm-password"
+                htmlFor="password"
                 className="font-semibold mb-1 text-[#404040]"
               >
-                Confirm Password
+                Password
               </Label>
-              <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
+              <InputGroup
+                className={`w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5 ${
+                  showAuthFieldError
+                    ? 'border-[#B4444D] ring-[2px] ring-[#B4444D]'
+                    : ''
+                }`}
+              >
                 <InputGroupInput
-                  id="confirm-password"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Re-enter Password"
-                  className="focus:ring-[#007B64]"
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Password"
+                  className={`focus:ring-[#007B64] ${
+                    showAuthFieldError ? 'bg-[#FFFAFA]' : ''
+                  }`}
                 />
                 <InputGroupAddon
                   align="inline-end"
                   className="hover:cursor-pointer"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showConfirmPassword ? <EyeIcon /> : <EyeOffIcon />}
+                  {showPassword ? <EyeIcon /> : <EyeOffIcon />}
                 </InputGroupAddon>
               </InputGroup>
             </div>
-          )}
 
-          {authPage === AuthPage.Signup ? (
-            <div className="flex gap-1 flex-wrap w-full">
-              <PasswordCriterion
-                name="8+ characters"
-                criterionMet={hasMinLength}
-              />
-              <PasswordCriterion name="Uppercase" criterionMet={hasUppercase} />
-              <PasswordCriterion name="Lowercase" criterionMet={hasLowercase} />
-              <PasswordCriterion
-                name="Special character"
-                criterionMet={hasSpecialChar}
-              />
-              <PasswordCriterion name="Number" criterionMet={hasNumber} />
-              <PasswordCriterion
-                name="Matching"
-                criterionMet={passwordsMatch}
-              />
-            </div>
-          ) : (
-            authPage === AuthPage.Login && (
-              <div className="flex items-center w-full">
-                {error && (
-                  <p className="text-sm text-[#B4444D] mr-2">{error}</p>
-                )}
-                <Button
-                  type="button"
-                  className="p-0 text-[#007B64] font-semibold ml-auto"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    resetFields();
-                    setAuthPage(AuthPage.ForgotPassword);
-                  }}
+            {authPage === AuthPage.Signup && (
+              <div>
+                <Label
+                  htmlFor="confirm-password"
+                  className="font-semibold mb-1 text-[#404040]"
                 >
-                  Forgot Password?
-                </Button>
+                  Confirm Password
+                </Label>
+                <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
+                  <InputGroupInput
+                    id="confirm-password"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter Password"
+                    className="focus:ring-[#007B64]"
+                  />
+                  <InputGroupAddon
+                    align="inline-end"
+                    className="hover:cursor-pointer"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <EyeIcon /> : <EyeOffIcon />}
+                  </InputGroupAddon>
+                </InputGroup>
               </div>
-            )
-          )}
-
-          {authPage === AuthPage.Login ? (
-            <Button
-              id="auth-submit-btn"
-              type="submit"
-              disabled={!email || !password || showAuthFieldError}
-              className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
-                !email || !password || showAuthFieldError
-                  ? 'bg-[#737373] cursor-not-allowed'
-                  : 'bg-[#007B64]'
-              }`}
-            >
-              {isLoading ? '...' : 'Login'}
-            </Button>
-          ) : authPage === AuthPage.ForgotPassword ? (
-            <Button
-              id="auth-submit-btn"
-              type="submit"
-              disabled={!email || isLoading || showAuthFieldError}
-              className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
-                !email || isLoading || showAuthFieldError
-                  ? 'bg-[#737373] cursor-not-allowed'
-                  : 'bg-[#007B64]'
-              }`}
-            >
-              {isLoading ? '...' : 'Send'}
-            </Button>
-          ) : (
-            <Button
-              className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
-                !email || !allCriteriaMet
-                  ? 'bg-[#737373] cursor-not-allowed'
-                  : 'bg-[#007B64]'
-              }`}
-              disabled={!email || !allCriteriaMet}
-              onClick={(e) => {
-                e.preventDefault();
-              }}
-            >
-              Continue
-            </Button>
-          )}
-
-          <div className="flex text-gray-500 justify-center items-center">
-            {authPage === AuthPage.ForgotPassword ? (
-              <>
-                <p>Go back to </p>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setAuthPage(AuthPage.Login);
-                    resetFields();
-                    setError('');
-                  }}
-                  className="text-md font-semibold text-[#007B64]"
-                >
-                  Sign in
-                </Button>
-              </>
-            ) : (
-              <>
-                <p>
-                  {authPage === AuthPage.Login
-                    ? "Don't have an account?"
-                    : 'Already have an account?'}
-                </p>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setAuthPage(
-                      authPage === AuthPage.Login
-                        ? AuthPage.Signup
-                        : AuthPage.Login,
-                    );
-                    setError('');
-                    resetFields();
-                  }}
-                  className="text-md font-semibold text-[#007B64]"
-                >
-                  {authPage === AuthPage.Login ? 'Create Account' : 'Sign in'}
-                </Button>
-              </>
             )}
-          </div>
-        </form>
-      </div>
+
+            {authPage === AuthPage.Signup ? (
+              <div className="flex gap-1 flex-wrap w-full">
+                <PasswordCriterion
+                  name="8+ characters"
+                  criterionMet={hasMinLength}
+                />
+                <PasswordCriterion
+                  name="Uppercase"
+                  criterionMet={hasUppercase}
+                />
+                <PasswordCriterion
+                  name="Lowercase"
+                  criterionMet={hasLowercase}
+                />
+                <PasswordCriterion
+                  name="Special character"
+                  criterionMet={hasSpecialChar}
+                />
+                <PasswordCriterion name="Number" criterionMet={hasNumber} />
+                <PasswordCriterion
+                  name="Matching"
+                  criterionMet={passwordsMatch}
+                />
+              </div>
+            ) : (
+              authPage === AuthPage.Login && (
+                <div className="flex items-center w-full">
+                  {error && (
+                    <p className="text-sm text-[#B4444D] mr-2">{error}</p>
+                  )}
+                  <Button
+                    type="button"
+                    className="p-0 text-[#007B64] font-semibold ml-auto"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      resetFields();
+                      setAuthPage(AuthPage.ForgotPassword);
+                    }}
+                  >
+                    Forgot Password?
+                  </Button>
+                </div>
+              )
+            )}
+
+            {authPage === AuthPage.Login ? (
+              <Button
+                id="auth-submit-btn"
+                type="submit"
+                disabled={!email || !password || showAuthFieldError}
+                className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
+                  !email || !password || showAuthFieldError
+                    ? 'bg-[#737373] cursor-not-allowed'
+                    : 'bg-[#007B64]'
+                }`}
+              >
+                {isLoading ? '...' : 'Login'}
+              </Button>
+            ) : authPage === AuthPage.ForgotPassword ? (
+              <Button
+                id="auth-submit-btn"
+                type="submit"
+                disabled={!email || isLoading || showAuthFieldError}
+                className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
+                  !email || isLoading || showAuthFieldError
+                    ? 'bg-[#737373] cursor-not-allowed'
+                    : 'bg-[#007B64]'
+                }`}
+              >
+                {isLoading ? '...' : 'Send'}
+              </Button>
+            ) : (
+              <Button
+                className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
+                  !email || !allCriteriaMet
+                    ? 'bg-[#737373] cursor-not-allowed'
+                    : 'bg-[#007B64]'
+                }`}
+                disabled={!email || !allCriteriaMet}
+                onClick={(e) => {
+                  e.preventDefault();
+                }}
+              >
+                Continue
+              </Button>
+            )}
+
+            <div className="flex text-gray-500 justify-center items-center">
+              {authPage === AuthPage.ForgotPassword ? (
+                <>
+                  <p>Go back to </p>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setAuthPage(AuthPage.Login);
+                      resetFields();
+                      setError('');
+                    }}
+                    className="text-md font-semibold text-[#007B64]"
+                  >
+                    Sign in
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p>
+                    {authPage === AuthPage.Login
+                      ? "Don't have an account?"
+                      : 'Already have an account?'}
+                  </p>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setAuthPage(
+                        authPage === AuthPage.Login
+                          ? AuthPage.Signup
+                          : AuthPage.Login,
+                      );
+                      setError('');
+                      resetFields();
+                    }}
+                    className="text-md font-semibold text-[#007B64]"
+                  >
+                    {authPage === AuthPage.Login ? 'Create Account' : 'Sign in'}
+                  </Button>
+                </>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };
