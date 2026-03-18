@@ -125,6 +125,42 @@ export class DonationsController {
     return stats;
   }
 
+  @Get('lapsed')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'get lapsed donor emails',
+    description:
+      'retrieve unique donor emails for donors who have not donated successfully in numMonths months and do not have recurring donations',
+  })
+  @ApiQuery({
+    name: 'numMonths',
+    required: false,
+    type: Number,
+    description: 'number of months since last successful donation',
+    example: 6,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'list of lapsed donor emails',
+    schema: {
+      type: 'object',
+      properties: {
+        emails: {
+          type: 'array',
+          items: { type: 'string' },
+          example: ['alice@example.com', 'bob@example.com'],
+        },
+      },
+    },
+  })
+  async getLapsedDonors(
+    @Query('numMonths', new ParseIntPipe({ optional: true }))
+    numMonths?: number,
+  ): Promise<{ emails: string[] }> {
+    return this.donationsService.getLapsedDonors(numMonths ?? 6);
+  }
+
   @Get()
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
