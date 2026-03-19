@@ -104,7 +104,6 @@ export const LoginPage: React.FC = () => {
         navigate('/confirm-registered', { replace: true });
         setError('Account created successfully! Please sign in.');
       } else if (authPage === AuthPage.ForgotPassword) {
-        // TODO: Show view confirming email was sent
         navigate('/confirm-sent-email', { replace: true });
       }
     } catch (err: unknown) {
