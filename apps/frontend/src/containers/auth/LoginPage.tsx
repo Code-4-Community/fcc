@@ -93,7 +93,6 @@ export const LoginPage: React.FC = () => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-    console.log('Form submitted');
 
     try {
       if (authPage === AuthPage.Login) {
@@ -201,39 +200,41 @@ export const LoginPage: React.FC = () => {
               </span>
             </div>
 
-            <div>
-              <Label
-                htmlFor="password"
-                className="font-semibold mb-1 text-[#404040]"
-              >
-                Password
-              </Label>
-              <InputGroup
-                className={`w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5 ${
-                  showAuthFieldError
-                    ? 'border-[#B4444D] ring-[2px] ring-[#B4444D]'
-                    : ''
-                }`}
-              >
-                <InputGroupInput
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Password"
-                  className={`focus:ring-[#007B64] ${
-                    showAuthFieldError ? 'bg-[#FFFAFA]' : ''
-                  }`}
-                />
-                <InputGroupAddon
-                  align="inline-end"
-                  className="hover:cursor-pointer"
-                  onClick={() => setShowPassword(!showPassword)}
+            {authPage !== AuthPage.ForgotPassword && (
+              <div>
+                <Label
+                  htmlFor="password"
+                  className="font-semibold mb-1 text-[#404040]"
                 >
-                  {showPassword ? <EyeIcon /> : <EyeOffIcon />}
-                </InputGroupAddon>
-              </InputGroup>
-            </div>
+                  Password
+                </Label>
+                <InputGroup
+                  className={`w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5 ${
+                    showAuthFieldError
+                      ? 'border-[#B4444D] ring-[2px] ring-[#B4444D]'
+                      : ''
+                  }`}
+                >
+                  <InputGroupInput
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className={`focus:ring-[#007B64] ${
+                      showAuthFieldError ? 'bg-[#FFFAFA]' : ''
+                    }`}
+                  />
+                  <InputGroupAddon
+                    align="inline-end"
+                    className="hover:cursor-pointer"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeIcon /> : <EyeOffIcon />}
+                  </InputGroupAddon>
+                </InputGroup>
+              </div>
+            )}
 
             {authPage === AuthPage.Signup && (
               <div>
@@ -342,9 +343,7 @@ export const LoginPage: React.FC = () => {
                     : 'bg-[#007B64]'
                 }`}
                 disabled={!email || !allCriteriaMet}
-                onClick={(e) => {
-                  e.preventDefault();
-                }}
+                onClick={handleSubmit}
               >
                 Continue
               </Button>

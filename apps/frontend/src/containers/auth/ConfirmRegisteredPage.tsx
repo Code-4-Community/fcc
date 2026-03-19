@@ -7,7 +7,7 @@ export const ConfirmRegisteredPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleSignIn = () => {
-    navigate('/');
+    navigate('/login');
   };
 
   return (

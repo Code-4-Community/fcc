@@ -7,7 +7,7 @@ export const ConfirmSentEmailPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleSignIn = () => {
-    navigate('/');
+    navigate('/login');
   };
 
   return (
