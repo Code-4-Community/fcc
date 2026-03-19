@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, replace } from 'react-router-dom';
 import { useAuth } from '../../components/AuthProvider';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent } from '../../components/ui/card';
-import cityBg from '../../assets/city-bg.png';
-import fccMark from '../../assets/fcc-mark.png';
+import bostonBg from '../../assets/green-boston-background.png';
+import fccLogo from '../../assets/fcc-logo.png';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
 import {
@@ -102,12 +102,11 @@ export const LoginPage: React.FC = () => {
       } else if (authPage === AuthPage.Signup) {
         // TODO: signup should take in just email, password, and username
         // await signup({ email, password, firstName, lastName });
-        setAuthPage(AuthPage.Login);
+        navigate('/confirm-registered', { replace: true });
         setError('Account created successfully! Please sign in.');
-        setPassword('');
       } else if (authPage === AuthPage.ForgotPassword) {
-        // TODO: Wire up to email-sending endpoint
         // TODO: Show view confirming email was sent
+        navigate('/confirm-sent-email', { replace: true });
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -124,7 +123,7 @@ export const LoginPage: React.FC = () => {
     <div className="relative flex justify-center items-center min-h-screen bg-[#007B64]">
       <div
         className="absolute inset-0 bg-no-repeat bg-cover bg-center opacity-30"
-        style={{ backgroundImage: `url(${cityBg})` }}
+        style={{ backgroundImage: `url(${bostonBg})` }}
       ></div>
       <Card className="relative z-10 p-10 m-auto bg-white rounded-[50px] w-[32rem]">
         <CardContent className="p-0">
@@ -136,7 +135,7 @@ export const LoginPage: React.FC = () => {
             }
           >
             <img
-              src={fccMark}
+              src={fccLogo}
               alt="FCC Logo"
               className={
                 authPage === AuthPage.Signup

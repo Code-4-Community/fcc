@@ -11,8 +11,8 @@ import { AuthProvider } from '@components/AuthProvider';
 import { ProtectedRoute } from '@components/ProtectedRoute';
 import { AdminRoute } from '@components/AdminRoute';
 import { LoginPage } from '@containers/auth/LoginPage';
-import { Modal1Page } from '@containers/auth/Modal1Page';
-import { Modal2Page } from '@containers/auth/Modal2Page';
+import { ConfirmSentEmailPage } from '@containers/auth/ConfirmSentEmailPage';
+import { ConfirmRegisteredPage } from '@containers/auth/ConfirmRegisteredPage';
 import { DashboardPage } from '@containers/dashboard/DashboardPage';
 import { DonorStatsChart } from '@components/DonorStatsChart';
 
@@ -27,12 +27,12 @@ const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
-    path: '/modal1',
-    element: <Modal1Page />,
+    path: '/confirm-sent-email',
+    element: <ConfirmSentEmailPage />,
   },
   {
-    path: '/modal2',
-    element: <Modal2Page />,
+    path: '/confirm-registered',
+    element: <ConfirmRegisteredPage />,
   },
   {
     path: '/dashboard',
