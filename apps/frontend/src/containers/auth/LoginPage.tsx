@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation, replace } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../components/AuthProvider';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent } from '../../components/ui/card';
@@ -99,8 +99,7 @@ export const LoginPage: React.FC = () => {
         await login({ email, password });
         navigate(from, { replace: true });
       } else if (authPage === AuthPage.Signup) {
-        // TODO: signup should take in just email, password, and username
-        // await signup({ email, password, firstName, lastName });
+        await signup({ email, password, firstName: username, lastName: '' });
         navigate('/confirm-registered', { replace: true });
         setError('Account created successfully! Please sign in.');
       } else if (authPage === AuthPage.ForgotPassword) {
