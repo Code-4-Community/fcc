@@ -283,8 +283,9 @@ describe('DonationsController', () => {
         perPage: 20,
         totalPages: 1,
       });
+      const req = { user: { status: 'ADMIN' } };
 
-      const result = await controller.findAll(1, 20);
+      const result = await controller.findAll(req, 1, 20);
 
       expect(repository.findPaginated).toHaveBeenCalledWith(1, 20, {
         donationType: undefined,
@@ -310,8 +311,10 @@ describe('DonationsController', () => {
         perPage: 20,
         totalPages: 0,
       });
+      const req = { user: { status: 'ADMIN' } };
 
       await controller.findAll(
+        req,
         1,
         20,
         DonationType.RECURRING,
@@ -340,8 +343,9 @@ describe('DonationsController', () => {
         perPage: 20,
         totalPages: 0,
       });
+      const req = { user: { status: 'ADMIN' } };
 
-      const result = await controller.findAll(1, 20);
+      const result = await controller.findAll(req, 1, 20);
 
       expect(result.rows).toEqual([]);
       expect(result.total).toBe(0);
