@@ -3377,15 +3377,15 @@
     consola "^2.15.0"
     node-fetch "^2.6.1"
 
-"@nx/cypress@22.0.2":
-  version "22.0.2"
-  resolved "https://registry.yarnpkg.com/@nx/cypress/-/cypress-22.0.2.tgz#d5f1d5f065d697d6d31a2e4995fb002921178106"
-  integrity sha512-SXkHjV2+vJZtY1YYbtGLCiVNSO73Fe11bNDFPubIkfhheAoWzfo7MpBFQOpurC27T796jer5wLg3RXRBYiuNUw==
+"@nx/cypress@22.5.1":
+  version "22.5.1"
+  resolved "https://registry.yarnpkg.com/@nx/cypress/-/cypress-22.5.1.tgz#4f7408912844cfbba2297d9f0d53f3a02c11747a"
+  integrity sha512-uPfsjuovDzBS/Q8+icNCQq/EEiak5nGcMMEJ7cb1Vqy8JCj9D6rtGoTfTu6m2SjX99sEoqesUIqJ9tpjh+68aw==
   dependencies:
-    "@nx/devkit" "22.0.2"
-    "@nx/eslint" "22.0.2"
-    "@nx/js" "22.0.2"
-    "@phenomnomnominal/tsquery" "~5.0.1"
+    "@nx/devkit" "22.5.1"
+    "@nx/eslint" "22.5.1"
+    "@nx/js" "22.5.1"
+    "@phenomnomnominal/tsquery" "~6.1.4"
     detect-port "^1.5.1"
     semver "^7.6.3"
     tree-kill "1.2.2"
@@ -3454,6 +3454,17 @@
   dependencies:
     "@nx/devkit" "22.0.2"
     "@nx/js" "22.0.2"
+    semver "^7.6.3"
+    tslib "^2.3.0"
+    typescript "~5.9.2"
+
+"@nx/eslint@22.5.1":
+  version "22.5.1"
+  resolved "https://registry.yarnpkg.com/@nx/eslint/-/eslint-22.5.1.tgz#6913a7ed5add15d98a2d8cdfd0ac6383c3702fce"
+  integrity sha512-878xSsfOKtnQBJlRyeeHANVr5+HJMeMfPgpsffRfFDoat7pF/B2KoK2UJx/wQlAHUyVubKNhm7x46fA/shqBow==
+  dependencies:
+    "@nx/devkit" "22.5.1"
+    "@nx/js" "22.5.1"
     semver "^7.6.3"
     tslib "^2.3.0"
     typescript "~5.9.2"
