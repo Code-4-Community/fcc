@@ -19,13 +19,3 @@ updates:
       - "aaronashby"
       - "thaninbew"
     open-pull-requests-limit: 3
-
-  # Enable version updates for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    assignees:
-      - "aaronashby"
-      - "thaninbew"
-    open-pull-requests-limit: 3
