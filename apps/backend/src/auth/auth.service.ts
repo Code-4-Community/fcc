@@ -27,6 +27,9 @@ export class AuthService {
   private readonly clientSecret: string;
 
   constructor() {
+    console.log(
+      `Initializing AuthService with UserPoolId: ${CognitoAuthConfig.userPoolId}, Region: ${CognitoAuthConfig.region}`,
+    );
     this.providerClient = new CognitoIdentityProviderClient({
       region: CognitoAuthConfig.region,
       credentials: {
@@ -142,7 +145,9 @@ export class AuthService {
     });
 
     try {
+      console.log(`Calling Cognito AdminInitiateAuth for ${email}`);
       const response = await this.providerClient.send(signInCommand);
+      console.log(`Cognito response received for ${email}`);
 
       return {
         accessToken: response.AuthenticationResult.AccessToken,

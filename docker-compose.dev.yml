@@ -36,7 +36,7 @@ services:
       NX_DB_DATABASE: fcc_dev
 
       NODE_ENV: development
-      PORT: 3000
+      PORT: 3005
 
       # JWT and Auth (add secrets in prod)
       JWT_SECRET: dev-secret-change-in-prod
@@ -52,7 +52,7 @@ services:
       NX_AWS_SECRET_ACCESS_KEY: ${NX_AWS_SECRET_ACCESS_KEY}
 
     ports:
-      - '3000:3000'
+      - '3005:3005'
     depends_on:
       postgres:
         condition: service_healthy
@@ -86,7 +86,7 @@ services:
       NX_DB_DATABASE: fcc_dev
 
       NODE_ENV: development
-      PORT: 3001
+      PORT: 3000
 
       # JWT and Auth (add secrets in prod)
       JWT_SECRET: dev-secret-change-in-prod
@@ -106,7 +106,7 @@ services:
       AWS_SES_SENDER_EMAIL: ${SENDER_EMAIL}
 
     ports:
-      - '3001:3001'
+      - '3000:3000'
     depends_on:
       postgres:
         condition: service_healthy

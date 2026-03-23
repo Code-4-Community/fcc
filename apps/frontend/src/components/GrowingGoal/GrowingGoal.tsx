@@ -97,6 +97,7 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
   return (
     <div className={styles['goal-container']}>
       <div className={styles['description-label']}>{message}</div>
+
       <div className={styles['growth-container']}>
         <div
           ref={growthContainerRef}
@@ -108,11 +109,14 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
               mask: `conic-gradient(black 0deg ${progress}deg, transparent ${progress}deg 360deg)`,
             }}
           ></div>
+
           <Plant />
+
           <div
             style={{ ...startHandleStyle, backgroundColor: '#650d77' }}
             className={styles['progress-bar-handle']}
           ></div>
+
           <div
             style={{
               ...endHandleStyle,
@@ -140,6 +144,7 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
             ) : (
               <div className={styles['sample-donor-profile']}></div>
             )}
+
             <div className={styles['sample-donor-amount']}>
               <b>
                 {props.sampleDonation.name.length > 8

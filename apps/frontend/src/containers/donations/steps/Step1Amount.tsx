@@ -1,24 +1,15 @@
-import React from 'react';
-import { cn } from '@lib/utils';
-import { Label } from '@components/ui/label';
-import { Button } from '@components/ui/button';
-import { Input } from '@components/ui/input';
-import { Textarea } from '@components/ui/textarea';
-import { Checkbox } from '@components/ui/checkbox';
-
+import { ToggleSwitch } from '@components/ToggleSwitch';
+import { DonationRecurrence } from './DonationRecurrence';
+import { DonationAmount } from './DonationAmount';
+import { DedicationSection } from './DedicationSection';
 import type {
   DonationFormData,
   FormErrors,
   DedicationKind,
 } from '../donation-form.types';
+import { type DonationRecurrenceOption } from '../donation-form.config';
 
-import {
-  DONATION_PRESET_AMOUNTS,
-  DONATION_RECURRENCE_OPTIONS,
-  type DonationRecurrenceOption,
-} from '../donation-form.config';
-
-interface Step1AmountProps {
+type Step1AmountProps = {
   formData: DonationFormData;
   errors: Partial<FormErrors>;
   isSubmitting: boolean;
@@ -27,9 +18,7 @@ interface Step1AmountProps {
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >,
   ) => void;
-}
-
-// helpers to synthesize events so we can reuse DonationForm.handleInputChange
+};
 
 const triggerTextChange = (
   onChange: Step1AmountProps['onChange'],
@@ -37,11 +26,7 @@ const triggerTextChange = (
   value: string,
 ) => {
   onChange({
-    target: {
-      name,
-      value,
-      type: 'text',
-    },
+    target: { name, value, type: 'text' },
   } as React.ChangeEvent<HTMLInputElement>);
 };
 
@@ -51,35 +36,24 @@ const triggerCheckboxToggle = (
   checked: boolean,
 ) => {
   onChange({
-    target: {
-      name,
-      type: 'checkbox',
-      checked,
-      value: checked ? 'on' : '',
-    },
+    target: { name, type: 'checkbox', checked, value: checked ? 'on' : '' },
   } as React.ChangeEvent<HTMLInputElement>);
 };
 
-export const Step1Amount: React.FC<Step1AmountProps> = ({
+export const Step1Amount = ({
   formData,
   errors,
   isSubmitting,
   onChange,
-}) => {
-  // donation amount presets
-  const handlePresetAmountClick = (amount: number) => {
+}: Step1AmountProps) => {
+  const handlePresetAmountClick = (amount: number) =>
     triggerTextChange(onChange, 'amount', String(amount));
-  };
 
   const isAmountSelected = (amount: number) =>
     formData.amount === String(amount);
 
-  // donation recurrence btns
   const handleRecurrenceClick = (option: DonationRecurrenceOption) => {
-    // always set donationType
     triggerTextChange(onChange, 'donationType', option.donationType);
-
-    // for recurring options, also set the recurringInterval field
     if (option.donationType === 'recurring' && option.recurringInterval) {
       triggerTextChange(
         onChange,
@@ -90,232 +64,78 @@ export const Step1Amount: React.FC<Step1AmountProps> = ({
   };
 
   const isRecurrenceSelected = (option: DonationRecurrenceOption) => {
-    if (option.donationType === 'one_time') {
+    if (option.donationType === 'one_time')
       return formData.donationType === 'one_time';
-    }
     return (
       formData.donationType === 'recurring' &&
       option.recurringInterval === formData.recurringInterval
     );
   };
 
-  // dedication btns
-  const handleDedicationKindClick = (kind: DedicationKind) => {
+  const handleDedicationKindClick = (kind: DedicationKind) =>
     triggerTextChange(onChange, 'dedicationKind', kind);
-  };
 
-  const isDedicationKindSelected = (kind: DedicationKind) =>
-    formData.dedicationKind === kind;
+  const handleAmountBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (!value) return;
+    const number = parseFloat(value);
+    if (isNaN(number)) return;
+    triggerTextChange(onChange, 'amount', number.toFixed(2));
+  };
 
   return (
     <div className="w-full flex flex-col items-start justify-start gap-6 font-sans">
-      <div className="flex flex-col">
-        <Label className="text-xl text-[#57585c] font-normal">
-          Donation Recurrence
-        </Label>
-        <div className="flex gap-2">
-          {DONATION_RECURRENCE_OPTIONS.map((option) => (
-            <Button
-              key={option.label}
-              type="button"
-              className={cn(
-                'h-12 px-4 whitespace-nowrap rounded border text-base cursor-pointer transition-colors duration-150 ease-in-out font-semibold disabled:opacity-60 disabled:cursor-not-allowed',
-                isRecurrenceSelected(option)
-                  ? 'bg-[#007b64] text-white border-[#007b64]'
-                  : 'bg-white text-black border-gray-300',
-              )}
-              onClick={() => handleRecurrenceClick(option)}
-              disabled={isSubmitting}
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-        {errors.recurringInterval && (
-          <span className="mt-[2%] text-sm text-[#d93025]">
-            {errors.recurringInterval}
-          </span>
-        )}
-      </div>
-      <div className="flex flex-col">
-        <Label className="text-lg text-[#57585c] font-normal" htmlFor="amount">
-          Donation Amount <span className="text-[#d93025]">*</span>
-        </Label>
+      <DonationRecurrence
+        donationType={formData.donationType}
+        recurringInterval={formData.recurringInterval}
+        error={errors.recurringInterval}
+        isSubmitting={isSubmitting}
+        onRecurrenceClick={handleRecurrenceClick}
+        isRecurrenceSelected={isRecurrenceSelected}
+      />
 
-        <div className="flex flex-wrap gap-4 mb-[0.5rem]">
-          {DONATION_PRESET_AMOUNTS.map((amount) => (
-            <Button
-              key={amount}
-              type="button"
-              className={cn(
-                'flex-[1_1_20%] h-12 px-4 w-full rounded border text-base font-semibold cursor-pointer transition-colors duration-150 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed',
-                isAmountSelected(amount)
-                  ? 'bg-[#007b64] text-white border-[#007b64]'
-                  : 'bg-white text-black border-gray-300',
-              )}
-              onClick={() => handlePresetAmountClick(amount)}
-              disabled={isSubmitting}
-            >
-              ${amount}
-            </Button>
-          ))}
-        </div>
+      <DonationAmount
+        amount={formData.amount}
+        error={errors.amount}
+        isSubmitting={isSubmitting}
+        onPresetClick={handlePresetAmountClick}
+        isAmountSelected={isAmountSelected}
+        onChange={onChange}
+        onAmountBlur={handleAmountBlur}
+      />
 
-        <div className="flex flex-row items-center justify-start gap-[4%] w-full">
-          <div className="text-base font-normal whitespace-nowrap">
-            Custom Amount
-          </div>
-          <div className="relative flex items-center w-full">
-            <span className="absolute left-3 text-base text-[#555] font-normal">
-              $
-            </span>
-            <Input
-              type="text"
-              id="amount"
-              name="amount"
-              inputMode="decimal"
-              pattern="\\d+(\\.\\d{1,2})?"
-              placeholder="0.00"
-              value={formData.amount}
-              onChange={onChange}
-              className={cn(
-                'pl-7 pr-12 h-10 text-base font-normal',
-                errors.amount ? 'border-[#d93025] bg-[#fff6f6]' : '',
-              )}
-              disabled={isSubmitting}
-              aria-invalid={!!errors.amount}
-              aria-describedby={errors.amount ? 'amount-error' : undefined}
-            />
-            <span className="absolute right-3 text-base text-[#555] font-normal">
-              USD
-            </span>
-          </div>
-        </div>
+      <ToggleSwitch
+        label="Donation Anonymity"
+        description="Display name as anonymous when publicly shown"
+        checked={formData.isAnonymous}
+        onToggle={() =>
+          triggerCheckboxToggle(onChange, 'isAnonymous', !formData.isAnonymous)
+        }
+        disabled={isSubmitting}
+      />
 
-        {errors.amount && (
-          <span id="amount-error" className="mt-2 text-sm text-[#d93025]">
-            {errors.amount}
-          </span>
-        )}
-      </div>
-
-      <div className="flex flex-col">
-        <Label className="text-lg text-[#57585c] font-normal">
-          Donation Anonymity
-        </Label>
-        <div
-          className="gap-[4%] flex items-start cursor-pointer select-none flex-wrap justify-start p-0"
-          role="switch"
-          aria-checked={formData.isAnonymous}
-          onClick={() =>
-            triggerCheckboxToggle(
-              onChange,
-              'isAnonymous',
-              !formData.isAnonymous,
-            )
-          }
-        >
-          <div
-            className={`relative flex-shrink-0 w-10 min-w-[12px] aspect-[2/1] rounded-full transition-all duration-300 ease-in-out shadow-[inset_0_0_3px_rgba(0,0,0,0.2)] ${formData.isAnonymous ? 'bg-[#2a7a73]' : 'bg-gray-300'}`}
-          >
-            <div
-              className={`absolute top-1/2 w-[40%] h-[70%] bg-white rounded-full -translate-y-1/2 transition-all duration-300 ease-in-out ${formData.isAnonymous ? 'left-[50%]' : 'left-[10%]'}`}
-            />
-          </div>
-          <span className="text-base text-[#333] text-left w-4/5">
-            Display name as anonymous when publicly shown
-          </span>
-        </div>
-      </div>
-
-      <div className="flex flex-col">
-        <div className="text-lg text-[#57585c] font-normal">
-          Dedicate This Donation
-        </div>
-        <div
-          className="gap-[4%] flex items-start cursor-pointer select-none flex-wrap justify-start p-0"
-          role="switch"
-          aria-checked={!!formData.isDedicated}
-          onClick={() =>
-            triggerCheckboxToggle(
-              onChange,
-              'isDedicated',
-              !formData.isDedicated,
-            )
-          }
-        >
-          <div
-            className={`relative flex-shrink-0 w-10 min-w-[12px] aspect-[2/1] rounded-full transition-all duration-300 ease-in-out shadow-[inset_0_0_3px_rgba(0,0,0,0.2)] ${formData.isDedicated ? 'bg-[#2a7a73]' : 'bg-gray-300'}`}
-          >
-            <div
-              className={`absolute top-1/2 w-[40%] h-[70%] bg-white rounded-full -translate-y-1/2 transition-all duration-300 ease-in-out ${formData.isDedicated ? 'left-[50%]' : 'left-[10%]'}`}
-            />{' '}
-          </div>
-        </div>
-      </div>
+      <ToggleSwitch
+        label="Dedicate This Donation"
+        description="Dedicate this donation"
+        checked={!!formData.isDedicated}
+        onToggle={() =>
+          triggerCheckboxToggle(onChange, 'isDedicated', !formData.isDedicated)
+        }
+        disabled={isSubmitting}
+      />
 
       {formData.isDedicated && (
-        <>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              className={cn(
-                'h-12 px-4 w-full whitespace-nowrap rounded border text-base cursor-pointer transition-colors duration-150 ease-in-out font-semibold disabled:opacity-60 disabled:cursor-not-allowed',
-                isDedicationKindSelected('honor')
-                  ? 'bg-[#007b64] text-white border-[#007b64]'
-                  : 'bg-white text-black border-gray-300',
-              )}
-              onClick={() => handleDedicationKindClick('honor')}
-              disabled={isSubmitting}
-            >
-              In Honor Of
-            </Button>
-            <Button
-              type="button"
-              className={cn(
-                'h-12 px-4 w-full whitespace-nowrap rounded border text-base cursor-pointer transition-colors duration-150 ease-in-out font-semibold disabled:opacity-60 disabled:cursor-not-allowed',
-                isDedicationKindSelected('memory')
-                  ? 'bg-[#007b64] text-white border-[#007b64]'
-                  : 'bg-white text-black border-gray-300',
-              )}
-              onClick={() => handleDedicationKindClick('memory')}
-              disabled={isSubmitting}
-            >
-              In Memory Of
-            </Button>
-          </div>
-
-          <div className="w-full h-[12%]">
-            <Textarea
-              id="dedicationMessage"
-              name="dedicationMessage"
-              value={formData.dedicationMessage}
-              onChange={onChange}
-              rows={4}
-              disabled={isSubmitting}
-              placeholder="Write a message.."
-            />
-          </div>
-
-          <div className="w-full flex-row flex items-center justify-start text-[#57585c] font-normal h-[6%] overflow-hidden text-base gap-2">
-            <Label>
-              <Checkbox
-                id="showDedicationPublicly"
-                name="showDedicationPublicly"
-                checked={formData.showDedicationPublicly}
-                onCheckedChange={(checked) =>
-                  triggerCheckboxToggle(
-                    onChange,
-                    'showDedicationPublicly',
-                    !!checked,
-                  )
-                }
-                disabled={isSubmitting}
-              />
-              Show dedication message publicly
-            </Label>
-          </div>
-        </>
+        <DedicationSection
+          dedicationKind={formData.dedicationKind ?? 'honor'}
+          dedicationMessage={formData.dedicationMessage}
+          showDedicationPublicly={formData.showDedicationPublicly}
+          isSubmitting={isSubmitting}
+          onDedicationKindClick={handleDedicationKindClick}
+          onMessageChange={onChange}
+          onShowPubliclyToggle={(checked) =>
+            triggerCheckboxToggle(onChange, 'showDedicationPublicly', checked)
+          }
+        />
       )}
     </div>
   );

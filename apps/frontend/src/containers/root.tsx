@@ -53,15 +53,17 @@ const Root: React.FC = () => {
         <section className="root-testimonial">
           <TestimonialCarousel slides={TESTIMONIAL_SLIDES} />
         </section>
+
         <section className="root-content-grid">
           <div className="root-goal-panel">
             <GrowingGoal
-              message="Donate to FCC!"
+              message="Grow your community with FCC"
               total={donationTotal}
               goal={10000}
               sampleDonation={SAMPLE_DONATION}
             />
           </div>
+
           <div className="root-form-panel">
             <DonationForm
               onSuccess={handleDonationSuccess}
