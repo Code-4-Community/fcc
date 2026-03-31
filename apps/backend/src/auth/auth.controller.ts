@@ -69,9 +69,11 @@ export class AuthController {
       const results = await Promise.all(
         cognitoUsers.map(async (cu) => {
           const email = cu.Attributes.find((a) => a.Name === 'email')?.Value;
+          const name = cu.Attributes.find((a) => a.Name === 'name')?.Value;
           const dbUsers = email ? await this.usersService.find(email) : [];
           return {
             username: cu.Username,
+            name,
             status: cu.UserStatus, // UNCONFIRMED, CONFIRMED, etc.
             email,
             dbUser: dbUsers[0] || null,
