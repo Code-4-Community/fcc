@@ -1,3 +1,4 @@
+import ShareOptions from '@containers/donations/ShareOptions';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 export interface CarouselSlide {
@@ -196,6 +197,7 @@ export const AutoRotatingTestimonialCarousel: React.FC<Props> = ({
           />
         </div>
       </div>
+      <ShareOptions activeSlideUrl={slides[activeIndex].image} />
     </div>
   );
 };
