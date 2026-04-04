@@ -170,79 +170,98 @@ export const UserManagement: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="px-4">
-        {/* Header row */}
-        <div className="flex items-center h-11 bg-[#f5f5f5]">
-          <div className="w-8 shrink-0" />
-          <div className="flex-1 px-2">
-            <span className="text-sm text-[#171717] tracking-[0.07px]">
-              Username
-            </span>
-          </div>
-          <div className="flex-1 px-2">
-            <span className="text-sm text-[#171717] tracking-[0.07px]">
-              Email
-            </span>
-          </div>
-          <div className="flex-1 px-2">
-            <span className="text-sm text-[#171717] tracking-[0.07px]">
-              Role
-            </span>
-          </div>
-          <div className="flex-1 flex justify-end px-2">
-            <span className="text-sm text-[#171717] tracking-[0.07px]">
-              Actions
-            </span>
-          </div>
-        </div>
-
-        {/* Data rows */}
-        {paginatedUsers.length > 0 ? (
-          paginatedUsers.map((user) => (
-            <div
-              key={user.username}
-              className="flex items-center h-11 bg-white border-b border-[#e5e5e5]"
-            >
-              <div className="w-8 shrink-0" />
-              <div className="flex-1 px-2">
-                <span className="text-sm text-[#171717] tracking-[0.07px] whitespace-nowrap">
-                  {user.name ?? user.username}
-                </span>
-              </div>
-              <div className="flex-1 px-2">
-                <span className="text-sm text-[#171717] tracking-[0.07px] whitespace-nowrap">
-                  {user.email}
-                </span>
-              </div>
-              <div className="flex-1 px-2">
-                <RoleBadge role={user.dbUser?.status} />
-              </div>
-              <div className="flex-1 flex items-center justify-end gap-2 px-2">
-                {currentUser?.status === 'ADMIN' && (
-                  <>
-                    <Button
-                      variant="success"
-                      onClick={() => handleVerify(user.email)}
-                      className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6"
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 border-[#e5e5e5] text-black bg-white"
-                    >
-                      Deny
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="flex items-center justify-center h-48">
-            <p className="text-sm text-[#737373]">No users found.</p>
-          </div>
-        )}
+      <div className="px-4 overflow-x-auto pb-4">
+        <table className="w-full min-w-[700px] border-collapse">
+          <thead>
+            {/* Header row */}
+            <tr className="bg-[#f5f5f5] h-11">
+              <th className="w-8 rounded-tl-lg"></th>
+              <th className="px-2 font-normal text-sm text-[#171717] tracking-[0.07px] text-left">
+                Username
+              </th>
+              <th className="px-2 font-normal text-sm text-[#171717] tracking-[0.07px] text-left">
+                Email
+              </th>
+              <th className="px-2 font-normal text-sm text-[#171717] tracking-[0.07px] text-left">
+                Role
+              </th>
+              <th className="px-2 font-normal text-sm text-[#171717] tracking-[0.07px] text-right rounded-tr-lg">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Data rows */}
+            {paginatedUsers.length > 0 ? (
+              paginatedUsers.map((user) => (
+                <tr
+                  key={user.username}
+                  className="h-[44px] bg-white border-b border-[#e5e5e5]"
+                >
+                  <td className="w-8"></td>
+                  <td className="px-2 max-w-[150px]">
+                    <div className="text-sm text-[#171717] tracking-[0.07px] truncate">
+                      {user.name ?? user.username}
+                    </div>
+                  </td>
+                  <td className="px-2 max-w-[250px]">
+                    <div className="text-sm text-[#171717] tracking-[0.07px] truncate">
+                      {user.email}
+                    </div>
+                  </td>
+                  <td className="px-2">
+                    <RoleBadge role={user.dbUser?.status} />
+                  </td>
+                  <td className="px-2 text-right">
+                    <div className="flex items-center justify-end gap-2 shrink-0">
+                      {currentUser?.status === 'ADMIN' && (
+                        <>
+                          {activeTab === 'pending' ? (
+                            <>
+                              <Button
+                                variant="success"
+                                onClick={() => handleVerify(user.email)}
+                                className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6"
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                variant="outline"
+                                className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 border-[#e5e5e5] text-black bg-white hover:bg-gray-50"
+                              >
+                                Deny
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                variant="outline"
+                                className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 font-['Source_Sans_Pro'] border-[#e5e5e5] text-black bg-white hover:bg-gray-50"
+                              >
+                                Edit Role
+                              </Button>
+                              <Button className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 bg-[#893C27] text-white hover:bg-[#6c2f1f] border-0">
+                                Revoke Approval
+                              </Button>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5}>
+                  <div className="flex items-center justify-center h-48">
+                    <p className="text-sm text-[#737373]">No users found.</p>
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
 
       {/* Pagination */}
