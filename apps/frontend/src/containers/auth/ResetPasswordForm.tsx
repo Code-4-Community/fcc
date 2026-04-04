@@ -97,18 +97,14 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
         >
           New Password
         </Label>
-        <InputGroup
-          className={`w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5 ${
-            error ? 'border-[#B4444D] ring-[2px] ring-[#B4444D]' : ''
-          }`}
-        >
+        <InputGroup className="w-full focus-within:border-[#007B64] focus-within:ring-[2.5px] focus-within:ring-[#007B64] py-5">
           <InputGroupInput
             id="new-password"
             type={showPassword ? 'text' : 'password'}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder="Password"
-            className={`focus:ring-[#007B64] ${error ? 'bg-[#FFFAFA]' : ''}`}
+            className="focus:ring-[#007B64]"
           />
           <InputGroupAddon
             align="inline-end"

@@ -147,8 +147,29 @@ export class AuthController {
   }
 
   @Post('/confirmPassword')
-  confirmPassword(@Body() body: ConfirmPasswordDto): Promise<void> {
-    return this.authService.confirmForgotPassword(body);
+  async confirmPassword(@Body() body: ConfirmPasswordDto): Promise<void> {
+    try {
+      await this.authService.confirmForgotPassword(body);
+    } catch (e) {
+      console.error('Confirm password error:', e);
+      // Map Cognito errors to user-friendly messages
+      if (e instanceof Error) {
+        const errName = (e as any).name || '';
+        if (
+          errName === 'InvalidVerificationCodeException' ||
+          errName === 'CodeMismatchException'
+        ) {
+          throw new BadRequestException('Confirmation code is incorrect');
+        }
+        if (errName === 'UserNotFoundException') {
+          throw new BadRequestException('User not found');
+        }
+        if (errName === 'ExpiredCodeException') {
+          throw new BadRequestException('Confirmation code has expired');
+        }
+      }
+      throw new BadRequestException(e.message || 'Failed to reset password');
+    }
   }
 
   @Post('/delete')
