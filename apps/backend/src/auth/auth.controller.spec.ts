@@ -13,6 +13,7 @@ describe('AuthController', () => {
 
   const mockUsersService = {
     create: jest.fn(),
+    find: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -35,5 +36,13 @@ describe('AuthController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  it('rejects forgot password for unregistered email', async () => {
+    mockUsersService.find.mockResolvedValue([]);
+
+    await expect(
+      controller.forgotPassword({ email: 'random@example.com' } as any),
+    ).rejects.toThrow('Account is not registered.');
   });
 });

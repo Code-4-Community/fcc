@@ -131,8 +131,19 @@ export class AuthController {
   }
 
   @Post('/forgotPassword')
-  forgotPassword(@Body() body: ForgotPasswordDto): Promise<void> {
-    return this.authService.forgotPassword(body.email);
+  async forgotPassword(@Body() body: ForgotPasswordDto): Promise<void> {
+    const registeredUsers = await this.usersService.find(body.email);
+
+    if (!registeredUsers.length) {
+      throw new BadRequestException('Account is not registered.');
+    }
+
+    try {
+      await this.authService.forgotPassword(body.email);
+    } catch (e) {
+      console.error('Forgot password error:', e);
+      throw new BadRequestException(e.message);
+    }
   }
 
   @Post('/confirmPassword')
