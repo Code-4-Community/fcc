@@ -1,6 +1,6 @@
 'use client';
 
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Bookmark,
   ListFilter,
@@ -56,10 +56,9 @@ type SidebarProps = {
   className?: string;
 };
 
-export default function Sidebar({
-  activeItem = 'Dashboard Overview',
-  className,
-}: SidebarProps) {
+export default function Sidebar({ className }: SidebarProps) {
+  const { pathname } = useLocation();
+
   return (
     <aside
       className={cn(
@@ -80,7 +79,7 @@ export default function Sidebar({
       {/*Navigation */}
       <nav className="flex w-full flex-col gap-0.05 px-4 pt-8">
         {navItems.map((item) => {
-          const isActive = item.label === activeItem;
+          const isActive = pathname === item.href;
 
           return (
             <Link

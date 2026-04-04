@@ -4,7 +4,7 @@ import Header from '../header/Header';
 export default function SidebarTester() {
   return (
     <div className="flex min-h-screen bg-white">
-      <Sidebar activeItem="Dashboard Overview" />
+      <Sidebar />
       <div className="flex flex-1 flex-col">
         <Header />
         <main className="flex-1 p-8">
