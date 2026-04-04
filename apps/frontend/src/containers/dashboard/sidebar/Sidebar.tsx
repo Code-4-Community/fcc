@@ -1,15 +1,17 @@
 'use client';
 
 import { Link } from 'react-router-dom';
+import {
+  Bookmark,
+  ListFilter,
+  Mail,
+  BadgeCheck,
+  Settings,
+  LucideIcon,
+} from 'lucide-react';
 
 import FCCLogo from './FCCLogo.svg';
 import FCCText from './FCC.svg';
-
-import DashboardOverviewIcon from './DashboardOverview.svg';
-import DonationTrackerIcon from './DonationTracker.svg';
-import EmailCommunicationIcon from './EmailCommunication.svg';
-import AdminApprovalIcon from './AdminApproval.svg';
-import SettingsIcon from './Settings.svg';
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ');
@@ -18,34 +20,34 @@ function cn(...classes: Array<string | false | null | undefined>) {
 type NavItem = {
   label: string;
   href: string;
-  icon: string;
+  icon: LucideIcon;
 };
 
 const navItems: NavItem[] = [
   {
     label: 'Dashboard Overview',
     href: '/dashboard',
-    icon: DashboardOverviewIcon,
+    icon: Bookmark,
   },
   {
     label: 'Donation Tracker',
     href: '/dashboard/donations',
-    icon: DonationTrackerIcon,
+    icon: ListFilter,
   },
   {
     label: 'Email Communication',
     href: '/dashboard/email',
-    icon: EmailCommunicationIcon,
+    icon: Mail,
   },
   {
     label: 'Admin Approval',
     href: '/dashboard/approval',
-    icon: AdminApprovalIcon,
+    icon: BadgeCheck,
   },
   {
     label: 'Settings',
     href: '/dashboard/settings',
-    icon: SettingsIcon,
+    icon: Settings,
   },
 ];
 
@@ -91,11 +93,7 @@ export default function Sidebar({
                   : 'text-neutral-700 hover:bg-neutral-100',
               )}
             >
-              <img
-                src={item.icon}
-                alt={item.label}
-                className="h-4 w-4 shrink-0"
-              />
+              <item.icon className="h-4 w-4 shrink-0" />
               <span>{item.label}</span>
             </Link>
           );
