@@ -1,3 +1,5 @@
+import { useAuth } from '../../../components/AuthProvider';
+
 type HeaderProps = {
   title?: string;
   userName?: string;
@@ -15,6 +17,17 @@ export default function Header({
   userRole = 'Admin/Standard',
   className,
 }: HeaderProps) {
+  const { user } = useAuth();
+
+  const displayUserName =
+    user?.firstName && user?.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : userName;
+
+  const displayUserRole = user?.status
+    ? user.status.charAt(0).toUpperCase() + user.status.slice(1).toLowerCase()
+    : userRole;
+
   return (
     <header
       className={cn(
@@ -31,10 +44,10 @@ export default function Header({
 
         <div className="ml-3 flex flex-col">
           <span className="font-['Source_Sans_Pro'] text-[16px] font-semibold leading-7 text-neutral-900">
-            {userName}
+            {displayUserName}
           </span>
           <span className="font-['Source_Sans_Pro'] text-[14px] font-normal leading-6 text-neutral-900">
-            {userRole}
+            {displayUserRole}
           </span>
         </div>
       </div>
