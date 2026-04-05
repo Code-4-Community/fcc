@@ -1,5 +1,6 @@
 import Sidebar from './Sidebar';
 import Header from '../header/Header';
+import EmailEditor from '../../../components/email-comms/EmailEditor';
 
 export default function SidebarTester() {
   return (
@@ -8,7 +9,7 @@ export default function SidebarTester() {
       <div className="flex flex-1 flex-col">
         <Header />
         <main className="flex-1 p-8">
-          <h2 className="text-2xl font-semibold">Sidebar + Header Test Page</h2>
+          <EmailEditor />
         </main>
       </div>
     </div>

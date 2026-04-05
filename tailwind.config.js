@@ -1,6 +1,4 @@
-import type { Config } from 'tailwindcss'
-
-export default {
+module.exports = {
   content: [
     './apps/frontend/index.html',
     './apps/frontend/src/**/*.{js,ts,jsx,tsx}',
@@ -12,6 +10,5 @@ export default {
       },
     },
   },
-  plugins: [],
-} satisfies Config
-
+  plugins: [require('@tailwindcss/typography')],
+}
