@@ -20,8 +20,23 @@ interface CombinedUser {
 
 const ROWS_PER_PAGE = 13;
 
-function RoleBadge({ role }: { role: string | null | undefined }) {
-  if (!role) return null;
+function RoleBadge({
+  role,
+  isApproved,
+}: {
+  role: string | null | undefined;
+  isApproved?: boolean;
+}) {
+  if (!role) {
+    if (isApproved) {
+      return (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm leading-6 whitespace-nowrap bg-gray-100 text-gray-500 italic">
+          Not Found
+        </span>
+      );
+    }
+    return null;
+  }
   const isAdmin = role === 'ADMIN';
   return (
     <span
@@ -72,6 +87,17 @@ export const UserManagement: React.FC = () => {
   const handleVerify = async (email: string) => {
     try {
       await (apiClient as any).axiosInstance.post('/api/auth/admin-verify', {
+        email,
+      });
+      fetchUsers();
+    } catch (err: any) {
+      alert('Error: ' + err.message);
+    }
+  };
+
+  const handleDeny = async (email: string) => {
+    try {
+      await (apiClient as any).axiosInstance.post('/api/auth/admin-deny', {
         email,
       });
       fetchUsers();
@@ -210,7 +236,10 @@ export const UserManagement: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-2">
-                    <RoleBadge role={user.dbUser?.status} />
+                    <RoleBadge
+                      role={user.dbUser?.status}
+                      isApproved={activeTab === 'approved'}
+                    />
                   </td>
                   <td className="px-2 text-right">
                     <div className="flex items-center justify-end gap-2 shrink-0">
@@ -227,6 +256,7 @@ export const UserManagement: React.FC = () => {
                               </Button>
                               <Button
                                 variant="outline"
+                                onClick={() => handleDeny(user.email)}
                                 className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 border-[#e5e5e5] text-black bg-white hover:bg-gray-50"
                               >
                                 Deny
@@ -240,8 +270,11 @@ export const UserManagement: React.FC = () => {
                               >
                                 Edit Role
                               </Button>
-                              <Button className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 bg-[#893C27] text-white hover:bg-[#6c2f1f] border-0">
-                                Revoke Approval
+                              <Button
+                                onClick={() => handleDeny(user.email)}
+                                className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 bg-[#893C27] text-white hover:bg-[#6c2f1f] border-0"
+                              >
+                                Delete User
                               </Button>
                             </>
                           )}

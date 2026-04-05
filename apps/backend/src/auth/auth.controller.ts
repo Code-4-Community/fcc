@@ -59,6 +59,28 @@ export class AuthController {
     }
   }
 
+  @Post('/admin-deny')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(CurrentUserInterceptor)
+  async adminDeny(
+    @Req() req: any,
+    @Body() body: { email: string },
+  ): Promise<void> {
+    if (req.user.status !== Status.ADMIN) {
+      throw new ForbiddenException('Only admins can deny users');
+    }
+    try {
+      await this.authService.deleteUser(body.email);
+    } catch (e) {
+      console.error('Admin deny error:', e);
+      throw new BadRequestException(e.message);
+    }
+    const dbUsers = await this.usersService.find(body.email);
+    if (dbUsers.length > 0) {
+      await this.usersService.remove(dbUsers[0].id);
+    }
+  }
+
   @Get('/users')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(CurrentUserInterceptor)
