@@ -4,6 +4,7 @@ import apiClient from '../../api/apiClient';
 import { useAuth } from '../../components/AuthProvider';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
+import { ConfirmationModal } from '../../components/ConfirmationModal';
 
 interface CombinedUser {
   username: string;
@@ -67,6 +68,14 @@ export const UserManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'pending' | 'approved'>('pending');
   const [currentPage, setCurrentPage] = useState(1);
+  const [editingUser, setEditingUser] = useState<CombinedUser | null>(null);
+  const [denyingUser, setDenyingUser] = useState<CombinedUser | null>(null);
+  const [verifyingUser, setVerifyingUser] = useState<CombinedUser | null>(null);
+  const [modalPosition, setModalPosition] = useState<
+    { top: number; right: number } | undefined
+  >(undefined);
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -84,25 +93,60 @@ export const UserManagement: React.FC = () => {
     fetchUsers();
   }, []);
 
-  const handleVerify = async (email: string) => {
+  const handleVerify = async () => {
+    if (!verifyingUser) return;
+    setIsProcessing(true);
     try {
       await (apiClient as any).axiosInstance.post('/api/auth/admin-verify', {
-        email,
+        email: verifyingUser.email,
       });
-      fetchUsers();
+      await fetchUsers();
+      setVerifyingUser(null);
+      setModalPosition(undefined);
     } catch (err: any) {
       alert('Error: ' + err.message);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  const handleDeny = async (email: string) => {
+  const handleDeny = async () => {
+    if (!denyingUser) return;
+    setIsProcessing(true);
     try {
       await (apiClient as any).axiosInstance.post('/api/auth/admin-deny', {
-        email,
+        email: denyingUser.email,
       });
-      fetchUsers();
+      await fetchUsers();
+      setDenyingUser(null);
+      setModalPosition(undefined);
     } catch (err: any) {
       alert('Error: ' + err.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleEditRole = async () => {
+    if (!editingUser) return;
+
+    // Shell function: we'll just log and close the modal for now
+    // as per instructions: "build it for edit role as an example"
+    setIsUpdatingRole(true);
+    try {
+      console.log(`Updating role for ${editingUser.email}`);
+      // Replace with your API call:
+      // await apiClient.axiosInstance.patch('/api/auth/user/role', { ... })
+
+      // Artificial delay to show loading state if you have one
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      await fetchUsers();
+      setEditingUser(null);
+    } catch (err: any) {
+      alert('Error changing role: ' + err.message);
+    } finally {
+      setIsUpdatingRole(false);
     }
   };
 
@@ -249,15 +293,31 @@ export const UserManagement: React.FC = () => {
                             <>
                               <Button
                                 variant="success"
-                                onClick={() => handleVerify(user.email)}
+                                onClick={(e) => {
+                                  const rect =
+                                    e.currentTarget.getBoundingClientRect();
+                                  setModalPosition({
+                                    top: rect.bottom + 8,
+                                    right: window.innerWidth - rect.right,
+                                  });
+                                  setVerifyingUser(user);
+                                }}
                                 className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6"
                               >
                                 Approve
                               </Button>
                               <Button
                                 variant="outline"
-                                onClick={() => handleDeny(user.email)}
-                                className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 border-[#e5e5e5] text-black bg-white hover:bg-gray-50"
+                                onClick={(e) => {
+                                  const rect =
+                                    e.currentTarget.getBoundingClientRect();
+                                  setModalPosition({
+                                    top: rect.bottom + 8,
+                                    right: window.innerWidth - rect.right,
+                                  });
+                                  setDenyingUser(user);
+                                }}
+                                className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 border-[#e5e5e5] text-black bg-white hover:bg-gray-50 shadow-sm"
                               >
                                 Deny
                               </Button>
@@ -266,13 +326,30 @@ export const UserManagement: React.FC = () => {
                             <>
                               <Button
                                 variant="outline"
-                                className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 font-['Source_Sans_Pro'] border-[#e5e5e5] text-black bg-white hover:bg-gray-50"
+                                onClick={(e) => {
+                                  const rect =
+                                    e.currentTarget.getBoundingClientRect();
+                                  setModalPosition({
+                                    top: rect.bottom + 8,
+                                    right: window.innerWidth - rect.right,
+                                  });
+                                  setEditingUser(user);
+                                }}
+                                className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 font-['Source_Sans_Pro'] border-[#e5e5e5] text-black bg-white hover:bg-gray-50 shadow-sm"
                               >
                                 Edit Role
                               </Button>
                               <Button
-                                onClick={() => handleDeny(user.email)}
-                                className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 bg-[#893C27] text-white hover:bg-[#6c2f1f] border-0"
+                                onClick={(e) => {
+                                  const rect =
+                                    e.currentTarget.getBoundingClientRect();
+                                  setModalPosition({
+                                    top: rect.bottom + 8,
+                                    right: window.innerWidth - rect.right,
+                                  });
+                                  setDenyingUser(user);
+                                }}
+                                className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 bg-[#893C27] text-white hover:bg-[#6c2f1f] border-0 outline-none"
                               >
                                 Delete User
                               </Button>
@@ -342,6 +419,100 @@ export const UserManagement: React.FC = () => {
             <ChevronRight size={13} />
           </Button>
         </div>
+      )}
+
+      {/* Modular Popups for User Actions */}
+      {editingUser && (
+        <ConfirmationModal
+          isOpen={true}
+          position={modalPosition}
+          onClose={() => {
+            setEditingUser(null);
+            setModalPosition(undefined);
+          }}
+          onConfirm={handleEditRole}
+          title="Edit Role"
+          heading={<>Update {editingUser.name || editingUser.username} role?</>}
+          description={
+            <>
+              By pressing Confirm, you will update{' '}
+              <span className="text-[#171717]">
+                {editingUser.name || editingUser.username}
+              </span>{' '}
+              role to{' '}
+              <span className="text-[#171717]">
+                {editingUser.dbUser?.status === 'ADMIN' ? 'STANDARD' : 'ADMIN'}
+              </span>
+              .
+            </>
+          }
+          confirmText="Confirm"
+          cancelText="Cancel"
+          confirmVariant="success"
+          isConfirming={isUpdatingRole}
+        />
+      )}
+
+      {verifyingUser && (
+        <ConfirmationModal
+          isOpen={true}
+          position={modalPosition}
+          onClose={() => {
+            setVerifyingUser(null);
+            setModalPosition(undefined);
+          }}
+          onConfirm={handleVerify}
+          title="Approve User"
+          heading={<>Approve {verifyingUser.name || verifyingUser.username}?</>}
+          description={
+            <>
+              By pressing Confirm, you will approve{' '}
+              <span className="text-[#171717]">
+                {verifyingUser.name || verifyingUser.username}
+              </span>{' '}
+              as a user. This will allow them to access the platform.
+            </>
+          }
+          confirmText="Confirm"
+          cancelText="Cancel"
+          confirmVariant="success"
+          isConfirming={isProcessing}
+        />
+      )}
+
+      {denyingUser && (
+        <ConfirmationModal
+          isOpen={true}
+          position={modalPosition}
+          onClose={() => {
+            setDenyingUser(null);
+            setModalPosition(undefined);
+          }}
+          onConfirm={handleDeny}
+          title="Delete User"
+          heading={
+            <>
+              {activeTab === 'pending' ? 'Deny' : 'Delete'}{' '}
+              {denyingUser.name || denyingUser.username}?
+            </>
+          }
+          description={
+            <>
+              By pressing Confirm, you will{' '}
+              <span className="text-[#171717]">
+                {activeTab === 'pending' ? 'deny and remove' : 'delete'}
+              </span>{' '}
+              <span className="text-[#171717]">
+                {denyingUser.name || denyingUser.username}
+              </span>{' '}
+              from the system. This action cannot be undone.
+            </>
+          }
+          confirmText="Confirm"
+          cancelText="Cancel"
+          confirmVariant="destructive"
+          isConfirming={isProcessing}
+        />
       )}
     </div>
   );
