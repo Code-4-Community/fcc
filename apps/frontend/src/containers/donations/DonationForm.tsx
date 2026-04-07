@@ -2,7 +2,8 @@ import apiClient, {
   type CreateDonationResponse,
   type CreateDonationRequest,
 } from '../../api/apiClient';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { type Step2DetailsRef } from './steps/Step2Details';
 import './donations.css';
 import {
   DonationFormData,
@@ -34,9 +35,6 @@ export const DonationForm: React.FC<DonationFormProps> = ({
     recurringInterval: 'monthly',
     isDedicated: false,
     dedicationKind: null,
-    cardNumber: '',
-    cardExpiry: '',
-    cardCvc: '',
     coverFees: false,
   });
 
@@ -44,6 +42,8 @@ export const DonationForm: React.FC<DonationFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [receiptId, setReceiptId] = useState<string | null>(null);
+  const [paymentMethodId, setPaymentMethodId] = useState<string | null>(null);
+  const step2Ref = useRef<Step2DetailsRef>(null);
 
   const clampStep = (value: number): DonationStep =>
     Math.max(1, Math.min(4, value)) as DonationStep;
@@ -155,9 +155,24 @@ export const DonationForm: React.FC<DonationFormProps> = ({
     setSubmitError(null);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!validateStep(currentStep)) {
       return;
+    }
+    if (currentStep === 2) {
+      try {
+        const pmId = await step2Ref.current?.createPaymentMethod();
+        if (!pmId) {
+          setSubmitError('Could not process card. Please try again.');
+          return;
+        }
+        setPaymentMethodId(pmId);
+      } catch (err) {
+        setSubmitError(
+          err instanceof Error ? err.message : 'Could not process card.',
+        );
+        return;
+      }
     }
     setCurrentStep((prev) => clampStep(prev + 1));
   };
@@ -177,9 +192,6 @@ export const DonationForm: React.FC<DonationFormProps> = ({
       dedicationMessage: '',
       showDedicationPublicly: false,
       recurringInterval: 'monthly',
-      cardNumber: '',
-      cardExpiry: '',
-      cardCvc: '',
       coverFees: false,
     });
     setErrors({});
@@ -188,27 +200,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
     setCurrentStep(1);
   };
 
-  const handleSubmit = async () => {
-    if (isSubmitting) {
-      return;
-    }
-
-    const step1Valid = validateStep(1);
-
-    if (!step1Valid) {
-      setCurrentStep(1);
-      return;
-    }
-
-    const step2Valid = validateStep(2);
-    if (!step2Valid) {
-      setCurrentStep(2);
-      return;
-    }
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
     try {
       const payload: CreateDonationRequest = {
         firstName: formData.firstName.trim(),
@@ -219,6 +211,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
         donationType: formData.donationType,
         dedicationMessage: formData.dedicationMessage,
         showDedicationPublicly: formData.showDedicationPublicly,
+        paymentIntentId,
         ...(formData.donationType === 'recurring' && {
           recurringInterval: formData.recurringInterval,
         }),
@@ -232,10 +225,8 @@ export const DonationForm: React.FC<DonationFormProps> = ({
       setCurrentStep(4);
     } catch (error) {
       const err = error as Error;
-      setSubmitError(err.message || 'Failed to submit donation');
+      setSubmitError(err.message || 'Failed to record donation');
       onError(err);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -254,6 +245,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
         return (
           <StripeProvider>
             <Step2Details
+              ref={step2Ref}
               formData={formData}
               errors={errors}
               isSubmitting={isSubmitting}
@@ -262,7 +254,18 @@ export const DonationForm: React.FC<DonationFormProps> = ({
           </StripeProvider>
         );
       case 3:
-        return <Step3Confirm formData={formData} />;
+        return (
+          <StripeProvider>
+            <Step3Confirm
+              formData={formData}
+              paymentMethodId={paymentMethodId}
+              onPaymentSuccess={handlePaymentSuccess}
+              onPaymentError={(error) => setSubmitError(error)}
+              isSubmitting={isSubmitting}
+              setIsSubmitting={setIsSubmitting}
+            />
+          </StripeProvider>
+        );
       case 4:
       default:
         return <Step4Receipt receiptId={receiptId} />;
@@ -322,17 +325,6 @@ export const DonationForm: React.FC<DonationFormProps> = ({
               onClick={handleNext}
             >
               NEXT
-            </button>
-          )}
-
-          {currentStep === 3 && (
-            <button
-              type="button"
-              className="submit-button"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Processing...' : 'Confirm Donation'}
             </button>
           )}
 

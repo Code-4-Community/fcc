@@ -7,15 +7,31 @@ export type DonationCreateRequest = {
   firstName: string;
   lastName: string;
   email: string;
-  amount: number; // parsed to number in the form
+  amount: number;
   isAnonymous: boolean;
   donationType: 'one_time' | 'recurring';
-  dedicationMessage: string; // allow '' from ui
+  dedicationMessage: string;
   showDedicationPublicly: boolean;
   recurringInterval?: 'weekly' | 'monthly' | 'yearly';
+  paymentIntentId?: string;
 };
 
 export type CreateDonationResponse = { id: string };
+
+export type CreatePaymentIntentRequest = {
+  amount: number; // in cents
+  currency: string;
+  metadata?: Record<string, unknown>;
+};
+
+export type PaymentIntentResponse = {
+  id: string;
+  clientSecret: string;
+  amount: number;
+  currency: string;
+  status: string;
+};
+
 type ApiError = { error?: string; message?: string };
 
 export class ApiClient {
@@ -26,9 +42,28 @@ export class ApiClient {
   }
 
   public async getHello(): Promise<string> {
-    //return this.get('/api') as Promise<string>;
     const res = await this.axiosInstance.get<string>('/api');
     return res.data;
+  }
+
+  public async createPaymentIntent(
+    body: CreatePaymentIntentRequest,
+  ): Promise<PaymentIntentResponse> {
+    try {
+      const res = await this.axiosInstance.post('/api/payments/intent', body);
+      return res.data as PaymentIntentResponse;
+    } catch (err: unknown) {
+      if (axios.isAxiosError<ApiError>(err)) {
+        const data = err.response?.data;
+        const msg =
+          data?.error ??
+          data?.message ??
+          err.message ??
+          'Failed to create payment intent';
+        throw new Error(msg);
+      }
+      throw new Error('Failed to create payment intent');
+    }
   }
 
   public async createDonation(

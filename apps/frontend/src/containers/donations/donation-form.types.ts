@@ -16,9 +16,6 @@ export interface DonationFormData {
   isAnonymous: boolean;
   dedicationMessage: string;
   showDedicationPublicly: boolean;
-  cardNumber: string;
-  cardExpiry: string;
-  cardCvc: string;
   coverFees: boolean;
 }
 

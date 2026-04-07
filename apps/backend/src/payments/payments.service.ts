@@ -177,7 +177,7 @@ export class PaymentsService {
           amount: request.amount,
           currency: request.currency,
           metadata: request.metadata,
-          payment_method_types: ['card', 'us_bank_accounts'],
+          payment_method_types: ['card'],
         });
 
       this.logger.debug(
