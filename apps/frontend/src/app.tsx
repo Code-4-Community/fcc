@@ -15,6 +15,7 @@ import { ConfirmSentEmailPage } from '@containers/auth/ConfirmSentEmailPage';
 import { ConfirmRegisteredPage } from '@containers/auth/ConfirmRegisteredPage';
 import { DashboardPage } from '@containers/dashboard/DashboardPage';
 import { DonorStatsChart } from '@components/DonorStatsChart';
+import SidebarTester from '@containers/dashboard/sidebar/SidebarTester';
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
         element: <DashboardPage />,
       },
     ],
+  },
+  {
+    path: '/sidebar-test',
+    element: <SidebarTester />,
   },
   {
     path: '/test',
