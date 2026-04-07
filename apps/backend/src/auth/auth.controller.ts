@@ -1,4 +1,17 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  ForbiddenException,
+  Get,
+  Post,
+  Req,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { CurrentUserInterceptor } from '../interceptors/current-user.interceptor';
+import { Status } from '../users/types';
 
 import { SignInDto } from './dtos/sign-in.dto';
 import { SignUpDto } from './dtos/sign-up.dto';
@@ -21,12 +34,88 @@ export class AuthController {
     private usersService: UsersService,
   ) {}
 
+  @Get('/me')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(CurrentUserInterceptor)
+  async me(@Req() req: any) {
+    return req.user;
+  }
+
+  @Post('/admin-verify')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(CurrentUserInterceptor)
+  async adminVerify(
+    @Req() req: any,
+    @Body() body: { email: string },
+  ): Promise<void> {
+    if (req.user.status !== Status.ADMIN) {
+      throw new ForbiddenException('Only admins can verify users');
+    }
+    try {
+      await this.authService.adminConfirmUser(body.email);
+    } catch (e) {
+      console.error('Admin verify error:', e);
+      throw new BadRequestException(e.message);
+    }
+  }
+
+  @Post('/admin-deny')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(CurrentUserInterceptor)
+  async adminDeny(
+    @Req() req: any,
+    @Body() body: { email: string },
+  ): Promise<void> {
+    if (req.user.status !== Status.ADMIN) {
+      throw new ForbiddenException('Only admins can deny users');
+    }
+    try {
+      await this.authService.deleteUser(body.email);
+    } catch (e) {
+      console.error('Admin deny error:', e);
+      throw new BadRequestException(e.message);
+    }
+    const dbUsers = await this.usersService.find(body.email);
+    if (dbUsers.length > 0) {
+      await this.usersService.remove(dbUsers[0].id);
+    }
+  }
+
+  @Get('/users')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(CurrentUserInterceptor)
+  async listUsers(@Req() req: any) {
+    try {
+      const cognitoUsers = await this.authService.listAllUsers();
+      // Combine with DB users
+      const results = await Promise.all(
+        cognitoUsers.map(async (cu) => {
+          const email = cu.Attributes.find((a) => a.Name === 'email')?.Value;
+          const name = cu.Attributes.find((a) => a.Name === 'name')?.Value;
+          const dbUsers = email ? await this.usersService.find(email) : [];
+          return {
+            username: cu.Username,
+            name,
+            status: cu.UserStatus, // UNCONFIRMED, CONFIRMED, etc.
+            email,
+            dbUser: dbUsers[0] || null,
+          };
+        }),
+      );
+      return results;
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
+  }
+
   @Post('/signup')
   async createUser(@Body() signUpDto: SignUpDto): Promise<User> {
+    console.log(`Signup request received for: ${signUpDto.email}`);
     // By default, creates a standard user
     try {
       await this.authService.signup(signUpDto);
     } catch (e) {
+      console.error('Signup error:', e);
       throw new BadRequestException(e.message);
     }
 
@@ -45,13 +134,19 @@ export class AuthController {
     try {
       this.authService.verifyUser(body.email, body.verificationCode);
     } catch (e) {
+      console.error('Verify error:', e);
       throw new BadRequestException(e.message);
     }
   }
 
   @Post('/signin')
-  signin(@Body() signInDto: SignInDto): Promise<SignInResponseDto> {
-    return this.authService.signin(signInDto);
+  async signin(@Body() signInDto: SignInDto): Promise<SignInResponseDto> {
+    console.log(`Signin request received for: ${signInDto.email}`);
+    try {
+      return await this.authService.signin(signInDto);
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
 
   @Post('/refresh')
@@ -76,6 +171,7 @@ export class AuthController {
     try {
       await this.authService.deleteUser(user.email);
     } catch (e) {
+      console.error('Delete error:', e);
       throw new BadRequestException(e.message);
     }
 

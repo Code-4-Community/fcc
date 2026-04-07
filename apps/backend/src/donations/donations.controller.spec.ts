@@ -3,6 +3,8 @@ import { DonationsController } from './donations.controller';
 import { DonationsService } from './donations.service';
 import { DonationsRepository } from './donations.repository';
 import { CreateDonationDto } from './dtos/create-donation-dto';
+import { CallHandler, ExecutionContext } from '@nestjs/common';
+import { CurrentUserInterceptor } from '../interceptors/current-user.interceptor';
 import {
   DonationType,
   RecurringInterval,
@@ -11,6 +13,8 @@ import {
 import { Donation as DomainDonation } from './mappers';
 import { INestApplication, BadRequestException } from '@nestjs/common';
 import request from 'supertest';
+import { AuthService } from '../auth/auth.service';
+import { UsersService } from '../users/users.service';
 describe('DonationsController', () => {
   let controller: DonationsController;
   let service: DonationsService;
@@ -34,10 +38,22 @@ describe('DonationsController', () => {
     create: jest.fn(),
     findPublic: jest.fn(),
     getTotalDonations: jest.fn(),
+    exportToCsv: jest.fn(),
+    getLapsedDonors: jest.fn(),
   };
 
   const mockRepository = {
     findPaginated: jest.fn(),
+  };
+
+  const mockAuthService = {
+    getUser: jest
+      .fn()
+      .mockResolvedValue([{ Name: 'email', Value: 'test@example.com' }]),
+  };
+
+  const mockUsersService = {
+    find: jest.fn().mockResolvedValue([]),
   };
 
   beforeEach(async () => {
@@ -52,12 +68,26 @@ describe('DonationsController', () => {
           provide: DonationsRepository,
           useValue: mockRepository,
         },
+        {
+          provide: AuthService,
+          useValue: mockAuthService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
       ],
-    }).compile();
+    })
+      .overrideInterceptor(CurrentUserInterceptor)
+      .useValue({
+        intercept: (_context: ExecutionContext, next: CallHandler) =>
+          next.handle(),
+      })
+      .compile();
 
-    controller = module.get<DonationsController>(DonationsController);
-    service = module.get<DonationsService>(DonationsService);
-    repository = module.get<DonationsRepository>(DonationsRepository);
+    controller = module.get(DonationsController);
+    service = module.get(DonationsService);
+    repository = module.get(DonationsRepository);
   });
 
   afterEach(() => {
@@ -148,6 +178,28 @@ describe('DonationsController', () => {
     });
   });
 
+  describe('getLapsedDonors', () => {
+    it('should call service.getLapsedDonors with provided numMonths', async () => {
+      mockService.getLapsedDonors.mockResolvedValue({
+        emails: ['a@example.com'],
+      });
+
+      const result = await controller.getLapsedDonors(9);
+
+      expect(service.getLapsedDonors).toHaveBeenCalledWith(9);
+      expect(result).toEqual({ emails: ['a@example.com'] });
+    });
+
+    it('should default numMonths to 6 when not provided', async () => {
+      mockService.getLapsedDonors.mockResolvedValue({ emails: [] });
+
+      const result = await controller.getLapsedDonors(undefined);
+
+      expect(service.getLapsedDonors).toHaveBeenCalledWith(6);
+      expect(result).toEqual({ emails: [] });
+    });
+  });
+
   describe('findPublic', () => {
     it('should return public donations', async () => {
       mockService.findPublic.mockResolvedValue([mockDomainDonation]);
@@ -231,8 +283,9 @@ describe('DonationsController', () => {
         perPage: 20,
         totalPages: 1,
       });
+      const req = { user: { status: 'ADMIN' } };
 
-      const result = await controller.findAll(1, 20);
+      const result = await controller.findAll(req, 1, 20);
 
       expect(repository.findPaginated).toHaveBeenCalledWith(1, 20, {
         donationType: undefined,
@@ -258,8 +311,10 @@ describe('DonationsController', () => {
         perPage: 20,
         totalPages: 0,
       });
+      const req = { user: { status: 'ADMIN' } };
 
       await controller.findAll(
+        req,
         1,
         20,
         DonationType.RECURRING,
@@ -288,11 +343,36 @@ describe('DonationsController', () => {
         perPage: 20,
         totalPages: 0,
       });
+      const req = { user: { status: 'ADMIN' } };
 
-      const result = await controller.findAll(1, 20);
+      const result = await controller.findAll(req, 1, 20);
 
       expect(result.rows).toEqual([]);
       expect(result.total).toBe(0);
+    });
+  });
+
+  describe('exportCsv', () => {
+    it('should call service exportToCsv method', async () => {
+      const mockStream = {
+        [Symbol.asyncIterator]: async function* () {
+          yield 'ID,First Name,Last Name,Email,Amount,Type,Interval,Date,Transaction ID\n';
+          yield '1,John,Doe,john@example.com,100,one_time,,2024-01-01T00:00:00.000Z,txn_123\n';
+        },
+      };
+
+      mockService.exportToCsv = jest.fn().mockResolvedValue(mockStream);
+
+      const mockRequest = {
+        user: {
+          status: 'ADMIN',
+        },
+      };
+
+      const result = await controller.exportCsv(mockRequest);
+
+      expect(service.exportToCsv).toHaveBeenCalled();
+      expect(result).toBeDefined();
     });
   });
 });
@@ -384,11 +464,23 @@ describe('Donation Integration', () => {
       }),
     };
 
+    const mockAuthServiceIntegration = {
+      getUser: jest
+        .fn()
+        .mockResolvedValue([{ Name: 'email', Value: 'test@example.com' }]),
+    };
+
+    const mockUsersServiceIntegration = {
+      find: jest.fn().mockResolvedValue([]),
+    };
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [DonationsController],
       providers: [
         { provide: DonationsService, useValue: mockService },
         { provide: DonationsRepository, useValue: {} },
+        { provide: AuthService, useValue: mockAuthServiceIntegration },
+        { provide: UsersService, useValue: mockUsersServiceIntegration },
       ],
     }).compile();
 

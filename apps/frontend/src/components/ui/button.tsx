@@ -16,7 +16,11 @@ const buttonVariants = cva(
           'hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground',
         destructive:
           'bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30',
+        success: 'bg-[#007B64] text-white hover:bg-[#006654] transition-colors',
+        share:
+          'bg-[#007B64] text-white hover:bg-[#006654] transition-colors w-[269px] h-[71px] rounded-[10px] font-semibold text-lg',
         link: 'text-primary underline-offset-4 hover:underline',
+        unstyled: '',
       },
       size: {
         default:
@@ -43,21 +47,41 @@ function Button({
   variant = 'default',
   size = 'default',
   asChild = false,
+  withShareIcon = false,
+  children,
   ...props
 }: React.ComponentProps<'button'> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
+    withShareIcon?: boolean;
   }) {
   const Comp = asChild ? Slot : 'button';
   return (
-    // @ts-expect-error - Slot type compatibility with button element
     <Comp
       data-slot="button"
       data-variant={variant}
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {children}
+      {withShareIcon && (
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+          <polyline points="16 6 12 2 8 6" />
+          <line x1="12" y1="2" x2="12" y2="15" />
+        </svg>
+      )}
+    </Comp>
   );
 }
 export { Button, buttonVariants };

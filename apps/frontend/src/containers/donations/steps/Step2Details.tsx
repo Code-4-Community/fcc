@@ -1,15 +1,15 @@
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
-import type { DonationFormData, FormErrors } from '../donation-form.types';
-import { DonationSummary } from '../DonationSummary';
 import { Input } from '@components/ui/input';
-import { Label } from '@components/ui/label';
+import { FormField } from './FormField';
+import { DonationSummary } from '../DonationSummary';
+import type { DonationFormData, FormErrors } from '../donation-form.types';
 
 export interface Step2DetailsRef {
   createPaymentMethod: () => Promise<string>;
 }
 
-interface Step2DetailsProps {
+type Step2DetailsProps = {
   formData: DonationFormData;
   errors: Partial<FormErrors>;
   isSubmitting: boolean;
@@ -18,7 +18,7 @@ interface Step2DetailsProps {
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >,
   ) => void;
-}
+};
 
 const cardElementOptions = {
   style: {
@@ -49,10 +49,12 @@ export const Step2Details = forwardRef<Step2DetailsRef, Step2DetailsProps>(
         if (!stripe || !elements) {
           throw new Error('Stripe has not loaded yet. Please try again.');
         }
+
         const cardElement = elements.getElement(CardElement);
         if (!cardElement) {
           throw new Error('Card information not found.');
         }
+
         const { error, paymentMethod } = await stripe.createPaymentMethod({
           type: 'card',
           card: cardElement,
@@ -61,28 +63,34 @@ export const Step2Details = forwardRef<Step2DetailsRef, Step2DetailsProps>(
             email: formData.email,
           },
         });
+
         if (error || !paymentMethod) {
           throw new Error(error?.message ?? 'Failed to process card');
         }
+
         return paymentMethod.id;
       },
     }));
 
     return (
-      <div className="step2-container">
-        <div className="step2-total-container">
-          <div className="step2-total-label">Total</div>
-          <div className="step2-total-amount-label">
+      <div className="w-full flex flex-col gap-6 font-sans">
+        <div className="flex flex-col items-center justify-center w-full">
+          <span className="text-base text-[#57585c] font-normal">Total</span>
+          <span className="text-4xl font-bold text-black">
             ${currentAmount.toFixed(2)}
-          </div>
+          </span>
         </div>
-        <div className="step2-payment-details-label">Payment Details</div>
-        <div className="step2-payment-details-container">
-          <div className="step2-name-container">
-            <div className="flex flex-col text-sm w-full">
-              <Label htmlFor="firstName">
-                First Name <span className="text-[#d93025]">*</span>
-              </Label>
+
+        <div className="flex flex-col gap-4 w-full">
+          <h1 className="text-black text-2xl pb-3">Payment Details</h1>
+
+          <div className="flex gap-4 w-full">
+            <FormField
+              id="firstName"
+              label="First Name"
+              required
+              error={errors.firstName}
+            >
               <Input
                 type="text"
                 id="firstName"
@@ -90,25 +98,21 @@ export const Step2Details = forwardRef<Step2DetailsRef, Step2DetailsProps>(
                 autoComplete="given-name"
                 value={formData.firstName}
                 onChange={onChange}
-                className={
-                  errors.firstName ? 'border-[#d93025] bg-[#fff6f6]' : ''
-                }
                 disabled={isSubmitting}
                 aria-invalid={!!errors.firstName}
                 aria-describedby={
                   errors.firstName ? 'firstName-error' : undefined
                 }
+                className="border border-black"
               />
-              {errors.firstName && (
-                <span id="firstName-error" className="text-xs text-[#d93025]">
-                  {errors.firstName}
-                </span>
-              )}
-            </div>
-            <div className="flex flex-col text-sm w-full">
-              <Label htmlFor="lastName">
-                Last Name <span className="text-[#d93025]">*</span>
-              </Label>
+            </FormField>
+
+            <FormField
+              id="lastName"
+              label="Last Name"
+              required
+              error={errors.lastName}
+            >
               <Input
                 type="text"
                 id="lastName"
@@ -116,26 +120,20 @@ export const Step2Details = forwardRef<Step2DetailsRef, Step2DetailsProps>(
                 autoComplete="family-name"
                 value={formData.lastName}
                 onChange={onChange}
-                className={
-                  errors.lastName ? 'border-[#d93025] bg-[#fff6f6]' : ''
-                }
                 disabled={isSubmitting}
                 aria-invalid={!!errors.lastName}
-                aria-describedby={
-                  errors.lastName ? 'lastName-error' : undefined
-                }
+                aria-describedby={errors.lastName ? 'lastName-error' : undefined}
+                className="border border-black"
               />
-              {errors.lastName && (
-                <span id="lastName-error" className="text-xs text-[#d93025]">
-                  {errors.lastName}
-                </span>
-              )}
-            </div>
+            </FormField>
           </div>
-          <div className="flex flex-col text-sm w-full max-w-[85%]">
-            <Label htmlFor="email">
-              Email Address <span className="text-[#d93025]">*</span>
-            </Label>
+
+          <FormField
+            id="email"
+            label="Email Address"
+            required
+            error={errors.email}
+          >
             <Input
               type="email"
               id="email"
@@ -143,28 +141,20 @@ export const Step2Details = forwardRef<Step2DetailsRef, Step2DetailsProps>(
               autoComplete="email"
               value={formData.email}
               onChange={onChange}
-              className={errors.email ? 'border-[#d93025] bg-[#fff6f6]' : ''}
               disabled={isSubmitting}
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? 'email-error' : undefined}
+              className="border border-black"
             />
-            {errors.email && (
-              <span id="email-error" className="text-xs text-[#d93025]">
-                {errors.email}
-              </span>
-            )}
-          </div>
-          <div className="step2-form-group">
-            <label>Card Information</label>
-            <div
-              style={{
-                border: '1px solid #ccc',
-                borderRadius: '8px',
-                padding: '12px 10px',
-                backgroundColor: '#fff',
-                width: '100%',
-              }}
-            >
+          </FormField>
+
+          <FormField
+            id="cardInformation"
+            label="Card Information"
+            required
+            error={cardError ?? undefined}
+          >
+            <div className="w-full border border-black rounded px-3 py-2 bg-white">
               <CardElement
                 options={cardElementOptions}
                 onChange={(event) => {
@@ -172,11 +162,9 @@ export const Step2Details = forwardRef<Step2DetailsRef, Step2DetailsProps>(
                 }}
               />
             </div>
-            {cardError && (
-              <span className="step2-error-message">{cardError}</span>
-            )}
-          </div>
+          </FormField>
         </div>
+
         <DonationSummary
           setCurrentAmount={setCurrentAmount}
           baseAmount={baseAmount}

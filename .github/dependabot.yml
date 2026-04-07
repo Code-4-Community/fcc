@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "aaronashby"
+      - "thaninbew"
+    open-pull-requests-limit: 3
+
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    directory: "/apps/backend"
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "aaronashby"
+      - "thaninbew"
+    open-pull-requests-limit: 3

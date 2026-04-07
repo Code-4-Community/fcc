@@ -4,6 +4,7 @@ import apiClient, {
 } from '../../api/apiClient';
 import React, { useRef, useState } from 'react';
 import { type Step2DetailsRef } from './steps/Step2Details';
+import { useSearchParams } from 'react-router-dom';
 import './donations.css';
 import {
   DonationFormData,
@@ -16,13 +17,20 @@ import { Step2Details } from './steps/Step2Details';
 import { Step3Confirm } from './steps/Step3Confirm';
 import { Step4Receipt } from './steps/Step4Receipt';
 import { StripeProvider } from './StripeProvider';
+import { Button } from '@components/ui/button';
 
 export const DonationForm: React.FC<DonationFormProps> = ({
   onSuccess,
   onError,
   onAmountChange,
 }) => {
-  const [currentStep, setCurrentStep] = useState<DonationStep>(1);
+  const [searchParams] = useSearchParams();
+  const [currentStep, setCurrentStep] = useState<DonationStep>(() => {
+    const stepParam = searchParams.get('step');
+    if (stepParam === '4') return 4;
+    return 1;
+  });
+
   const [formData, setFormData] = useState<DonationFormData>({
     firstName: '',
     lastName: '',
@@ -41,9 +49,11 @@ export const DonationForm: React.FC<DonationFormProps> = ({
   const [errors, setErrors] = useState<Partial<FormErrors>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [receiptId, setReceiptId] = useState<string | null>(null);
   const [paymentMethodId, setPaymentMethodId] = useState<string | null>(null);
   const step2Ref = useRef<Step2DetailsRef>(null);
+  const [receiptId, setReceiptId] = useState<string | null>(
+    searchParams.get('receiptId'),
+  );
 
   const clampStep = (value: number): DonationStep =>
     Math.max(1, Math.min(4, value)) as DonationStep;
@@ -241,6 +251,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
             onChange={handleInputChange}
           />
         );
+
       case 2:
         return (
           <StripeProvider>
@@ -253,6 +264,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
             />
           </StripeProvider>
         );
+
       case 3:
         return (
           <StripeProvider>
@@ -278,25 +290,29 @@ export const DonationForm: React.FC<DonationFormProps> = ({
   return (
     <div className="donation-form-container">
       <form
-        className="donation-form"
+        className="donation-form flex flex-col p-[5%] box-border min-h-fit"
         onSubmit={(e) => e.preventDefault()}
         noValidate
       >
-        <div className="progress-bar-container">
+        <div
+          className={`flex w-full flex-row justify-center items-center gap-[3%] mb-[8%] ${currentStep === 1 || currentStep === 3 ? 'font-sans' : ''}`}
+        >
           <div
-            className={
-              currentStep === 1 ? 'progress-bar-purple' : 'progress-bar-grey'
-            }
+            className={`w-[31%] aspect-[14/1] rounded-[10px] ${
+              currentStep === 1 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
+            }`}
           ></div>
+
           <div
-            className={
-              currentStep === 2 ? 'progress-bar-purple' : 'progress-bar-grey'
-            }
+            className={`w-[31%] aspect-[14/1] rounded-[10px] ${
+              currentStep === 2 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
+            }`}
           ></div>
+
           <div
-            className={
-              currentStep === 3 ? 'progress-bar-purple' : 'progress-bar-grey'
-            }
+            className={`w-[31%] aspect-[14/1] rounded-[10px] ${
+              currentStep === 3 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
+            }`}
           ></div>
         </div>
         {submitError && (
@@ -307,31 +323,52 @@ export const DonationForm: React.FC<DonationFormProps> = ({
 
         {renderStep()}
 
-        <div className="step-actions">
+        <div
+          className={`flex flex-row items-center justify-center w-full gap-[7%] pt-6 mt-auto ${currentStep === 1 || currentStep === 3 ? 'font-sans' : ''}`}
+        >
           {showBackButton && (
-            <button
+            <Button
+              variant="unstyled"
               type="button"
-              className="action-button"
+              className="flex-1 rounded-[2cqh] border-[3px] border-[#007b64] bg-white text-[#007b64] font-semibold h-[2.5rem] flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#f0fffb]"
               onClick={handleBack}
             >
-              BACK
-            </button>
+              Back
+            </Button>
           )}
 
           {showNextButton && (
-            <button
+            <Button
+              variant="unstyled"
               type="button"
-              className="action-button"
+              className="flex-1 rounded-[2cqh] bg-[#007b64] text-white font-semibold h-[2.5rem] flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#006b54]"
               onClick={handleNext}
             >
-              NEXT
-            </button>
+              Next
+            </Button>
+          )}
+
+          {currentStep === 3 && (
+            <Button
+              variant="unstyled"
+              type="button"
+              className="flex-1 rounded-[4px] bg-[#007b64] hover:bg-[#006b54] text-white h-[2.5rem] px-3 text-base font-semibold disabled:bg-[#aaa]"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Processing...' : 'Donate'}
+            </Button>
           )}
 
           {currentStep === 4 && (
-            <button type="button" className="primary" onClick={resetForm}>
+            <Button
+              variant="default"
+              type="button"
+              className="primary font-semibold"
+              onClick={resetForm}
+            >
               Make another donation
-            </button>
+            </Button>
           )}
         </div>
       </form>

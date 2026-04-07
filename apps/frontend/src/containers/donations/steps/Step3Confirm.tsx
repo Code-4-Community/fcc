@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useStripe } from '@stripe/react-stripe-js';
 import type { DonationFormData } from '../donation-form.types';
-import { Card } from '@components/ui/card';
 import apiClient from '../../../api/apiClient';
+import { Card, CardHeader, CardTitle, CardContent } from '@components/ui/card';
 
 interface Step3ConfirmProps {
   formData: DonationFormData;

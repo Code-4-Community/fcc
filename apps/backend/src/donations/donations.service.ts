@@ -9,6 +9,8 @@ import {
 } from './donation.entity';
 import { Repository } from 'typeorm';
 import { CreateDonationRequest, Donation as DomainDonation } from './mappers';
+import { Readable } from 'stream';
+import { DonationsRepository } from './donations.repository';
 
 interface PaymentIntentSyncPayload {
   donationId?: number;
@@ -23,6 +25,7 @@ export class DonationsService {
   constructor(
     @InjectRepository(Donation)
     private donationRepository: Repository<Donation>,
+    private readonly donationsRepository: DonationsRepository,
   ) {}
 
   async create(
@@ -260,5 +263,68 @@ export class DonationsService {
     }
 
     await this.donationRepository.save(donation);
+  }
+
+  async getLapsedDonors(numMonths = 6): Promise<{ emails: string[] }> {
+    if (!Number.isFinite(numMonths) || numMonths <= 0) {
+      throw new BadRequestException('numMonths must be a positive number');
+    }
+
+    const emails = await this.donationsRepository.findLapsedDonors(numMonths);
+    return { emails };
+  }
+
+  async exportToCsv(): Promise<Readable> {
+    const donations = await this.donationRepository.find();
+    const headers = [
+      'ID',
+      'First Name',
+      'Last Name',
+      'Email',
+      'Amount',
+      'Type',
+      'Interval',
+      'Date',
+      'Transaction ID',
+    ];
+
+    // Helper function to escape CSV fields
+    const escapeCsvField = (
+      field: string | number | null | undefined,
+    ): string => {
+      if (field === null || field === undefined) {
+        return '';
+      }
+      const stringValue = String(field);
+      // If the field contains comma, quote, or newline, wrap in quotes and escape quotes
+      if (
+        stringValue.includes(',') ||
+        stringValue.includes('"') ||
+        stringValue.includes('\n')
+      ) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      }
+      return stringValue;
+    };
+
+    const csvRows: string[] = [headers.join(',')];
+    for (const donation of donations) {
+      const row = [
+        escapeCsvField(donation.id),
+        escapeCsvField(donation.firstName),
+        escapeCsvField(donation.lastName),
+        escapeCsvField(donation.email),
+        escapeCsvField(donation.amount),
+        escapeCsvField(donation.donationType),
+        escapeCsvField(donation.recurringInterval),
+        escapeCsvField(donation.createdAt.toISOString()),
+        escapeCsvField(donation.transactionId),
+      ];
+      csvRows.push(row.join(','));
+    }
+    const csvContent = csvRows.join('\n');
+    const stream = Readable.from([csvContent]);
+
+    return stream;
   }
 }

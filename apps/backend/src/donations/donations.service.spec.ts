@@ -6,7 +6,7 @@ import { DonationType, Donation, DonationStatus } from './donation.entity';
 import { DonationsService } from './donations.service';
 import { CreateDonationRequest } from './mappers';
 import { DonationResponseDto } from './dtos/donation-response-dto';
-
+import { DonationsRepository } from './donations.repository';
 // mock donations
 
 // invalid donation: non positive donation amount
@@ -216,7 +216,9 @@ const expectedDonations: DonationResponseDto[] = allDonations.map(
 describe('DonationsService', () => {
   let service: DonationsService;
   let repo: jest.Mocked<Partial<Repository<Donation>>>;
-
+  let mockDonationsRepository: jest.Mocked<
+    Pick<DonationsRepository, 'findLapsedDonors'>
+  >;
   beforeAll(async () => {
     const repoMock = {
       manager: {
@@ -236,10 +238,16 @@ describe('DonationsService', () => {
       findOne: jest.fn(),
     } as unknown as jest.Mocked<Partial<Repository<Donation>>>;
 
+    mockDonationsRepository = {
+      findLapsedDonors: jest.fn(),
+    };
+
     const app = await Test.createTestingModule({
       providers: [
         DonationsService,
         { provide: getRepositoryToken(Donation), useValue: repoMock },
+
+        { provide: DonationsRepository, useValue: mockDonationsRepository },
       ],
     }).compile();
 
@@ -249,24 +257,18 @@ describe('DonationsService', () => {
     repo.findOne.mockImplementation(
       async (options?: FindOneOptions<Donation>) => {
         const where = options?.where as FindOptionsWhere<Donation> | undefined;
-        if (!where) {
-          return null;
-        }
+        if (!where) return null;
 
         if (where.id !== undefined && where.id !== null) {
           const donation = allDonations.find((d) => d.id === where.id);
-          if (donation) {
-            return donation;
-          }
+          if (donation) return donation;
         }
 
         if (where.transactionId) {
           const donation = allDonations.find(
             (d) => d.transactionId === where.transactionId,
           );
-          if (donation) {
-            return donation;
-          }
+          if (donation) return donation;
         }
 
         return null;
@@ -327,6 +329,36 @@ describe('DonationsService', () => {
     it('should return createDonationDTO if valid donation', async () => {
       const findDonations = await service.findAll();
       expect(findDonations).toEqual(expectedDonations);
+    });
+  });
+
+  describe('getLapsedDonors', () => {
+    it('should call repository.findLapsedDonors with numMonths', async () => {
+      mockDonationsRepository.findLapsedDonors.mockResolvedValue([
+        'a@example.com',
+        'b@example.com',
+      ]);
+
+      const result = await service.getLapsedDonors(9);
+
+      expect(mockDonationsRepository.findLapsedDonors).toHaveBeenCalledWith(9);
+      expect(result).toEqual({
+        emails: ['a@example.com', 'b@example.com'],
+      });
+    });
+
+    it('should default to 6 months if numMonths is undefined', async () => {
+      mockDonationsRepository.findLapsedDonors.mockResolvedValue([]);
+
+      const result = await service.getLapsedDonors();
+
+      expect(mockDonationsRepository.findLapsedDonors).toHaveBeenCalledWith(6);
+      expect(result).toEqual({ emails: [] });
+    });
+
+    it('should throw if numMonths is not positive', async () => {
+      await expect(service.getLapsedDonors(0)).rejects.toThrow();
+      await expect(service.getLapsedDonors(-3)).rejects.toThrow();
     });
   });
 
@@ -402,6 +434,99 @@ describe('DonationsService', () => {
           status: DonationStatus.FAILED,
         }),
       );
+    });
+  });
+
+  describe('exportToCsv', () => {
+    it('should include all donation data in CSV rows', async () => {
+      const stream = await service.exportToCsv();
+
+      const chunks: Buffer[] = [];
+      for await (const chunk of stream) {
+        chunks.push(Buffer.from(chunk));
+      }
+      const csvContent = Buffer.concat(chunks).toString('utf-8');
+
+      const lines = csvContent.split('\n');
+      expect(lines.length).toBe(4); // Header + 3 data rows
+
+      // Check that donation data is present
+      expect(csvContent).toContain(validDonation1.firstName);
+      expect(csvContent).toContain(validDonation1.email);
+      expect(csvContent).toContain(String(validDonation1.amount));
+    });
+
+    it('should handle empty donations list', async () => {
+      // Clear the in-memory donations
+      jest.spyOn(repo, 'find').mockResolvedValue([]);
+
+      const stream = await service.exportToCsv();
+
+      const chunks: Buffer[] = [];
+      for await (const chunk of stream) {
+        chunks.push(Buffer.from(chunk));
+      }
+      const csvContent = Buffer.concat(chunks).toString('utf-8');
+
+      const lines = csvContent.split('\n');
+      expect(lines.length).toBe(1); // Should only have header
+      expect(lines[0]).toBe(
+        'ID,First Name,Last Name,Email,Amount,Type,Interval,Date,Transaction ID',
+      );
+    });
+
+    it('should escape CSV fields with commas correctly', async () => {
+      const donationWithComma = {
+        ...validDonation1,
+        id: 999,
+        firstName: 'John, Jr.',
+        lastName: 'Smith, Sr.',
+      };
+
+      jest
+        .spyOn(repo, 'find')
+        .mockResolvedValue([donationWithComma as Donation]);
+
+      const stream = await service.exportToCsv();
+
+      const chunks: Buffer[] = [];
+      for await (const chunk of stream) {
+        chunks.push(Buffer.from(chunk));
+      }
+      const csvContent = Buffer.concat(chunks).toString('utf-8');
+
+      // Fields with commas should be wrapped in quotes
+      expect(csvContent).toContain('"John, Jr."');
+      expect(csvContent).toContain('"Smith, Sr."');
+    });
+
+    it('should handle null/undefined values correctly', async () => {
+      const donationWithNulls = {
+        ...validDonation1,
+        id: 888,
+        recurringInterval: null,
+        transactionId: null,
+      };
+
+      jest
+        .spyOn(repo, 'find')
+        .mockResolvedValue([donationWithNulls as Donation]);
+
+      const stream = await service.exportToCsv();
+
+      const chunks: Buffer[] = [];
+      for await (const chunk of stream) {
+        chunks.push(Buffer.from(chunk));
+      }
+      const csvContent = Buffer.concat(chunks).toString('utf-8');
+
+      const lines = csvContent.split('\n');
+      const dataRow = lines[1];
+      const fields = dataRow.split(',');
+
+      // Null values should be empty strings
+      expect(fields[6]).toBe(''); // recurringInterval
+      expect(fields[8]).toBe(''); // transactionId
     });
   });
 });
