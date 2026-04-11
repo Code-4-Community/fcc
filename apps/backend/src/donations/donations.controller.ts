@@ -125,6 +125,65 @@ export class DonationsController {
     return stats;
   }
 
+  @Get('goal/active')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(CurrentUserInterceptor)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'get active growing goal summary',
+    description:
+      'retrieve the active goal, the amount raised during that goal period, and progress percentage for the admin dashboard',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'active goal summary',
+    schema: {
+      type: 'object',
+      properties: {
+        goal: {
+          nullable: true,
+          type: 'object',
+          properties: {
+            id: { type: 'number', example: 1 },
+            targetAmount: { type: 'number', example: 50000 },
+            startDate: { type: 'string', example: '2026-01-01' },
+            endDate: { type: 'string', example: '2026-06-30' },
+            dateRangeLabel: {
+              type: 'string',
+              example: 'January - June 2026',
+            },
+          },
+        },
+        amountRaised: { type: 'number', example: 31336 },
+        progressPercent: { type: 'number', example: 62.67 },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'unauthorized',
+  })
+  async getActiveGoalSummary(@Req() req: any): Promise<{
+    goal: {
+      id: number;
+      targetAmount: number;
+      startDate: string;
+      endDate: string;
+      dateRangeLabel: string;
+    } | null;
+    amountRaised: number;
+    progressPercent: number;
+  }> {
+    if (
+      req.user.status !== Status.ADMIN &&
+      req.user.status !== Status.STANDARD
+    ) {
+      throw new UnauthorizedException('Admin access required');
+    }
+
+    return this.donationsService.getActiveGoalSummary();
+  }
+
   @Get('lapsed')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()

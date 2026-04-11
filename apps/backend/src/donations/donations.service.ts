@@ -11,6 +11,7 @@ import { Repository } from 'typeorm';
 import { CreateDonationRequest, Donation as DomainDonation } from './mappers';
 import { Readable } from 'stream';
 import { DonationsRepository } from './donations.repository';
+import { Goal } from './goal.entity';
 
 interface PaymentIntentSyncPayload {
   donationId?: number;
@@ -25,6 +26,10 @@ export class DonationsService {
   constructor(
     @InjectRepository(Donation)
     private donationRepository: Repository<Donation>,
+
+    @InjectRepository(Goal)
+    private goalRepository: Repository<Goal>,
+
     private readonly donationsRepository: DonationsRepository,
   ) {}
 
@@ -326,5 +331,70 @@ export class DonationsService {
     const stream = Readable.from([csvContent]);
 
     return stream;
+  }
+
+  async getActiveGoalSummary() {
+    const today = new Date().toISOString().split('T')[0];
+
+    // 1. find active goal
+    const goal = await this.goalRepository
+      .createQueryBuilder('goal')
+      .where(':today BETWEEN goal.startDate AND goal.endDate', { today })
+      .orderBy('goal.startDate', 'DESC')
+      .getOne();
+
+    if (!goal) {
+      return {
+        goal: null,
+        amountRaised: 0,
+        progressPercent: 0,
+      };
+    }
+
+    // 2. sum donations in goal period
+    const result = await this.donationRepository
+      .createQueryBuilder('donation')
+      .select('COALESCE(SUM(donation.amount), 0)', 'amount')
+      .where('donation.status = :status', { status: DonationStatus.SUCCEEDED })
+      .andWhere('donation.createdAt >= :startDate', {
+        startDate: goal.startDate,
+      })
+      .andWhere('donation.createdAt <= :endDate', {
+        endDate: `${goal.endDate} 23:59:59`,
+      })
+      .getRawOne<{ amount: string }>();
+
+    const amountRaised = Number(result?.amount ?? 0);
+
+    const progressPercent =
+      goal.targetAmount > 0
+        ? Math.min((amountRaised / goal.targetAmount) * 100, 100)
+        : 0;
+
+    return {
+      goal: {
+        id: goal.id,
+        targetAmount: goal.targetAmount,
+        startDate: goal.startDate,
+        endDate: goal.endDate,
+        dateRangeLabel: this.formatDateRange(goal.startDate, goal.endDate),
+      },
+      amountRaised,
+      progressPercent,
+    };
+  }
+
+  private formatDateRange(start: string, end: string): string {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    const startMonth = startDate.toLocaleString('en-US', { month: 'long' });
+    const endMonth = endDate.toLocaleString('en-US', { month: 'long' });
+
+    if (startDate.getFullYear() === endDate.getFullYear()) {
+      return `${startMonth} - ${endMonth} ${startDate.getFullYear()}`;
+    }
+
+    return `${startMonth} ${startDate.getFullYear()} - ${endMonth} ${endDate.getFullYear()}`;
   }
 }

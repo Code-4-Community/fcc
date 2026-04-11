@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../components/AuthProvider';
 import { Button } from '../../components/ui/button';
-
 import { UserManagement } from './UserManagement';
 
 export const DashboardPage: React.FC = () => {
