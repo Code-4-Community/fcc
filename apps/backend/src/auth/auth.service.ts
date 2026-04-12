@@ -30,15 +30,22 @@ export class AuthService {
     console.log(
       `Initializing AuthService with UserPoolId: ${CognitoAuthConfig.userPoolId}, Region: ${CognitoAuthConfig.region}`,
     );
+    const accessKeyId = process.env.NX_AWS_ACCESS_KEY;
+    const secretAccessKey = process.env.NX_AWS_SECRET_ACCESS_KEY;
+
     this.providerClient = new CognitoIdentityProviderClient({
       region: CognitoAuthConfig.region,
-      credentials: {
-        accessKeyId: process.env.NX_AWS_ACCESS_KEY,
-        secretAccessKey: process.env.NX_AWS_SECRET_ACCESS_KEY,
-      },
+      ...(accessKeyId && secretAccessKey
+        ? {
+            credentials: {
+              accessKeyId,
+              secretAccessKey,
+            },
+          }
+        : {}),
     });
 
-    this.clientSecret = process.env.COGNITO_CLIENT_SECRET;
+    this.clientSecret = process.env.COGNITO_CLIENT_SECRET ?? '';
   }
 
   // Computes secret hash to authenticate this backend to Cognito
@@ -75,9 +82,11 @@ export class AuthService {
   }
 
   async adminConfirmUser(email: string): Promise<void> {
+    const username = await this.resolveCognitoUsernameByEmail(email);
+
     const confirmCommand = new AdminConfirmSignUpCommand({
       UserPoolId: CognitoAuthConfig.userPoolId,
-      Username: email,
+      Username: username,
     });
 
     await this.providerClient.send(confirmCommand);
@@ -88,27 +97,32 @@ export class AuthService {
     status: Status = Status.STANDARD,
   ): Promise<boolean> {
     console.log(`Attempting signup for: ${email} with status: ${status}`);
+    const username = this.buildCognitoUsername(email);
     const signUpCommand = new SignUpCommand({
       ClientId: CognitoAuthConfig.clientId,
-      SecretHash: this.calculateHash(email),
-      Username: email,
-      Password: password,
+      SecretHash: this.calculateHash(username),
+      Username: username,
       UserAttributes: [
         {
-          Name: 'name',
-          Value: `${firstName} ${lastName}`,
+          Name: 'email',
+          Value: email,
         },
-        // Commented out as it might cause InvalidParameterException if not in User Pool
-        // {
-        //   Name: 'custom:role',
-        //   Value: status,
-        // },
+        {
+          Name: 'name',
+          Value: `${firstName} ${lastName}`.trim(),
+        },
       ],
+      Password: password,
+      // Commented out as it might cause InvalidParameterException if not in User Pool
+      // {
+      //   Name: 'custom:role',
+      //   Value: status,
+      // },
     });
 
     try {
       const response = await this.providerClient.send(signUpCommand);
-      return response.UserConfirmed;
+      return response.UserConfirmed ?? false;
     } catch (err) {
       console.error('Cognito signup error:', err);
       throw err;
@@ -116,10 +130,12 @@ export class AuthService {
   }
 
   async verifyUser(email: string, verificationCode: string): Promise<void> {
+    const username = await this.resolveCognitoUsernameByEmail(email);
+
     const confirmCommand = new ConfirmSignUpCommand({
       ClientId: CognitoAuthConfig.clientId,
-      SecretHash: this.calculateHash(email),
-      Username: email,
+      SecretHash: this.calculateHash(username),
+      Username: username,
       ConfirmationCode: verificationCode,
     });
 
@@ -127,12 +143,14 @@ export class AuthService {
   }
 
   async signin({ email, password }: SignInDto): Promise<SignInResponseDto> {
+    const username = await this.resolveCognitoUsernameByEmail(email);
+
     const authParameters: Record<string, string> = {
-      USERNAME: email,
+      USERNAME: username,
       PASSWORD: password,
     };
 
-    const secretHash = this.calculateHash(email);
+    const secretHash = this.calculateHash(username);
     if (secretHash) {
       authParameters.SECRET_HASH = secretHash;
     }
@@ -145,14 +163,23 @@ export class AuthService {
     });
 
     try {
-      console.log(`Calling Cognito AdminInitiateAuth for ${email}`);
+      console.log(`Calling Cognito AdminInitiateAuth for ${username}`);
       const response = await this.providerClient.send(signInCommand);
-      console.log(`Cognito response received for ${email}`);
+      console.log(`Cognito response received for ${username}`);
+      const authResult = response.AuthenticationResult;
+
+      if (
+        !authResult?.AccessToken ||
+        !authResult.RefreshToken ||
+        !authResult.IdToken
+      ) {
+        throw new Error('Cognito sign in did not return the expected tokens.');
+      }
 
       return {
-        accessToken: response.AuthenticationResult.AccessToken,
-        refreshToken: response.AuthenticationResult.RefreshToken,
-        idToken: response.AuthenticationResult.IdToken,
+        accessToken: authResult.AccessToken,
+        refreshToken: authResult.RefreshToken,
+        idToken: authResult.IdToken,
       };
     } catch (err: unknown) {
       if (
@@ -192,19 +219,26 @@ export class AuthService {
     });
 
     const response = await this.providerClient.send(refreshCommand);
+    const authResult = response.AuthenticationResult;
+
+    if (!authResult?.AccessToken || !authResult.IdToken) {
+      throw new Error('Cognito refresh did not return the expected tokens.');
+    }
 
     return {
-      accessToken: response.AuthenticationResult.AccessToken,
+      accessToken: authResult.AccessToken,
       refreshToken: refreshToken,
-      idToken: response.AuthenticationResult.IdToken,
+      idToken: authResult.IdToken,
     };
   }
 
   async forgotPassword(email: string) {
+    const username = await this.resolveCognitoUsernameByEmail(email);
+
     const forgotCommand = new ForgotPasswordCommand({
       ClientId: CognitoAuthConfig.clientId,
-      Username: email,
-      SecretHash: this.calculateHash(email),
+      Username: username,
+      SecretHash: this.calculateHash(username),
     });
 
     await this.providerClient.send(forgotCommand);
@@ -215,10 +249,12 @@ export class AuthService {
     confirmationCode,
     newPassword,
   }: ConfirmPasswordDto) {
+    const username = await this.resolveCognitoUsernameByEmail(email);
+
     const confirmComamnd = new ConfirmForgotPasswordCommand({
       ClientId: CognitoAuthConfig.clientId,
-      SecretHash: this.calculateHash(email),
-      Username: email,
+      SecretHash: this.calculateHash(username),
+      Username: username,
       ConfirmationCode: confirmationCode,
       Password: newPassword,
     });
@@ -227,11 +263,31 @@ export class AuthService {
   }
 
   async deleteUser(email: string): Promise<void> {
+    const username = await this.resolveCognitoUsernameByEmail(email);
+
     const adminDeleteUserCommand = new AdminDeleteUserCommand({
-      Username: email,
+      Username: username,
       UserPoolId: CognitoAuthConfig.userPoolId,
     });
 
     await this.providerClient.send(adminDeleteUserCommand);
+  }
+
+  private buildCognitoUsername(email: string): string {
+    const localPart = email.split('@')[0].replace(/[^a-zA-Z0-9_-]/g, '');
+    const prefix = localPart.length > 0 ? localPart : 'user';
+
+    return `fcc-${prefix}-${Date.now().toString(36)}`;
+  }
+
+  private async resolveCognitoUsernameByEmail(email: string): Promise<string> {
+    const usersCommand = new ListUsersCommand({
+      UserPoolId: CognitoAuthConfig.userPoolId,
+      Filter: `email = "${email}"`,
+      Limit: 1,
+    });
+
+    const { Users } = await this.providerClient.send(usersCommand);
+    return Users?.[0]?.Username ?? email;
   }
 }

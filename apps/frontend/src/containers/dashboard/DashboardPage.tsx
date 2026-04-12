@@ -5,7 +5,15 @@ import { Button } from '../../components/ui/button';
 import { UserManagement } from './UserManagement';
 
 export const DashboardPage: React.FC = () => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+
+  const fullName = [user?.firstName, user?.lastName]
+    .filter((part) => typeof part === 'string' && part.trim().length > 0)
+    .join(' ')
+    .trim();
+
+  const welcomeName =
+    user?.displayName || fullName || user?.username || user?.email || 'user';
 
   return (
     <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
@@ -25,7 +33,7 @@ export const DashboardPage: React.FC = () => {
 
       <main style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
         <section>
-          <h3>Welcome!</h3>
+          <h3>Welcome, {welcomeName}!</h3>
           <p>You are logged into the protected dashboard.</p>
         </section>
 

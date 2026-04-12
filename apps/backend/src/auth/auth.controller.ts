@@ -26,6 +26,22 @@ import { ConfirmPasswordDto } from './dtos/confirm-password.dto';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
 import { ApiTags } from '@nestjs/swagger';
 
+interface AuthenticatedUser {
+  id?: number;
+  idUser?: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  name?: string;
+  displayName?: string;
+  username?: string;
+  status?: string;
+}
+
+interface AuthenticatedRequest {
+  user?: AuthenticatedUser;
+}
+
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
@@ -37,25 +53,61 @@ export class AuthController {
   @Get('/me')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(CurrentUserInterceptor)
-  async me(@Req() req: any) {
-    return req.user;
+  async me(@Req() req: AuthenticatedRequest) {
+    const user = req.user ?? {};
+
+    return {
+      ...user,
+      displayName: this.resolveDisplayName(user),
+      username: this.resolveUsername(user),
+    };
+  }
+
+  private resolveDisplayName(user: AuthenticatedUser): string {
+    const fullName = [user.firstName, user.lastName]
+      .filter((part) => typeof part === 'string' && part.trim().length > 0)
+      .join(' ')
+      .trim();
+
+    return (
+      fullName ||
+      user.name ||
+      user.displayName ||
+      user.username ||
+      user.email ||
+      user.idUser ||
+      'User'
+    );
+  }
+
+  private resolveUsername(user: AuthenticatedUser): string {
+    return (
+      user.username ||
+      user.email ||
+      user.idUser ||
+      this.resolveDisplayName(user)
+    );
+  }
+
+  private getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : 'Unknown error';
   }
 
   @Post('/admin-verify')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(CurrentUserInterceptor)
   async adminVerify(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Body() body: { email: string },
   ): Promise<void> {
-    if (req.user.status !== Status.ADMIN) {
+    if (req.user?.status !== Status.ADMIN) {
       throw new ForbiddenException('Only admins can verify users');
     }
     try {
       await this.authService.adminConfirmUser(body.email);
-    } catch (e) {
-      console.error('Admin verify error:', e);
-      throw new BadRequestException(e.message);
+    } catch (error: unknown) {
+      console.error('Admin verify error:', error);
+      throw new BadRequestException(this.getErrorMessage(error));
     }
   }
 
@@ -63,17 +115,17 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(CurrentUserInterceptor)
   async adminDeny(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Body() body: { email: string },
   ): Promise<void> {
-    if (req.user.status !== Status.ADMIN) {
+    if (req.user?.status !== Status.ADMIN) {
       throw new ForbiddenException('Only admins can deny users');
     }
     try {
       await this.authService.deleteUser(body.email);
-    } catch (e) {
-      console.error('Admin deny error:', e);
-      throw new BadRequestException(e.message);
+    } catch (error: unknown) {
+      console.error('Admin deny error:', error);
+      throw new BadRequestException(this.getErrorMessage(error));
     }
     const dbUsers = await this.usersService.find(body.email);
     if (dbUsers.length > 0) {
@@ -84,14 +136,15 @@ export class AuthController {
   @Get('/users')
   @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(CurrentUserInterceptor)
-  async listUsers(@Req() req: any) {
+  async listUsers() {
     try {
       const cognitoUsers = await this.authService.listAllUsers();
       // Combine with DB users
       const results = await Promise.all(
         cognitoUsers.map(async (cu) => {
-          const email = cu.Attributes.find((a) => a.Name === 'email')?.Value;
-          const name = cu.Attributes.find((a) => a.Name === 'name')?.Value;
+          const attributes = cu.Attributes ?? [];
+          const email = attributes.find((a) => a.Name === 'email')?.Value;
+          const name = attributes.find((a) => a.Name === 'name')?.Value;
           const dbUsers = email ? await this.usersService.find(email) : [];
           return {
             username: cu.Username,
@@ -103,8 +156,8 @@ export class AuthController {
         }),
       );
       return results;
-    } catch (e) {
-      throw new BadRequestException(e.message);
+    } catch (error: unknown) {
+      throw new BadRequestException(this.getErrorMessage(error));
     }
   }
 
@@ -114,9 +167,9 @@ export class AuthController {
     // By default, creates a standard user
     try {
       await this.authService.signup(signUpDto);
-    } catch (e) {
-      console.error('Signup error:', e);
-      throw new BadRequestException(e.message);
+    } catch (error: unknown) {
+      console.error('Signup error:', error);
+      throw new BadRequestException(this.getErrorMessage(error));
     }
 
     const user = await this.usersService.create(
@@ -133,9 +186,9 @@ export class AuthController {
   verifyUser(@Body() body: VerifyUserDto): void {
     try {
       this.authService.verifyUser(body.email, body.verificationCode);
-    } catch (e) {
-      console.error('Verify error:', e);
-      throw new BadRequestException(e.message);
+    } catch (error: unknown) {
+      console.error('Verify error:', error);
+      throw new BadRequestException(this.getErrorMessage(error));
     }
   }
 
@@ -144,8 +197,8 @@ export class AuthController {
     console.log(`Signin request received for: ${signInDto.email}`);
     try {
       return await this.authService.signin(signInDto);
-    } catch (e) {
-      throw new BadRequestException(e.message);
+    } catch (error: unknown) {
+      throw new BadRequestException(this.getErrorMessage(error));
     }
   }
 
@@ -168,13 +221,17 @@ export class AuthController {
   async delete(@Body() body: DeleteUserDto): Promise<void> {
     const user = await this.usersService.findOne(body.userId);
 
-    try {
-      await this.authService.deleteUser(user.email);
-    } catch (e) {
-      console.error('Delete error:', e);
-      throw new BadRequestException(e.message);
+    if (!user) {
+      throw new BadRequestException('User not found');
     }
 
-    this.usersService.remove(user.id);
+    try {
+      await this.authService.deleteUser(user.email);
+    } catch (error: unknown) {
+      console.error('Delete error:', error);
+      throw new BadRequestException(this.getErrorMessage(error));
+    }
+
+    await this.usersService.remove(user.id);
   }
 }

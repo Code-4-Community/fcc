@@ -18,6 +18,13 @@ interface PaymentIntentSyncPayload {
   status: DonationStatus;
 }
 
+interface DonationStats {
+  total: number;
+  count: number;
+  yearToDate: number;
+  monthToDate: number;
+}
+
 @Injectable()
 export class DonationsService {
   private readonly logger = new Logger(DonationsService.name);
@@ -95,14 +102,15 @@ export class DonationsService {
       amount: finalDonation.amount,
       isAnonymous: finalDonation.isAnonymous,
       donationType: finalDonation.donationType as 'one_time' | 'recurring',
-      recurringInterval: finalDonation.recurringInterval as
-        | 'weekly'
-        | 'monthly'
-        | 'bimonthly'
-        | 'quarterly'
-        | 'annually'
-        | undefined,
-      dedicationMessage: finalDonation.dedicationMessage || undefined,
+      recurringInterval:
+        (donation.recurringInterval as
+          | 'weekly'
+          | 'monthly'
+          | 'bimonthly'
+          | 'quarterly'
+          | 'annually'
+          | null) ?? undefined,
+      dedicationMessage: donation.dedicationMessage ?? undefined,
       showDedicationPublicly: finalDonation.showDedicationPublicly,
       status: finalDonation.status as
         | 'pending'
@@ -111,7 +119,7 @@ export class DonationsService {
         | 'cancelled',
       createdAt: finalDonation.createdAt,
       updatedAt: finalDonation.updatedAt,
-      transactionId: finalDonation.transactionId || undefined,
+      transactionId: finalDonation.transactionId ?? undefined,
     };
   }
 
@@ -128,11 +136,11 @@ export class DonationsService {
           amount: donation.amount,
           isAnonymous: donation.isAnonymous,
           donationType: donation.donationType,
-          recurringInterval: donation.recurringInterval,
-          dedicationMessage: donation.dedicationMessage,
+          recurringInterval: donation.recurringInterval ?? undefined,
+          dedicationMessage: donation.dedicationMessage ?? undefined,
           showDedicationPublicly: donation.showDedicationPublicly,
           status: donation.status,
-          transactionId: donation.transactionId,
+          transactionId: donation.transactionId ?? undefined,
           createdAt: donation.createdAt,
           updatedAt: donation.updatedAt,
         };
@@ -161,14 +169,15 @@ export class DonationsService {
       amount: donation.amount,
       isAnonymous: donation.isAnonymous,
       donationType: donation.donationType as 'one_time' | 'recurring',
-      recurringInterval: donation.recurringInterval as
-        | 'weekly'
-        | 'monthly'
-        | 'bimonthly'
-        | 'quarterly'
-        | 'annually'
-        | undefined,
-      dedicationMessage: donation.dedicationMessage || undefined,
+      recurringInterval:
+        (donation.recurringInterval as
+          | 'weekly'
+          | 'monthly'
+          | 'bimonthly'
+          | 'quarterly'
+          | 'annually'
+          | null) ?? undefined,
+      dedicationMessage: donation.dedicationMessage ?? undefined,
       showDedicationPublicly: donation.showDedicationPublicly,
       status: donation.status as
         | 'pending'
@@ -177,7 +186,7 @@ export class DonationsService {
         | 'cancelled',
       createdAt: donation.createdAt,
       updatedAt: donation.updatedAt,
-      transactionId: donation.transactionId || undefined,
+      transactionId: donation.transactionId ?? undefined,
     }));
   }
 
@@ -198,32 +207,38 @@ export class DonationsService {
       amount: donation.amount,
       isAnonymous: donation.isAnonymous,
       donationType: donation.donationType,
-      recurringInterval: donation.recurringInterval,
-      dedicationMessage: donation.dedicationMessage,
+      recurringInterval: donation.recurringInterval ?? undefined,
+      dedicationMessage: donation.dedicationMessage ?? undefined,
       showDedicationPublicly: donation.showDedicationPublicly,
       status: donation.status,
-      transactionId: donation.transactionId,
+      transactionId: donation.transactionId ?? undefined,
       createdAt: donation.createdAt,
       updatedAt: donation.updatedAt,
     };
   }
 
-  async getTotalDonations(): Promise<{ total: number; count: number }> {
+  async getTotalDonations(): Promise<DonationStats> {
+    const now = new Date();
+    const yearStart = new Date(now.getFullYear(), 0, 1);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
     const [donations] = await this.donationRepository.manager.query(
-      `SELECT COUNT(amount) AS count, SUM(amount) AS total FROM donations`,
+      `SELECT
+        COALESCE(COUNT(*), 0) AS count,
+        COALESCE(SUM("amount"), 0) AS total,
+        COALESCE(SUM(CASE WHEN "createdAt" >= $2 THEN "amount" ELSE 0 END), 0) AS "yearToDate",
+        COALESCE(SUM(CASE WHEN "createdAt" >= $3 THEN "amount" ELSE 0 END), 0) AS "monthToDate"
+      FROM "donations"
+      WHERE "status" = $1`,
+      [DonationStatus.SUCCEEDED, yearStart, monthStart],
     );
 
-    // SQL SUM returns null when no rows exist; coerce to numbers with sensible defaults
-    const total =
-      donations.total !== null && donations.total !== undefined
-        ? Number(donations.total)
-        : 0;
-    const count =
-      donations.count !== null && donations.count !== undefined
-        ? Number(donations.count)
-        : 0;
-
-    return { total, count };
+    return {
+      total: Number(donations?.total ?? 0),
+      count: Number(donations?.count ?? 0),
+      yearToDate: Number(donations?.yearToDate ?? 0),
+      monthToDate: Number(donations?.monthToDate ?? 0),
+    };
   }
 
   async syncPaymentIntentStatus(
