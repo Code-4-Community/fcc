@@ -348,18 +348,6 @@ export const DonationForm: React.FC<DonationFormProps> = ({
             </Button>
           )}
 
-          {currentStep === 3 && (
-            <Button
-              variant="unstyled"
-              type="button"
-              className="flex-1 rounded-[4px] bg-[#007b64] hover:bg-[#006b54] text-white h-[2.5rem] px-3 text-base font-semibold disabled:bg-[#aaa]"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Processing...' : 'Donate'}
-            </Button>
-          )}
-
           {currentStep === 4 && (
             <Button
               variant="default"
