@@ -4,9 +4,7 @@ import Header from '../header/Header';
 import { useAuth } from '../../../components/AuthProvider';
 import apiClient from '../../../api/apiClient';
 import DonationStatCard from './DonationStatCard';
-import bankIcon from './bank.png';
-import clockIcon from './clock.png';
-import calendarIcon from './calendar.png';
+import { PiggyBank, Clock, CalendarDays } from 'lucide-react';
 import welcomeBackground from '../../../assets/green-boston-background.png';
 
 type DonationStats = {
@@ -78,22 +76,25 @@ export default function SidebarTester() {
           <section className="grid grid-cols-1 items-start gap-4 md:grid-cols-[minmax(0,1fr)_clamp(350px,31vw,520px)]">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <DonationStatCard
-                iconSrc={bankIcon}
-                iconAlt="Total donations"
+                Icon={PiggyBank}
+                iconColor="#3D3E6E"
+                bgColor="#ECECF0"
                 label="Total"
                 value={formatCurrency(stats.total)}
               />
 
               <DonationStatCard
-                iconSrc={clockIcon}
-                iconAlt="Year-to-date donations"
+                Icon={Clock}
+                iconColor="#893C27"
+                bgColor="#F3EBE9"
                 label="Year-to-date"
                 value={formatCurrency(stats.yearToDate)}
               />
 
               <DonationStatCard
-                iconSrc={calendarIcon}
-                iconAlt="This month donations"
+                Icon={CalendarDays}
+                iconColor="#C7BE3B"
+                bgColor="#F4F2D8"
                 label="This Month"
                 value={formatCurrency(stats.monthToDate)}
               />
