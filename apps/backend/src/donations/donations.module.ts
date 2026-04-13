@@ -8,9 +8,10 @@ import { User } from '../users/user.entity';
 import { AuthService } from '../auth/auth.service';
 import { UsersService } from '../users/users.service';
 import { CurrentUserInterceptor } from '../interceptors/current-user.interceptor';
+import { Goal } from './goal.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Donation, User])],
+  imports: [TypeOrmModule.forFeature([Donation, Goal, User])],
   controllers: [DonationsController],
   providers: [
     DonationsService,

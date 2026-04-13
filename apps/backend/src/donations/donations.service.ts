@@ -11,11 +11,19 @@ import { Repository } from 'typeorm';
 import { CreateDonationRequest, Donation as DomainDonation } from './mappers';
 import { Readable } from 'stream';
 import { DonationsRepository } from './donations.repository';
+import { Goal } from './goal.entity';
 
 interface PaymentIntentSyncPayload {
   donationId?: number;
   transactionId?: string;
   status: DonationStatus;
+}
+
+interface DonationStats {
+  total: number;
+  count: number;
+  yearToDate: number;
+  monthToDate: number;
 }
 
 @Injectable()
@@ -25,6 +33,10 @@ export class DonationsService {
   constructor(
     @InjectRepository(Donation)
     private donationRepository: Repository<Donation>,
+
+    @InjectRepository(Goal)
+    private goalRepository: Repository<Goal>,
+
     private readonly donationsRepository: DonationsRepository,
   ) {}
 
@@ -95,14 +107,15 @@ export class DonationsService {
       amount: finalDonation.amount,
       isAnonymous: finalDonation.isAnonymous,
       donationType: finalDonation.donationType as 'one_time' | 'recurring',
-      recurringInterval: finalDonation.recurringInterval as
-        | 'weekly'
-        | 'monthly'
-        | 'bimonthly'
-        | 'quarterly'
-        | 'annually'
-        | undefined,
-      dedicationMessage: finalDonation.dedicationMessage || undefined,
+      recurringInterval:
+        (donation.recurringInterval as
+          | 'weekly'
+          | 'monthly'
+          | 'bimonthly'
+          | 'quarterly'
+          | 'annually'
+          | null) ?? undefined,
+      dedicationMessage: donation.dedicationMessage ?? undefined,
       showDedicationPublicly: finalDonation.showDedicationPublicly,
       status: finalDonation.status as
         | 'pending'
@@ -111,7 +124,7 @@ export class DonationsService {
         | 'cancelled',
       createdAt: finalDonation.createdAt,
       updatedAt: finalDonation.updatedAt,
-      transactionId: finalDonation.transactionId || undefined,
+      transactionId: finalDonation.transactionId ?? undefined,
     };
   }
 
@@ -128,11 +141,11 @@ export class DonationsService {
           amount: donation.amount,
           isAnonymous: donation.isAnonymous,
           donationType: donation.donationType,
-          recurringInterval: donation.recurringInterval,
-          dedicationMessage: donation.dedicationMessage,
+          recurringInterval: donation.recurringInterval ?? undefined,
+          dedicationMessage: donation.dedicationMessage ?? undefined,
           showDedicationPublicly: donation.showDedicationPublicly,
           status: donation.status,
-          transactionId: donation.transactionId,
+          transactionId: donation.transactionId ?? undefined,
           createdAt: donation.createdAt,
           updatedAt: donation.updatedAt,
         };
@@ -161,14 +174,15 @@ export class DonationsService {
       amount: donation.amount,
       isAnonymous: donation.isAnonymous,
       donationType: donation.donationType as 'one_time' | 'recurring',
-      recurringInterval: donation.recurringInterval as
-        | 'weekly'
-        | 'monthly'
-        | 'bimonthly'
-        | 'quarterly'
-        | 'annually'
-        | undefined,
-      dedicationMessage: donation.dedicationMessage || undefined,
+      recurringInterval:
+        (donation.recurringInterval as
+          | 'weekly'
+          | 'monthly'
+          | 'bimonthly'
+          | 'quarterly'
+          | 'annually'
+          | null) ?? undefined,
+      dedicationMessage: donation.dedicationMessage ?? undefined,
       showDedicationPublicly: donation.showDedicationPublicly,
       status: donation.status as
         | 'pending'
@@ -177,7 +191,7 @@ export class DonationsService {
         | 'cancelled',
       createdAt: donation.createdAt,
       updatedAt: donation.updatedAt,
-      transactionId: donation.transactionId || undefined,
+      transactionId: donation.transactionId ?? undefined,
     }));
   }
 
@@ -198,32 +212,38 @@ export class DonationsService {
       amount: donation.amount,
       isAnonymous: donation.isAnonymous,
       donationType: donation.donationType,
-      recurringInterval: donation.recurringInterval,
-      dedicationMessage: donation.dedicationMessage,
+      recurringInterval: donation.recurringInterval ?? undefined,
+      dedicationMessage: donation.dedicationMessage ?? undefined,
       showDedicationPublicly: donation.showDedicationPublicly,
       status: donation.status,
-      transactionId: donation.transactionId,
+      transactionId: donation.transactionId ?? undefined,
       createdAt: donation.createdAt,
       updatedAt: donation.updatedAt,
     };
   }
 
-  async getTotalDonations(): Promise<{ total: number; count: number }> {
+  async getTotalDonations(): Promise<DonationStats> {
+    const now = new Date();
+    const yearStart = new Date(now.getFullYear(), 0, 1);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
     const [donations] = await this.donationRepository.manager.query(
-      `SELECT COUNT(amount) AS count, SUM(amount) AS total FROM donations`,
+      `SELECT
+        COALESCE(COUNT(*), 0) AS count,
+        COALESCE(SUM("amount"), 0) AS total,
+        COALESCE(SUM(CASE WHEN "createdAt" >= $2 THEN "amount" ELSE 0 END), 0) AS "yearToDate",
+        COALESCE(SUM(CASE WHEN "createdAt" >= $3 THEN "amount" ELSE 0 END), 0) AS "monthToDate"
+      FROM "donations"
+      WHERE "status" = $1`,
+      [DonationStatus.SUCCEEDED, yearStart, monthStart],
     );
 
-    // SQL SUM returns null when no rows exist; coerce to numbers with sensible defaults
-    const total =
-      donations.total !== null && donations.total !== undefined
-        ? Number(donations.total)
-        : 0;
-    const count =
-      donations.count !== null && donations.count !== undefined
-        ? Number(donations.count)
-        : 0;
-
-    return { total, count };
+    return {
+      total: Number(donations?.total ?? 0),
+      count: Number(donations?.count ?? 0),
+      yearToDate: Number(donations?.yearToDate ?? 0),
+      monthToDate: Number(donations?.monthToDate ?? 0),
+    };
   }
 
   async syncPaymentIntentStatus(
@@ -326,5 +346,84 @@ export class DonationsService {
     const stream = Readable.from([csvContent]);
 
     return stream;
+  }
+
+  async getActiveGoalSummary() {
+    // --- TEMPORARY MOCK FOR TESTING ---
+    return {
+      goal: {
+        id: 999,
+        targetAmount: 50000,
+        startDate: '2026-01-01',
+        endDate: '2026-06-30',
+        dateRangeLabel: 'January - June 2026',
+      },
+      amountRaised: 31336,
+      progressPercent: 62.67,
+    };
+    /* 
+    const today = new Date().toISOString().split('T')[0];
+    
+    // 1. find active goal
+    const goal = await this.goalRepository
+      .createQueryBuilder('goal')
+      .where(':today BETWEEN goal.startDate AND goal.endDate', { today })
+      .orderBy('goal.startDate', 'DESC')
+      .getOne();
+
+    if (!goal) {
+      return {
+        goal: null,
+        amountRaised: 0,
+        progressPercent: 0,
+      };
+    }
+
+    // 2. sum donations in goal period
+    const result = await this.donationRepository
+      .createQueryBuilder('donation')
+      .select('COALESCE(SUM(donation.amount), 0)', 'amount')
+      .where('donation.status = :status', { status: DonationStatus.SUCCEEDED })
+      .andWhere('donation.createdAt >= :startDate', {
+        startDate: goal.startDate,
+      })
+      .andWhere('donation.createdAt <= :endDate', {
+        endDate: `${goal.endDate} 23:59:59`,
+      })
+      .getRawOne<{ amount: string }>();
+
+    const amountRaised = Number(result?.amount ?? 0);
+
+    const progressPercent =
+      goal.targetAmount > 0
+        ? Math.min((amountRaised / goal.targetAmount) * 100, 100)
+        : 0;
+
+    return {
+      goal: {
+        id: goal.id,
+        targetAmount: goal.targetAmount,
+        startDate: goal.startDate,
+        endDate: goal.endDate,
+        dateRangeLabel: this.formatDateRange(goal.startDate, goal.endDate),
+      },
+      amountRaised,
+      progressPercent,
+    };
+    */
+  }
+
+  private formatDateRange(start: string, end: string): string {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    const startMonth = startDate.toLocaleString('en-US', { month: 'long' });
+    const endMonth = endDate.toLocaleString('en-US', { month: 'long' });
+
+    if (startDate.getFullYear() === endDate.getFullYear()) {
+      return `${startMonth} - ${endMonth} ${startDate.getFullYear()}`;
+    }
+
+    return `${startMonth} ${startDate.getFullYear()} - ${endMonth} ${endDate.getFullYear()}`;
   }
 }

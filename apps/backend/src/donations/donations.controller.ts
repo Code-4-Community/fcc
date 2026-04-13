@@ -99,7 +99,7 @@ export class DonationsController {
   @ApiOperation({
     summary: 'get donation statistics',
     description:
-      'retrieve aggregate donation statistics including total amount and count',
+      'retrieve aggregate donation statistics for successful donations, including lifetime total, year-to-date total, and month-to-date total',
   })
   @ApiResponse({
     status: 200,
@@ -109,20 +109,86 @@ export class DonationsController {
       properties: {
         total: {
           type: 'number',
-          description: 'total donation amount in dollars',
+          description: 'lifetime total amount from successful donations',
           example: 25000.0,
         },
         count: {
           type: 'number',
-          description: 'total number of donations',
+          description: 'total number of successful donations',
           example: 150,
+        },
+        yearToDate: {
+          type: 'number',
+          description:
+            'successful donation amount from January 1st of the current year through now',
+          example: 18000.0,
+        },
+        monthToDate: {
+          type: 'number',
+          description:
+            'successful donation amount from the first day of the current month through now',
+          example: 4200.0,
         },
       },
     },
   })
-  async getStats(): Promise<{ total: number; count: number }> {
+  async getStats(): Promise<{
+    total: number;
+    count: number;
+    yearToDate: number;
+    monthToDate: number;
+  }> {
     const stats = await this.donationsService.getTotalDonations();
     return stats;
+  }
+
+  @Get('goal/active')
+  @ApiOperation({
+    summary: 'get active growing goal summary',
+    description:
+      'retrieve the active goal, the amount raised during that goal period, and progress percentage',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'active goal summary',
+    schema: {
+      type: 'object',
+      properties: {
+        goal: {
+          nullable: true,
+          type: 'object',
+          properties: {
+            id: { type: 'number', example: 1 },
+            targetAmount: { type: 'number', example: 50000 },
+            startDate: { type: 'string', example: '2026-01-01' },
+            endDate: { type: 'string', example: '2026-06-30' },
+            dateRangeLabel: {
+              type: 'string',
+              example: 'January - June 2026',
+            },
+          },
+        },
+        amountRaised: { type: 'number', example: 31336 },
+        progressPercent: { type: 'number', example: 62.67 },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'unauthorized',
+  })
+  async getActiveGoalSummary(@Req() req: any): Promise<{
+    goal: {
+      id: number;
+      targetAmount: number;
+      startDate: string;
+      endDate: string;
+      dateRangeLabel: string;
+    } | null;
+    amountRaised: number;
+    progressPercent: number;
+  }> {
+    return this.donationsService.getActiveGoalSummary();
   }
 
   @Get('lapsed')
