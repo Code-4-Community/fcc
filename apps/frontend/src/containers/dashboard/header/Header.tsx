@@ -1,4 +1,5 @@
 import { useAuth } from '../../../components/AuthProvider';
+import { getDisplayName } from '../../../utils/user';
 
 type HeaderProps = {
   title?: string;
@@ -19,10 +20,7 @@ export default function Header({
 }: HeaderProps) {
   const { user } = useAuth();
 
-  const displayUserName =
-    user?.firstName && user?.lastName
-      ? `${user.firstName} ${user.lastName}`
-      : userName;
+  const displayUserName = getDisplayName(user) || userName;
 
   const displayUserRole = user?.status
     ? user.status.charAt(0).toUpperCase() + user.status.slice(1).toLowerCase()

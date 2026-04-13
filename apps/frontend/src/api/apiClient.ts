@@ -15,6 +15,12 @@ export type DonationCreateRequest = {
 };
 
 export type CreateDonationResponse = { id: string };
+export type DonationStatsResponse = {
+  total: number;
+  count: number;
+  yearToDate: number;
+  monthToDate: number;
+};
 
 export type SignInRequest = { email: string; password: string };
 export type SignUpRequest = {
@@ -138,6 +144,15 @@ export class ApiClient {
       return res.data;
     } catch (err: unknown) {
       this.handleAxiosError(err, 'Failed to fetch donations');
+    }
+  }
+
+  public async getDonationStats(): Promise<DonationStatsResponse> {
+    try {
+      const res = await this.axiosInstance.get('/api/donations/stats');
+      return res.data as DonationStatsResponse;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to fetch donation stats');
     }
   }
 

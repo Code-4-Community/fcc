@@ -677,9 +677,17 @@ describe('Donations (e2e) - expanded stubs', () => {
   });
 
   describe('GET /api/donations/stats', () => {
-    it('successfully returns the correct total and count', async () => {
-      // Seed two donations so the total is 25 and count is 2
+    it('successfully returns the correct totals for successful donations', async () => {
       const now = new Date();
+      const startOfYear = new Date(now.getFullYear(), 0, 1);
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const oneDayMs = 24 * 60 * 60 * 1000;
+      const yearToDateDonationDate =
+        now.getMonth() === 0
+          ? new Date(startOfYear.getTime() + oneDayMs)
+          : new Date(startOfMonth.getTime() - oneDayMs);
+      const monthDonationDate = new Date(startOfMonth.getTime() + oneDayMs);
+
       await donationRepository.save([
         {
           firstName: 'Sam',
@@ -693,8 +701,8 @@ describe('Donations (e2e) - expanded stubs', () => {
           showDedicationPublicly: false,
           status: DonationStatus.SUCCEEDED,
           transactionId: null,
-          createdAt: now,
-          updatedAt: now,
+          createdAt: new Date(startOfYear.getTime() - oneDayMs),
+          updatedAt: new Date(startOfYear.getTime() - oneDayMs),
         },
         {
           firstName: 'Rex',
@@ -708,8 +716,38 @@ describe('Donations (e2e) - expanded stubs', () => {
           showDedicationPublicly: false,
           status: DonationStatus.SUCCEEDED,
           transactionId: null,
-          createdAt: now,
-          updatedAt: now,
+          createdAt: yearToDateDonationDate,
+          updatedAt: yearToDateDonationDate,
+        },
+        {
+          firstName: 'Mia',
+          lastName: 'Crowe',
+          email: 'mia.crowe@example.com',
+          amount: 20,
+          isAnonymous: false,
+          donationType: DonationType.ONE_TIME,
+          recurringInterval: null,
+          dedicationMessage: null,
+          showDedicationPublicly: false,
+          status: DonationStatus.SUCCEEDED,
+          transactionId: null,
+          createdAt: monthDonationDate,
+          updatedAt: monthDonationDate,
+        },
+        {
+          firstName: 'Pat',
+          lastName: 'Roe',
+          email: 'pat.roe@example.com',
+          amount: 99,
+          isAnonymous: false,
+          donationType: DonationType.ONE_TIME,
+          recurringInterval: null,
+          dedicationMessage: null,
+          showDedicationPublicly: false,
+          status: DonationStatus.PENDING,
+          transactionId: null,
+          createdAt: monthDonationDate,
+          updatedAt: monthDonationDate,
         },
       ] as Partial<Donation>[]);
 
@@ -717,15 +755,25 @@ describe('Donations (e2e) - expanded stubs', () => {
         .get('/api/donations/stats')
         .expect(200);
 
-      expect(res.body).toEqual({ total: 25, count: 2 });
+      expect(res.body).toEqual({
+        total: 45,
+        count: 3,
+        yearToDate: 35,
+        monthToDate: now.getMonth() === 0 ? 35 : 20,
+      });
     });
 
-    it('successfully returns the correct total and count even if the database is empty', async () => {
+    it('successfully returns zero stats even if the database is empty', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/donations/stats')
         .expect(200);
 
-      expect(res.body).toEqual({ total: 0, count: 0 });
+      expect(res.body).toEqual({
+        total: 0,
+        count: 0,
+        yearToDate: 0,
+        monthToDate: 0,
+      });
     });
   });
 });
