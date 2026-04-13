@@ -63,7 +63,6 @@ const Root: React.FC = () => {
           <div className="root-goal-panel">
             <GrowingGoal
               message={label}
-              subMessage={data?.goal?.dateRangeLabel}
               total={donationTotal}
               goal={targetGoal}
               sampleDonation={SAMPLE_DONATION}
