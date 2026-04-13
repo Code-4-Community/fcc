@@ -3,9 +3,12 @@ import { useAuth } from '../../components/AuthProvider';
 import { Button } from '../../components/ui/button';
 import { UserManagement } from './UserManagement';
 import { AdminGrowingGoal } from './AdminGrowingGoal';
+import { getDisplayName } from '../../utils/user';
 
 export const DashboardPage: React.FC = () => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+
+  const welcomeName = getDisplayName(user);
 
   return (
     <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>

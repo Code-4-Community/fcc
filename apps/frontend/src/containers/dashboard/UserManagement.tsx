@@ -128,18 +128,14 @@ export const UserManagement: React.FC = () => {
   };
 
   const handleEditRole = async () => {
-    if (!editingUser) return;
+    if (!editingUser || !editingUser.dbUser) return;
 
-    // Shell function: we'll just log and close the modal for now
-    // as per instructions: "build it for edit role as an example"
     setIsUpdatingRole(true);
     try {
-      console.log(`Updating role for ${editingUser.email}`);
-      // Replace with your API call:
-      // await apiClient.axiosInstance.patch('/api/auth/user/role', { ... })
+      const currentStatus = editingUser.dbUser.status;
+      const newStatus = currentStatus === 'ADMIN' ? 'STANDARD' : 'ADMIN';
 
-      // Artificial delay to show loading state if you have one
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await apiClient.updateUserStatus(editingUser.dbUser.id, newStatus);
 
       await fetchUsers();
       setEditingUser(null);

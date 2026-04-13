@@ -99,7 +99,7 @@ export class DonationsController {
   @ApiOperation({
     summary: 'get donation statistics',
     description:
-      'retrieve aggregate donation statistics including total amount and count',
+      'retrieve aggregate donation statistics for successful donations, including lifetime total, year-to-date total, and month-to-date total',
   })
   @ApiResponse({
     status: 200,
@@ -109,18 +109,35 @@ export class DonationsController {
       properties: {
         total: {
           type: 'number',
-          description: 'total donation amount in dollars',
+          description: 'lifetime total amount from successful donations',
           example: 25000.0,
         },
         count: {
           type: 'number',
-          description: 'total number of donations',
+          description: 'total number of successful donations',
           example: 150,
+        },
+        yearToDate: {
+          type: 'number',
+          description:
+            'successful donation amount from January 1st of the current year through now',
+          example: 18000.0,
+        },
+        monthToDate: {
+          type: 'number',
+          description:
+            'successful donation amount from the first day of the current month through now',
+          example: 4200.0,
         },
       },
     },
   })
-  async getStats(): Promise<{ total: number; count: number }> {
+  async getStats(): Promise<{
+    total: number;
+    count: number;
+    yearToDate: number;
+    monthToDate: number;
+  }> {
     const stats = await this.donationsService.getTotalDonations();
     return stats;
   }

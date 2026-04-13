@@ -15,6 +15,12 @@ export type DonationCreateRequest = {
 };
 
 export type CreateDonationResponse = { id: string };
+export type DonationStatsResponse = {
+  total: number;
+  count: number;
+  yearToDate: number;
+  monthToDate: number;
+};
 
 export type ActiveGoalResponse = {
   goal: {
@@ -159,6 +165,26 @@ export class ApiClient {
       return res.data;
     } catch (err: unknown) {
       this.handleAxiosError(err, 'Failed to fetch donations');
+    }
+  }
+
+  public async getDonationStats(): Promise<DonationStatsResponse> {
+    try {
+      const res = await this.axiosInstance.get('/api/donations/stats');
+      return res.data as DonationStatsResponse;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to fetch donation stats');
+    }
+  }
+
+  public async updateUserStatus(
+    id: number,
+    status: 'ADMIN' | 'STANDARD',
+  ): Promise<void> {
+    try {
+      await this.axiosInstance.patch(`/api/users/${id}/status`, { status });
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to update user status');
     }
   }
 
