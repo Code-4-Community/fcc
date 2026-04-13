@@ -7,6 +7,7 @@ import {
 } from '@components/GrowingGoal/GrowingGoal';
 import { TestimonialCarousel } from '@components/testimonials/TestimonialCarousel';
 import { DonationForm } from './donations/DonationForm';
+import { useActiveGoal } from '../hooks/useActiveGoal';
 import CarouselImage1 from '@components/testimonials/TestimonialImages/Carousel_image1.png';
 import CarouselImage2 from '@components/testimonials/TestimonialImages/Carousel_image2.png';
 import CarouselImage3 from '@components/testimonials/TestimonialImages/Carousel_image3.png';
@@ -37,7 +38,11 @@ const TESTIMONIAL_SLIDES = [
 ];
 
 const Root: React.FC = () => {
-  const donationTotal = 3000;
+  const { data } = useActiveGoal();
+  // Falling back to 3000 if data is not available yet, but ideally we should wait or handle loading
+  const donationTotal = data?.amountRaised ?? 3000;
+  const targetGoal = data?.goal?.targetAmount ?? 10000;
+  const label = data?.goal?.dateRangeLabel ?? 'Grow your community with FCC';
 
   const handleDonationSuccess = (donationId: string) => {
     console.info(`Donation submitted: ${donationId}`);
@@ -59,7 +64,7 @@ const Root: React.FC = () => {
             <GrowingGoal
               message="Grow your community with FCC"
               total={donationTotal}
-              goal={10000}
+              goal={targetGoal}
               sampleDonation={SAMPLE_DONATION}
             />
           </div>
