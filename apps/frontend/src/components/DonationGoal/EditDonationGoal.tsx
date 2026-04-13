@@ -34,7 +34,7 @@ export default function EditDonationGoal() {
       </div>
 
       {/* Title Field */}
-      <div className="flex w-full flex-col gap-2">
+      <div className="flex w-full flex-col gap-0.5">
         <label className="text-[14px] font-normal leading-6 text-[#171717]">
           Title
         </label>
@@ -50,7 +50,7 @@ export default function EditDonationGoal() {
       </div>
 
       {/* Goal Amount Field */}
-      <div className="flex w-full flex-col gap-2">
+      <div className="flex w-full flex-col gap-0.5">
         <div className="flex w-full items-center justify-between">
           <label className="w-[174.5px] text-[14px] font-normal leading-6 text-[#171717]">
             Goal Amount
@@ -72,7 +72,7 @@ export default function EditDonationGoal() {
       </div>
 
       {/* Start Date Field */}
-      <div className="flex w-full flex-col gap-2">
+      <div className="flex w-full flex-col gap-0.5">
         <label className="w-full text-[14px] font-normal leading-6 text-[#171717]">
           Start Date
         </label>
