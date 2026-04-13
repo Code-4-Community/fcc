@@ -22,6 +22,18 @@ export type DonationStatsResponse = {
   monthToDate: number;
 };
 
+export type ActiveGoalResponse = {
+  goal: {
+    id: number;
+    targetAmount: number;
+    startDate: string;
+    endDate: string;
+    dateRangeLabel: string;
+  } | null;
+  amountRaised: number;
+  progressPercent: number;
+};
+
 export type SignInRequest = { email: string; password: string };
 export type SignUpRequest = {
   firstName: string;
@@ -105,6 +117,15 @@ export class ApiClient {
       await this.axiosInstance.post('/api/auth/confirmPassword', body);
     } catch (err: unknown) {
       this.handleAxiosError(err, 'Failed to reset password');
+    }
+  }
+  
+  public async getActiveGoalSummary(): Promise<ActiveGoalResponse> {
+    try {
+      const res = await this.axiosInstance.get('/api/donations/goal/active');
+      return res.data;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to fetch active goal');
     }
   }
 

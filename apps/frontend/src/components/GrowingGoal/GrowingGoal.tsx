@@ -13,17 +13,20 @@ export type GrowingGoalProps = {
   total: number;
   goal: number;
   sampleDonation?: SampleDonation;
+  variant?: 'default' | 'admin';
+  subMessage?: string;
 };
 
 export const GrowingGoal = (props: GrowingGoalProps) => {
-  const { message, total, goal } = props;
+  const { message, total, goal, variant = 'default', subMessage } = props;
   const growthContainerRef = useRef<HTMLDivElement>(null);
   const [radius, setRadius] = useState(0);
   const [endHandle, setEndHandle] = useState({
     top: 0,
     left: 0,
   });
-  const progress = Math.floor((total / goal) * 360);
+  const progress = goal > 0 ? Math.floor((total / goal) * 360) : 0;
+  const percentage = goal > 0 ? Math.round((total / goal) * 100) : 0;
 
   // calculate gradient color of growth container handles
   const getGradientColor = (degree: number): string => {
@@ -95,8 +98,28 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
   };
 
   return (
-    <div className={styles['goal-container']}>
-      <div className={styles['description-label']}>{message}</div>
+    <div className={styles['goal-container']} style={{ background: '#FCFCFC' }}>
+      <div
+        className={styles['description-label']}
+        style={
+          variant === 'admin'
+            ? {
+                backgroundColor: '#FCFCFC',
+                color: '#000',
+                borderBottom: '1px solid #E5E5E5',
+                height: 'auto',
+                padding: '4% 2%',
+              }
+            : {}
+        }
+      >
+        {message}
+        {variant === 'admin' && subMessage && (
+          <span style={{ fontSize: '3.5cqw', color: '#666', fontWeight: 400 }}>
+            {subMessage}
+          </span>
+        )}
+      </div>
 
       <div className={styles['growth-container']}>
         <div
@@ -127,8 +150,28 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
         </div>
       </div>
       <div className={styles['total-donation-label']}>
-        <span style={{ fontWeight: '700' }}>${total.toFixed(0)}</span>{' '}
-        <span style={{ fontSize: '4cqw' }}>raised of</span> ${goal.toFixed(0)}
+        <div style={{ marginBottom: variant === 'admin' ? '2%' : '0' }}>
+          <span style={{ fontWeight: '700' }}>${total.toLocaleString()}</span>{' '}
+          <span style={{ fontSize: '4cqw' }}>raised of</span> $
+          {goal.toLocaleString()}
+        </div>
+        {variant === 'admin' && (
+          <div
+            style={{
+              display: 'inline-flex',
+              padding: '2% 6%',
+              backgroundColor: '#F2F2F2',
+              borderRadius: '999px',
+              fontSize: '3.5cqw',
+              color: '#000',
+              fontWeight: 400,
+              marginTop: '2%',
+              fontFamily: "'Source Sans Pro', sans-serif",
+            }}
+          >
+            {percentage}% complete
+          </div>
+        )}
       </div>
       <div className={styles['sample-donor-container']}>
         {props.sampleDonation && (
