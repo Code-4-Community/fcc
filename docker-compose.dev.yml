@@ -51,6 +51,8 @@ services:
       NX_AWS_ACCESS_KEY: ${NX_AWS_ACCESS_KEY}
       NX_AWS_SECRET_ACCESS_KEY: ${NX_AWS_SECRET_ACCESS_KEY}
 
+      VITE_API_BASE_URL: http://localhost:3000
+
     ports:
       - '3005:3005'
     depends_on:
@@ -97,6 +99,8 @@ services:
       COGNITO_CLIENT_SECRET: ${COGNITO_CLIENT_SECRET}
       NX_AWS_ACCESS_KEY: ${NX_AWS_ACCESS_KEY}
       NX_AWS_SECRET_ACCESS_KEY: ${NX_AWS_SECRET_ACCESS_KEY}
+
+      VITE_API_BASE_URL: http://localhost:3000
 
       STRIPE_SECRET_KEY: 'sk_test_1234567890'
 

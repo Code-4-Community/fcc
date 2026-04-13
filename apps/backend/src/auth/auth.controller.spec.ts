@@ -45,4 +45,33 @@ describe('AuthController', () => {
       controller.forgotPassword({ email: 'random@example.com' } as any),
     ).rejects.toThrow('Account is not registered.');
   });
+  
+  describe('me', () => {
+    it('returns a display name when first and last name are available', async () => {
+      const result = await controller.me({
+        user: {
+          id: 1,
+          firstName: 'Jane',
+          lastName: 'Doe',
+          email: 'jane@example.com',
+          status: 'STANDARD',
+        },
+      });
+
+      expect(result.displayName).toBe('Jane Doe');
+      expect(result.username).toBe('jane@example.com');
+    });
+
+    it('falls back to username or id when a display name is unavailable', async () => {
+      const result = await controller.me({
+        user: {
+          idUser: 'abc-123',
+          email: 'plain@example.com',
+        },
+      });
+
+      expect(result.displayName).toBe('plain@example.com');
+      expect(result.username).toBe('plain@example.com');
+    });
+  });
 });
