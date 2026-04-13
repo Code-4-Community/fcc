@@ -42,7 +42,7 @@ const Root: React.FC = () => {
   // Falling back to 3000 if data is not available yet, but ideally we should wait or handle loading
   const donationTotal = data?.amountRaised ?? 3000;
   const targetGoal = data?.goal?.targetAmount ?? 10000;
-  const label = data?.goal?.dateRangeLabel ?? 'Grow your community with FCC';
+  const label = data?.goal?.title || 'Grow your community with FCC';
 
   const handleDonationSuccess = (donationId: string) => {
     console.info(`Donation submitted: ${donationId}`);
@@ -62,7 +62,8 @@ const Root: React.FC = () => {
         <section className="root-content-grid">
           <div className="root-goal-panel">
             <GrowingGoal
-              message="Grow your community with FCC"
+              message={label}
+              subMessage={data?.goal?.dateRangeLabel}
               total={donationTotal}
               goal={targetGoal}
               sampleDonation={SAMPLE_DONATION}

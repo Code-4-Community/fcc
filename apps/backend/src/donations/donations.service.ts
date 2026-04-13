@@ -12,6 +12,7 @@ import { CreateDonationRequest, Donation as DomainDonation } from './mappers';
 import { Readable } from 'stream';
 import { DonationsRepository } from './donations.repository';
 import { Goal } from './goal.entity';
+import { UpdateGoalDto } from './dtos';
 
 interface PaymentIntentSyncPayload {
   donationId?: number;
@@ -348,26 +349,27 @@ export class DonationsService {
     return stream;
   }
 
-  async getActiveGoalSummary() {
-    // --- TEMPORARY MOCK FOR TESTING ---
-    return {
-      goal: {
-        id: 999,
-        targetAmount: 50000,
-        startDate: '2026-01-01',
-        endDate: '2026-06-30',
-        dateRangeLabel: 'January - June 2026',
-      },
-      amountRaised: 31336,
-      progressPercent: 62.67,
-    };
-    /* 
+  async getActiveGoalSummary(): Promise<{
+    goal: {
+      id: number;
+      title: string;
+      targetAmount: number;
+      startDate: string;
+      endDate: string;
+      dateRangeLabel: string;
+    } | null;
+    amountRaised: number;
+    progressPercent: number;
+  }> {
     const today = new Date().toISOString().split('T')[0];
-    
+
     // 1. find active goal
     const goal = await this.goalRepository
       .createQueryBuilder('goal')
-      .where(':today BETWEEN goal.startDate AND goal.endDate', { today })
+      .where(
+        '(:today BETWEEN goal.startDate AND goal.endDate) OR (goal.startDate <= :today AND goal.endDate IS NULL) OR (goal.startDate IS NULL AND goal.endDate >= :today) OR (goal.startDate IS NULL AND goal.endDate IS NULL)',
+        { today },
+      )
       .orderBy('goal.startDate', 'DESC')
       .getOne();
 
@@ -384,10 +386,10 @@ export class DonationsService {
       .createQueryBuilder('donation')
       .select('COALESCE(SUM(donation.amount), 0)', 'amount')
       .where('donation.status = :status', { status: DonationStatus.SUCCEEDED })
-      .andWhere('donation.createdAt >= :startDate', {
+      .andWhere(goal.startDate ? 'donation.createdAt >= :startDate' : '1=1', {
         startDate: goal.startDate,
       })
-      .andWhere('donation.createdAt <= :endDate', {
+      .andWhere(goal.endDate ? 'donation.createdAt <= :endDate' : '1=1', {
         endDate: `${goal.endDate} 23:59:59`,
       })
       .getRawOne<{ amount: string }>();
@@ -402,20 +404,77 @@ export class DonationsService {
     return {
       goal: {
         id: goal.id,
+        title: goal.title ?? '',
         targetAmount: goal.targetAmount,
-        startDate: goal.startDate,
-        endDate: goal.endDate,
-        dateRangeLabel: this.formatDateRange(goal.startDate, goal.endDate),
+        startDate: goal.startDate ?? '',
+        endDate: goal.endDate ?? '',
+        dateRangeLabel: this.formatDateRange(
+          goal.startDate ?? null,
+          goal.endDate ?? null,
+        ),
       },
       amountRaised,
       progressPercent,
     };
-    */
   }
 
-  private formatDateRange(start: string, end: string): string {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
+  async updateGoal(
+    id: number | null,
+    updateGoalDto: UpdateGoalDto,
+  ): Promise<Goal> {
+    let goal: Goal | null;
+
+    if (id) {
+      goal = await this.goalRepository.findOneBy({ id });
+    } else {
+      const today = new Date().toISOString().split('T')[0];
+      goal = await this.goalRepository
+        .createQueryBuilder('goal')
+        .where(':today BETWEEN goal.startDate AND goal.endDate', { today })
+        .orderBy('goal.startDate', 'DESC')
+        .getOne();
+    }
+
+    if (!goal) {
+      return this.createGoal(updateGoalDto);
+    }
+
+    Object.assign(goal, updateGoalDto);
+    return this.goalRepository.save(goal);
+  }
+
+  async createGoal(updateGoalDto: UpdateGoalDto): Promise<Goal> {
+    const goal = this.goalRepository.create({
+      ...updateGoalDto,
+    });
+    return this.goalRepository.save(goal);
+  }
+
+  private formatDateRange(start: string | null, end: string | null): string {
+    if (!start && !end) return '';
+
+    const options: Intl.DateTimeFormatOptions = {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    };
+
+    if (start && !end) {
+      const startDate = new Date(start);
+      return `Started ${startDate.toLocaleDateString('en-US', options)}`;
+    }
+
+    if (!start && end) {
+      const endDate = new Date(end);
+      return `By ${endDate.toLocaleDateString('en-US', options)}`;
+    }
+
+    if (!start && !end) {
+      return 'Ongoing';
+    }
+
+    const startDate = new Date(start as string);
+    const endDate = new Date(end as string);
 
     const startMonth = startDate.toLocaleString('en-US', { month: 'long' });
     const endMonth = endDate.toLocaleString('en-US', { month: 'long' });

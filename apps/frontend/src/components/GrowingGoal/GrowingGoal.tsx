@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './GrowingGoal.module.css';
 import Plant from './Plant';
+import { Pencil } from 'lucide-react';
+import { Button } from '../ui/button';
 
 export type SampleDonation = {
   name: string;
@@ -15,10 +17,18 @@ export type GrowingGoalProps = {
   sampleDonation?: SampleDonation;
   variant?: 'default' | 'admin';
   subMessage?: string;
+  onEdit?: () => void;
 };
 
 export const GrowingGoal = (props: GrowingGoalProps) => {
-  const { message, total, goal, variant = 'default', subMessage } = props;
+  const {
+    message,
+    total,
+    goal,
+    variant = 'default',
+    subMessage,
+    onEdit,
+  } = props;
   const growthContainerRef = useRef<HTMLDivElement>(null);
   const [radius, setRadius] = useState(0);
   const [endHandle, setEndHandle] = useState({
@@ -108,16 +118,41 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
                 color: '#000',
                 borderBottom: '1px solid #E5E5E5',
                 height: 'auto',
-                padding: '4% 2%',
+                padding: '4% 4%',
+                alignItems: 'flex-start',
+                textAlign: 'left',
+                position: 'relative',
               }
             : {}
         }
       >
-        {message}
-        {variant === 'admin' && subMessage && (
-          <span style={{ fontSize: '3.5cqw', color: '#666', fontWeight: 400 }}>
+        <span style={variant === 'admin' ? { fontWeight: 600 } : {}}>
+          {message}
+        </span>
+        {subMessage && (
+          <span
+            style={{
+              fontSize: '3.5cqw',
+              color: variant === 'admin' ? '#666' : '#FFFFFF',
+              fontWeight: 400,
+              display: 'block',
+            }}
+          >
             {subMessage}
           </span>
+        )}
+
+        {variant === 'admin' && onEdit && (
+          <Button
+            onClick={onEdit}
+            variant="outline"
+            className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-2 border-[#E5E5E5] bg-white px-3 py-1 shadow-sm hover:bg-neutral-50"
+          >
+            <Pencil size={14} className="text-[#404040]" />
+            <span className="text-[14px] font-normal leading-6 text-black">
+              Edit
+            </span>
+          </Button>
         )}
       </div>
 
