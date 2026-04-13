@@ -4,6 +4,7 @@ import Header from '../header/Header';
 import { useAuth } from '../../../components/AuthProvider';
 import apiClient from '../../../api/apiClient';
 import DonationStatCard from './DonationStatCard';
+import { getDisplayName } from '../../../utils/user';
 import { PiggyBank, Clock, CalendarDays } from 'lucide-react';
 import welcomeBackground from '../../../assets/green-boston-background.png';
 
@@ -40,21 +41,7 @@ export default function SidebarTester() {
     fetchStats();
   }, []);
 
-  const displayUserName = useMemo(() => {
-    const fullName = [user?.firstName, user?.lastName]
-      .filter((part) => typeof part === 'string' && part.trim().length > 0)
-      .join(' ')
-      .trim();
-
-    return (
-      user?.displayName ||
-      fullName ||
-      user?.username ||
-      user?.email ||
-      user?.idUser ||
-      'Username'
-    );
-  }, [user]);
+  const displayUserName = useMemo(() => getDisplayName(user), [user]);
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('en-US', {

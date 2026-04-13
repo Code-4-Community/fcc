@@ -21,13 +21,21 @@ export class CurrentUserInterceptor implements NestInterceptor {
     );
     const userEmail = cognitoUserAttributes.find(
       (attribute) => attribute.Name === 'email',
-    ).Value;
+    )?.Value;
+
+    if (!userEmail) {
+      return handler.handle();
+    }
+
     const users = await this.usersService.find(userEmail);
 
     if (users.length > 0) {
       const user = users[0];
 
-      request.user = user;
+      request.user = {
+        ...request.user,
+        ...user,
+      };
     }
 
     return handler.handle();

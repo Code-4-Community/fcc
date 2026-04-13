@@ -3,17 +3,12 @@ import { useAuth } from '../../components/AuthProvider';
 import { Button } from '../../components/ui/button';
 
 import { UserManagement } from './UserManagement';
+import { getDisplayName } from '../../utils/user';
 
 export const DashboardPage: React.FC = () => {
   const { logout, user } = useAuth();
 
-  const fullName = [user?.firstName, user?.lastName]
-    .filter((part) => typeof part === 'string' && part.trim().length > 0)
-    .join(' ')
-    .trim();
-
-  const welcomeName =
-    user?.displayName || fullName || user?.username || user?.email || 'user';
+  const welcomeName = getDisplayName(user);
 
   return (
     <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
