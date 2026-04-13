@@ -36,6 +36,26 @@ export class CurrentUserInterceptor implements NestInterceptor {
         ...request.user,
         ...user,
       };
+    } else {
+      // Selfhealing: Create DB record if it doesn't exist but cognito user exists
+      const nameAttribute = cognitoUserAttributes.find(
+        (attribute) => attribute.Name === 'name',
+      )?.Value;
+      const [firstName = '', lastName = ''] = (nameAttribute || '').split(' ');
+
+      try {
+        const newUser = await this.usersService.create(
+          userEmail,
+          firstName,
+          lastName,
+        );
+        request.user = {
+          ...request.user,
+          ...newUser,
+        };
+      } catch (error) {
+        console.error('Failed to self-heal user in DB:', error);
+      }
     }
 
     return handler.handle();

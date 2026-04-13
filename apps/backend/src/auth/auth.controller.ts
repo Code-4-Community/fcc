@@ -145,13 +145,33 @@ export class AuthController {
           const attributes = cu.Attributes ?? [];
           const email = attributes.find((a) => a.Name === 'email')?.Value;
           const name = attributes.find((a) => a.Name === 'name')?.Value;
-          const dbUsers = email ? await this.usersService.find(email) : [];
+          let dbUser = null;
+
+          if (email) {
+            const dbUsers = await this.usersService.find(email);
+            if (dbUsers.length > 0) {
+              dbUser = dbUsers[0];
+            } else {
+              // Selfhealing: Create DB record if it doesn't exist but cognito user exists
+              const [firstName = '', lastName = ''] = (name || '').split(' ');
+              try {
+                dbUser = await this.usersService.create(
+                  email,
+                  firstName,
+                  lastName,
+                );
+              } catch (err) {
+                console.error(`Failed to auto-populate user ${email}:`, err);
+              }
+            }
+          }
+
           return {
             username: cu.Username,
             name,
             status: cu.UserStatus, // UNCONFIRMED, CONFIRMED, etc.
             email,
-            dbUser: dbUsers[0] || null,
+            dbUser: dbUser,
           };
         }),
       );

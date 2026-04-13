@@ -156,6 +156,17 @@ export class ApiClient {
     }
   }
 
+  public async updateUserStatus(
+    id: number,
+    status: 'ADMIN' | 'STANDARD',
+  ): Promise<void> {
+    try {
+      await this.axiosInstance.patch(`/api/users/${id}/status`, { status });
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to update user status');
+    }
+  }
+
   private async get(path: string): Promise<unknown> {
     return this.axiosInstance.get(path).then((response) => response.data);
   }

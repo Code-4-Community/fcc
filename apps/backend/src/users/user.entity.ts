@@ -1,21 +1,21 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 import type { Status } from './types';
 
 @Entity('users')
 export class User {
-  @Column({ primary: true })
-  id: number;
+  @PrimaryGeneratedColumn()
+  id!: number;
 
   @Column()
-  status: Status;
+  status!: Status;
 
   @Column()
-  firstName: string;
+  firstName!: string;
 
   @Column()
-  lastName: string;
+  lastName!: string;
 
   @Column()
-  email: string;
+  email!: string;
 }
