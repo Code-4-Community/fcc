@@ -16,6 +16,18 @@ export type DonationCreateRequest = {
 
 export type CreateDonationResponse = { id: string };
 
+export type ActiveGoalResponse = {
+  goal: {
+    id: number;
+    targetAmount: number;
+    startDate: string;
+    endDate: string;
+    dateRangeLabel: string;
+  } | null;
+  amountRaised: number;
+  progressPercent: number;
+};
+
 export type SignInRequest = { email: string; password: string };
 export type SignUpRequest = {
   firstName: string;
@@ -78,6 +90,15 @@ export class ApiClient {
       return res.data as AuthResponse;
     } catch (err: unknown) {
       this.handleAxiosError(err, 'Failed to refresh token');
+    }
+  }
+
+  public async getActiveGoalSummary(): Promise<ActiveGoalResponse> {
+    try {
+      const res = await this.axiosInstance.get('/api/donations/goal/active');
+      return res.data;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to fetch active goal');
     }
   }
 

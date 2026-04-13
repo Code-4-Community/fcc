@@ -334,8 +334,21 @@ export class DonationsService {
   }
 
   async getActiveGoalSummary() {
+    // --- TEMPORARY MOCK FOR TESTING ---
+    return {
+      goal: {
+        id: 999,
+        targetAmount: 50000,
+        startDate: '2026-01-01',
+        endDate: '2026-06-30',
+        dateRangeLabel: 'January - June 2026',
+      },
+      amountRaised: 31336,
+      progressPercent: 62.67,
+    };
+    /* 
     const today = new Date().toISOString().split('T')[0];
-
+    
     // 1. find active goal
     const goal = await this.goalRepository
       .createQueryBuilder('goal')
@@ -382,6 +395,7 @@ export class DonationsService {
       amountRaised,
       progressPercent,
     };
+    */
   }
 
   private formatDateRange(start: string, end: string): string {

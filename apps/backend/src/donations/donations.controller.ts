@@ -126,13 +126,10 @@ export class DonationsController {
   }
 
   @Get('goal/active')
-  @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(CurrentUserInterceptor)
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'get active growing goal summary',
     description:
-      'retrieve the active goal, the amount raised during that goal period, and progress percentage for the admin dashboard',
+      'retrieve the active goal, the amount raised during that goal period, and progress percentage',
   })
   @ApiResponse({
     status: 200,
@@ -174,13 +171,6 @@ export class DonationsController {
     amountRaised: number;
     progressPercent: number;
   }> {
-    if (
-      req.user.status !== Status.ADMIN &&
-      req.user.status !== Status.STANDARD
-    ) {
-      throw new UnauthorizedException('Admin access required');
-    }
-
     return this.donationsService.getActiveGoalSummary();
   }
 
