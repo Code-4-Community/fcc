@@ -25,6 +25,7 @@ export type DonationStatsResponse = {
 export type ActiveGoalResponse = {
   goal: {
     id: number;
+    title: string;
     targetAmount: number;
     startDate: string;
     endDate: string;
@@ -32,6 +33,13 @@ export type ActiveGoalResponse = {
   } | null;
   amountRaised: number;
   progressPercent: number;
+};
+
+export type UpdateGoalRequest = {
+  title?: string;
+  targetAmount: number;
+  startDate: string;
+  endDate: string;
 };
 
 export type SignInRequest = { email: string; password: string };
@@ -105,6 +113,18 @@ export class ApiClient {
       return res.data;
     } catch (err: unknown) {
       this.handleAxiosError(err, 'Failed to fetch active goal');
+    }
+  }
+
+  public async updateGoal(
+    id: number | null,
+    body: UpdateGoalRequest,
+  ): Promise<void> {
+    try {
+      const url = id ? `/api/donations/goal/${id}` : '/api/donations/goal';
+      await this.axiosInstance.patch(url, body);
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to update goal');
     }
   }
 

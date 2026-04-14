@@ -11,20 +11,23 @@ export class Goal {
   @PrimaryGeneratedColumn('identity', {
     generatedIdentity: 'ALWAYS',
   })
-  id: number;
+  id!: number;
 
   @Column({ type: 'int' })
-  targetAmount: number;
+  targetAmount!: number;
 
-  @Column({ type: 'date' })
-  startDate: string;
+  @Column({ type: 'text', nullable: true })
+  title?: string;
 
-  @Column({ type: 'date' })
-  endDate: string;
+  @Column({ type: 'date', nullable: true })
+  startDate?: string;
+
+  @Column({ type: 'date', nullable: true })
+  endDate?: string;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'now()' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ type: 'timestamp', default: () => 'now()' })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Param,
   Body,
   Query,
   ParseIntPipe,
@@ -25,9 +27,12 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { DonationsService } from './donations.service';
 import { DonationsRepository, PaginationFilters } from './donations.repository';
-import { CreateDonationDto } from './dtos/create-donation-dto';
-import { DonationResponseDto } from './dtos/donation-response-dto';
-import { PublicDonationDto } from './dtos/public-donation-dto';
+import {
+  CreateDonationDto,
+  DonationResponseDto,
+  PublicDonationDto,
+  UpdateGoalDto,
+} from './dtos';
 import { DonationMappers } from './mappers';
 import {
   DonationType,
@@ -36,6 +41,7 @@ import {
 } from './donation.entity';
 import { CurrentUserInterceptor } from '../interceptors/current-user.interceptor';
 import { Status } from '../users/types';
+import { Goal } from './goal.entity';
 
 @ApiTags('Donations')
 @Controller('donations')
@@ -189,6 +195,31 @@ export class DonationsController {
     progressPercent: number;
   }> {
     return this.donationsService.getActiveGoalSummary();
+  }
+
+  @Patch('goal/:id?')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'update an existing goal (admin)',
+    description:
+      'update the details of a specific donation goal. If no ID is provided, the current active goal is updated. Requires authentication.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'goal successfully updated',
+    type: Goal,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'goal not found',
+  })
+  async updateGoal(
+    @Param('id', new ParseIntPipe({ optional: true })) id: number | null,
+    @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+    updateGoalDto: UpdateGoalDto,
+  ): Promise<Goal> {
+    return this.donationsService.updateGoal(id, updateGoalDto);
   }
 
   @Get('lapsed')
