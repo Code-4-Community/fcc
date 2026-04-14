@@ -25,7 +25,8 @@ export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [username, setUsername] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -84,7 +85,8 @@ export const LoginPage: React.FC = () => {
     setEmail('');
     setPassword('');
     setConfirmPassword('');
-    setUsername('');
+    setFirstName('');
+    setLastName('');
     setShowPassword(false);
     setShowConfirmPassword(false);
   };
@@ -99,13 +101,14 @@ export const LoginPage: React.FC = () => {
         await login({ email, password });
         navigate(from, { replace: true });
       } else if (authPage === AuthPage.Signup) {
-        await signup({ email, password, firstName: username, lastName: '' });
+        await signup({ email, password, firstName, lastName });
         navigate('/confirm-registered', { replace: true });
         setError('Account created successfully! Please sign in.');
       } else if (authPage === AuthPage.ForgotPassword) {
         navigate('/confirm-sent-email', { replace: true });
       }
     } catch (err: unknown) {
+      console.error('Auth error:', err);
       if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -153,22 +156,41 @@ export const LoginPage: React.FC = () => {
             noValidate
           >
             {authPage === AuthPage.Signup && (
-              <div>
-                <Label
-                  htmlFor="username"
-                  className="font-semibold mb-1 text-[#404040]"
-                >
-                  Username
-                </Label>
-                <Input
-                  type="text"
-                  placeholder="Username"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
-                  id="username"
-                />
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <Label
+                    htmlFor="firstName"
+                    className="font-semibold mb-1 text-[#404040]"
+                  >
+                    First Name
+                  </Label>
+                  <Input
+                    type="text"
+                    placeholder="First Name"
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
+                    id="firstName"
+                  />
+                </div>
+                <div className="flex-1">
+                  <Label
+                    htmlFor="lastName"
+                    className="font-semibold mb-1 text-[#404040]"
+                  >
+                    Last Name
+                  </Label>
+                  <Input
+                    type="text"
+                    placeholder="Last Name"
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="w-full py-5 focus:ring-[2.5px] focus:ring-[#007B64]"
+                    id="lastName"
+                  />
+                </div>
               </div>
             )}
 
@@ -285,6 +307,9 @@ export const LoginPage: React.FC = () => {
                   name="Matching"
                   criterionMet={passwordsMatch}
                 />
+                {error && (
+                  <p className="text-sm text-[#B4444D] mt-2">{error}</p>
+                )}
               </div>
             ) : (
               authPage === AuthPage.Login && (
