@@ -1,4 +1,3 @@
-import ImageUploadButton from './ImageUploadButton';
 import type { Signature } from './types';
 export default function SignatureEditor({
   sig,
@@ -24,25 +23,12 @@ export default function SignatureEditor({
 
   return (
     <div className="flex flex-col gap-4">
-      <ImageUploadButton
-        label="Profile photo"
-        currentUrl={sig.avatarUrl || ''}
-        onUpload={(url) => onChange({ ...sig, avatarUrl: url })}
-        shape="rounded-full"
-      />
-
       <div className="grid grid-cols-2 gap-3">
         {field('Full Name', 'name', 'Your name')}
 
         {field('Position', 'position', 'Your title')}
 
-        {field('Company', 'company', 'Company name')}
-
-        {field('Website', 'website', 'www.company.com')}
-
         {field('Email', 'email', 'you@company.com')}
-
-        {field('Phone', 'phone', '+1 (555) 000-0000')}
       </div>
     </div>
   );

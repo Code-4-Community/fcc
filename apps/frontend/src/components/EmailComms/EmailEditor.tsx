@@ -9,13 +9,12 @@ import {
   buildSignatureHTML,
 } from './types';
 import type { TabId, EmailData, EmailsState, Signature } from './types';
+import { Button } from '../ui/button';
 
-export default function EmailEditor() {
+export function EmailEditor() {
   const [activeTab, setActiveTab] = useState<TabId>('donation');
   const [emails, setEmails] = useState<EmailsState>(defaultEmails);
   const [sig, setSig] = useState<Signature>(defaultSignature);
-  const [headerImageUrl, setHeaderImageUrl] = useState('');
-  const [ctaText, setCtaText] = useState('Call to action button text');
   const [saved, setSaved] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -33,7 +32,6 @@ export default function EmailEditor() {
       subject: emails[activeTab].subject,
       body: emails[activeTab].body,
       signature: sig,
-      cta: ctaText,
     });
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
@@ -45,7 +43,6 @@ export default function EmailEditor() {
       <html><body>
         ${email.body}
         ${buildSignatureHTML(sig)}
-        ${ctaText ? `<div style="text-align:center;margin:28px 0"><a href="#" style="background:#059669;color:white;padding:14px 32px;border-radius:8px;font-weight:700;text-decoration:none;font-size:14px;letter-spacing:0.05em">${ctaText}</a></div>` : ''}
       </body></html>
     `;
     console.log('[EmailEditor] Send payload:', {
@@ -58,16 +55,16 @@ export default function EmailEditor() {
   };
 
   return (
-    <div className="flex flex-col gap-5 p-6 bg-slate-50 min-h-screen font-sans">
-      <div className="flex items-center gap-1 bg-white rounded-2xl p-1.5 shadow-sm border border-slate-100 w-fit">
+    <div className="relative flex flex-col gap-5 p-6 bg-slate-50 min-h-screen font-sans">
+      <div className="flex items-center gap-1 bg-white rounded-2xl p-1.5 border border-slate-100 w-fit">
         {TAB_CONFIG.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+            className={`flex items-center px-4 py-2 rounded-sm text-sm font-medium transition-all ${
               activeTab === tab.id
-                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-200'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+                ? 'bg-emerald-700 text-white'
+                : 'text-neutral-700 hover:bg-neutral-100'
             }`}
           >
             {tab.label}
@@ -82,23 +79,13 @@ export default function EmailEditor() {
           onEmailChange={handleEmailChange}
           sig={sig}
           onSigChange={setSig}
-          headerImageUrl={headerImageUrl}
-          onHeaderImageChange={setHeaderImageUrl}
-          ctaText={ctaText}
-          onCtaChange={setCtaText}
           saved={saved}
           sent={sent}
           onSave={handleSave}
           onSend={handleSend}
         />
 
-        <EmailPreviewPanel
-          activeTab={activeTab}
-          emails={emails}
-          sig={sig}
-          ctaText={ctaText}
-          headerImageUrl={headerImageUrl}
-        />
+        <EmailPreviewPanel activeTab={activeTab} emails={emails} sig={sig} />
       </div>
     </div>
   );

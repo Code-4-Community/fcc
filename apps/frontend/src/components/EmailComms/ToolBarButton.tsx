@@ -17,10 +17,8 @@ export default function ToolBarButton({
         onClick();
       }}
       title={title}
-      className={`h-7 w-7 flex items-center justify-center rounded text-sm transition-all ${
-        active
-          ? 'bg-emerald-600 text-white shadow-inner'
-          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+      className={`w-7 self-stretch flex items-center justify-center rounded text-sm transition-all text-[#212529] ${
+        active ? 'bg-[#212529]/15' : 'hover:bg-[#212529]/10'
       }`}
     >
       {children}
