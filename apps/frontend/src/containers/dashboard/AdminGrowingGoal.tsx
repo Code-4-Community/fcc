@@ -96,7 +96,7 @@ export const AdminGrowingGoal: React.FC = () => {
     return (
       <EditDonationGoal
         initialData={{
-          title: 'Donate to FCC',
+          title: data?.goal?.title || '',
           goalAmount: data?.goal?.targetAmount
             ? `$${data.goal.targetAmount.toLocaleString()}`
             : '',
@@ -124,7 +124,7 @@ export const AdminGrowingGoal: React.FC = () => {
 
   return (
     <GrowingGoal
-      message={data.goal.title || 'Current Donation Goal'}
+      message="Current Donation Goal"
       subMessage={data.goal.dateRangeLabel}
       total={data.amountRaised}
       goal={data.goal.targetAmount}
