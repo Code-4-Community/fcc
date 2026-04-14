@@ -36,33 +36,22 @@ export const AdminGrowingGoal: React.FC = () => {
         throw new Error('Invalid goal amount. Please enter a number.');
       }
 
-      const isoRegex = /^\d{4}-\d{2}-\d{2}$/;
-      const slashRegex = /^\d{4}\/\d{2}\/\d{2}$/;
+      const mmddyyyyRegex = /^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/;
 
-      // Validate date format (YYYY-MM-DD or YYYY/MM/DD)
-      let startDate = formData.startDate || null;
-      if (startDate) {
-        if (!isoRegex.test(startDate) && !slashRegex.test(startDate)) {
-          throw new Error(
-            'Invalid Start Date format. Please use YYYY-MM-DD or YYYY/MM/DD.',
-          );
-        }
-        if (startDate.includes('/')) {
-          startDate = startDate.replace(/\//g, '-');
-        }
-      }
+      const parseDate = (dateStr: string | null) => {
+        if (!dateStr) return null;
 
-      let endDate = formData.endDate || null;
-      if (endDate) {
-        if (!isoRegex.test(endDate) && !slashRegex.test(endDate)) {
-          throw new Error(
-            'Invalid End Date format. Please use YYYY-MM-DD or YYYY/MM/DD.',
-          );
+        const match = dateStr.match(mmddyyyyRegex);
+        if (match) {
+          const [_, m, d, y] = match;
+          return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
         }
-        if (endDate.includes('/')) {
-          endDate = endDate.replace(/\//g, '-');
-        }
-      }
+
+        throw new Error('Invalid date format. Please use MM/DD/YYYY.');
+      };
+
+      const startDate = parseDate(formData.startDate);
+      const endDate = parseDate(formData.endDate || null);
 
       const id = data?.goal?.id || null;
       console.log('Sending update to API:', {
@@ -93,6 +82,14 @@ export const AdminGrowingGoal: React.FC = () => {
   };
 
   if (isEditing) {
+    const formatToMMDDYYYY = (dateStr?: string) => {
+      if (!dateStr || !dateStr.includes('-')) return dateStr || '';
+      const [y, m, d] = dateStr.split('-');
+      // Strip time if present
+      const day = d.split('T')[0];
+      return `${m}/${day}/${y}`;
+    };
+
     return (
       <EditDonationGoal
         initialData={{
@@ -100,8 +97,8 @@ export const AdminGrowingGoal: React.FC = () => {
           goalAmount: data?.goal?.targetAmount
             ? `$${data.goal.targetAmount.toLocaleString()}`
             : '',
-          startDate: data?.goal?.startDate || '',
-          endDate: data?.goal?.endDate || '',
+          startDate: formatToMMDDYYYY(data?.goal?.startDate),
+          endDate: formatToMMDDYYYY(data?.goal?.endDate),
           amountRaised: data?.amountRaised,
           targetAmount: data?.goal?.targetAmount,
         }}

@@ -125,7 +125,7 @@ export default function EditDonationGoal({
 
           <input
             type="text"
-            placeholder="YYYY-MM-DD or YYYY/MM/DD"
+            placeholder="MM/DD/YYYY"
             value={form.startDate}
             onChange={(e) =>
               setForm((prev) => ({ ...prev, startDate: e.target.value }))
@@ -146,7 +146,7 @@ export default function EditDonationGoal({
 
           <input
             type="text"
-            placeholder="YYYY-MM-DD or YYYY/MM/DD"
+            placeholder="MM/DD/YYYY"
             value={form.endDate}
             onChange={(e) =>
               setForm((prev) => ({ ...prev, endDate: e.target.value }))
