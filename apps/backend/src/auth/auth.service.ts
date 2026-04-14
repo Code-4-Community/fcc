@@ -97,7 +97,7 @@ export class AuthService {
     status: Status = Status.STANDARD,
   ): Promise<boolean> {
     console.log(`Attempting signup for: ${email} with status: ${status}`);
-    const username = this.buildCognitoUsername(email);
+    const username = email;
     const signUpCommand = new SignUpCommand({
       ClientId: CognitoAuthConfig.clientId,
       SecretHash: this.calculateHash(username),

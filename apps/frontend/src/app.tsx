@@ -16,6 +16,7 @@ import { ConfirmRegisteredPage } from '@containers/auth/ConfirmRegisteredPage';
 import { DashboardPage } from '@containers/dashboard/DashboardPage';
 import { DonorStatsChart } from '@components/DonorStatsChart';
 import SidebarTester from '@containers/dashboard/sidebar/SidebarTester';
+import EditDonationGoalTester from '@components/DonationGoal/EditDonationGoalTester';
 import { AdminGrowingGoalTester } from '@containers/dashboard/AdminGrowingGoalTester';
 
 const router = createBrowserRouter([
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
   {
     path: '/sidebar-test',
     element: <SidebarTester />,
+  },
+  {
+    path: '/edit-donation-goal-test',
+    element: <EditDonationGoalTester />,
   },
   {
     path: '/test',
