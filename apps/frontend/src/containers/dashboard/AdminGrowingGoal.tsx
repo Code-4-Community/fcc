@@ -102,6 +102,8 @@ export const AdminGrowingGoal: React.FC = () => {
             : '',
           startDate: data?.goal?.startDate || '',
           endDate: data?.goal?.endDate || '',
+          amountRaised: data?.amountRaised,
+          targetAmount: data?.goal?.targetAmount,
         }}
         onCancel={() => setIsEditing(false)}
         onSave={handleSave}

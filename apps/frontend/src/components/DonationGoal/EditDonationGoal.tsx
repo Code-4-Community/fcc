@@ -10,6 +10,8 @@ interface EditDonationGoalProps {
     goalAmount?: string;
     startDate?: string;
     endDate?: string;
+    amountRaised?: number;
+    targetAmount?: number;
   };
   onCancel?: () => void;
   onSave?: (data: any) => void;
@@ -95,7 +97,9 @@ export default function EditDonationGoal({
           </label>
 
           <p className="text-right text-[11px] font-normal text-[#737373]">
-            Currently raised: $8,000/$10,000
+            Currently raised: $
+            {initialData?.amountRaised?.toLocaleString() ?? '0'}/$
+            {initialData?.targetAmount?.toLocaleString() ?? '0'}
           </p>
         </div>
 
