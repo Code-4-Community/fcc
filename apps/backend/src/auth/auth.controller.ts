@@ -237,9 +237,9 @@ export class AuthController {
 
     try {
       await this.authService.forgotPassword(body.email);
-    } catch (e) {
-      console.error('Forgot password error:', e);
-      throw new BadRequestException(e.message);
+    } catch (error: unknown) {
+      console.error('Forgot password error:', error);
+      throw new BadRequestException(this.getErrorMessage(error));
     }
   }
 
@@ -247,25 +247,22 @@ export class AuthController {
   async confirmPassword(@Body() body: ConfirmPasswordDto): Promise<void> {
     try {
       await this.authService.confirmForgotPassword(body);
-    } catch (e) {
-      console.error('Confirm password error:', e);
+    } catch (error: unknown) {
+      console.error('Confirm password error:', error);
       // Map Cognito errors to user-friendly messages
-      if (e instanceof Error) {
-        const errName = (e as any).name || '';
-        if (
-          errName === 'InvalidVerificationCodeException' ||
-          errName === 'CodeMismatchException'
-        ) {
-          throw new BadRequestException('Confirmation code is incorrect');
-        }
-        if (errName === 'UserNotFoundException') {
-          throw new BadRequestException('User not found');
-        }
-        if (errName === 'ExpiredCodeException') {
-          throw new BadRequestException('Confirmation code has expired');
+      if (error instanceof Error) {
+        const errName = (error as any).name || '';
+        switch (errName) {
+          case 'InvalidVerificationCodeException':
+          case 'CodeMismatchException':
+            throw new BadRequestException('Confirmation code is incorrect');
+          case 'UserNotFoundException':
+            throw new BadRequestException('User not found');
+          case 'ExpiredCodeException':
+            throw new BadRequestException('Confirmation code has expired');
         }
       }
-      throw new BadRequestException(e.message || 'Failed to reset password');
+      throw new BadRequestException(this.getErrorMessage(error));
     }
   }
 

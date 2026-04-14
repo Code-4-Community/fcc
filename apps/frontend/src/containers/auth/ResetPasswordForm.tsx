@@ -9,6 +9,7 @@ import {
 } from '@components/ui/input-group';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { PasswordCriterion } from './PasswordCriterion';
+import { usePasswordValidation } from './usePasswordValidation';
 import apiClient from '@api/apiClient';
 
 interface ResetPasswordFormProps {
@@ -28,22 +29,15 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const hasMinLength = newPassword.length >= 8;
-  const hasUppercase = /[A-Z]/.test(newPassword);
-  const hasLowercase = /[a-z]/.test(newPassword);
-  const hasNumber = /\d/.test(newPassword);
-  const hasSpecialChar = /[^A-Za-z0-9]/.test(newPassword);
-  const passwordsMatch =
-    newPassword.length > 0 &&
-    confirmPassword.length > 0 &&
-    newPassword === confirmPassword;
-  const allCriteriaMet =
-    hasMinLength &&
-    hasUppercase &&
-    hasLowercase &&
-    hasNumber &&
-    hasSpecialChar &&
-    passwordsMatch;
+  const {
+    hasMinLength,
+    hasUppercase,
+    hasLowercase,
+    hasNumber,
+    hasSpecialChar,
+    passwordsMatch,
+    allCriteriaMet,
+  } = usePasswordValidation(newPassword, confirmPassword);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

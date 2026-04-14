@@ -7,6 +7,7 @@ import { DonationsService } from './donations.service';
 import { CreateDonationRequest } from './mappers';
 import { DonationResponseDto } from './dtos/donation-response-dto';
 import { DonationsRepository } from './donations.repository';
+import { Goal } from './goal.entity';
 // mock donations
 
 // invalid donation: non positive donation amount
@@ -242,7 +243,7 @@ describe('DonationsService', () => {
       providers: [
         DonationsService,
         { provide: getRepositoryToken(Donation), useValue: repoMock },
-
+        { provide: getRepositoryToken(Goal), useValue: {} },
         { provide: DonationsRepository, useValue: mockDonationsRepository },
       ],
     }).compile();

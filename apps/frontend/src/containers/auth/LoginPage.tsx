@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../components/AuthProvider';
 import { Button } from '../../components/ui/button';
@@ -14,6 +14,7 @@ import {
 } from '@components/ui/input-group';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { PasswordCriterion } from './PasswordCriterion';
+import { usePasswordValidation } from './usePasswordValidation';
 import apiClient from '@api/apiClient';
 
 enum AuthPage {
@@ -45,28 +46,21 @@ export const LoginPage: React.FC = () => {
   } | null;
   const from = locationState?.from?.pathname || '/dashboard';
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (locationState?.message) {
       setSuccess(locationState.message);
     }
   }, [locationState?.message]);
 
-  const hasMinLength = password.length >= 8;
-  const hasUppercase = /[A-Z]/.test(password);
-  const hasLowercase = /[a-z]/.test(password);
-  const hasNumber = /\d/.test(password);
-  const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
-  const passwordsMatch =
-    password.length > 0 &&
-    confirmPassword.length > 0 &&
-    password === confirmPassword;
-  const allCriteriaMet =
-    hasMinLength &&
-    hasUppercase &&
-    hasLowercase &&
-    hasNumber &&
-    hasSpecialChar &&
-    passwordsMatch;
+  const {
+    hasMinLength,
+    hasUppercase,
+    hasLowercase,
+    hasNumber,
+    hasSpecialChar,
+    passwordsMatch,
+    allCriteriaMet,
+  } = usePasswordValidation(password, confirmPassword);
 
   const showAuthFieldError =
     authPage === AuthPage.Login &&
