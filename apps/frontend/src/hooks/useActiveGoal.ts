@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ApiClient, type ActiveGoalResponse } from '../api/apiClient';
 
 const apiClient = new ApiClient();
@@ -8,29 +8,29 @@ export const useActiveGoal = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchGoal = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchGoal = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        // Ensure we use the current token if available
-        const token = localStorage.getItem('token');
-        apiClient.setAuthToken(token);
+      // Ensure we use the current token if available
+      const token = localStorage.getItem('accessToken');
+      apiClient.setAuthToken(token);
 
-        const result = await apiClient.getActiveGoalSummary();
-        setData(result);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to fetch active goal',
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchGoal();
+      const result = await apiClient.getActiveGoalSummary();
+      setData(result);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch active goal',
+      );
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  return { data, loading, error };
+  useEffect(() => {
+    fetchGoal();
+  }, [fetchGoal]);
+
+  return { data, loading, error, refresh: fetchGoal };
 };
