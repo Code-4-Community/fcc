@@ -311,9 +311,9 @@ export const LoginPage: React.FC = () => {
               <Button
                 id="auth-submit-btn"
                 type="submit"
-                disabled={!email || !password || showAuthFieldError}
+                disabled={!email || !password}
                 className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
-                  !email || !password || showAuthFieldError
+                  !email || !password
                     ? 'bg-[#737373] cursor-not-allowed'
                     : 'bg-[#007B64]'
                 }`}
@@ -324,9 +324,9 @@ export const LoginPage: React.FC = () => {
               <Button
                 id="auth-submit-btn"
                 type="submit"
-                disabled={!email || isLoading || showAuthFieldError}
+                disabled={!email || isLoading}
                 className={`py-5 h-14 rounded-full font-semibold text-xl text-white ${
-                  !email || isLoading || showAuthFieldError
+                  !email || isLoading
                     ? 'bg-[#737373] cursor-not-allowed'
                     : 'bg-[#007B64]'
                 }`}
