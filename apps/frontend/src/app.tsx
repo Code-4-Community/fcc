@@ -11,7 +11,7 @@ import { AuthProvider } from '@components/AuthProvider';
 import { ProtectedRoute } from '@components/ProtectedRoute';
 import { AdminRoute } from '@components/AdminRoute';
 import { LoginPage } from '@containers/auth/LoginPage';
-import { ConfirmSentEmailPage } from '@containers/auth/ConfirmSentEmailPage';
+import { ResetPasswordPage } from '@containers/auth/ResetPasswordPage';
 import { ConfirmRegisteredPage } from '@containers/auth/ConfirmRegisteredPage';
 import { DashboardPage } from '@containers/dashboard/DashboardPage';
 import { DonorStatsChart } from '@components/DonorStatsChart';
@@ -30,8 +30,8 @@ const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
-    path: '/confirm-sent-email',
-    element: <ConfirmSentEmailPage />,
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
   },
   {
     path: '/confirm-registered',

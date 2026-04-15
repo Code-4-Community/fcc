@@ -55,6 +55,11 @@ export type AuthResponse = {
   idToken: string;
 };
 export type RefreshRequest = { refreshToken: string; userSub: string };
+export type ConfirmPasswordRequest = {
+  email: string;
+  confirmationCode: string;
+  newPassword: string;
+};
 
 type ApiError = { error?: string; message?: string };
 
@@ -107,6 +112,22 @@ export class ApiClient {
     }
   }
 
+  public async forgotPassword(email: string): Promise<void> {
+    try {
+      await this.axiosInstance.post('/api/auth/forgotPassword', { email });
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to send password reset email');
+    }
+  }
+
+  public async confirmPassword(body: ConfirmPasswordRequest): Promise<void> {
+    try {
+      await this.axiosInstance.post('/api/auth/confirmPassword', body);
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to reset password');
+    }
+  }
+  
   public async getActiveGoalSummary(): Promise<ActiveGoalResponse> {
     try {
       const res = await this.axiosInstance.get('/api/donations/goal/active');

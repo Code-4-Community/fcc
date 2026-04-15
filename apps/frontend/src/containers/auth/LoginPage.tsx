@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../components/AuthProvider';
 import { Button } from '../../components/ui/button';
@@ -14,6 +14,8 @@ import {
 } from '@components/ui/input-group';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { PasswordCriterion } from './PasswordCriterion';
+import { usePasswordValidation } from './usePasswordValidation';
+import apiClient from '@api/apiClient';
 
 enum AuthPage {
   Login,
@@ -31,6 +33,7 @@ export const LoginPage: React.FC = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [authPage, setAuthPage] = useState<AuthPage>(AuthPage.Login);
 
@@ -40,30 +43,31 @@ export const LoginPage: React.FC = () => {
 
   const locationState = location.state as {
     from?: { pathname: string };
+    message?: string;
   } | null;
   const from = locationState?.from?.pathname || '/dashboard';
 
-  const hasMinLength = password.length >= 8;
-  const hasUppercase = /[A-Z]/.test(password);
-  const hasLowercase = /[a-z]/.test(password);
-  const hasNumber = /\d/.test(password);
-  const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
-  const passwordsMatch =
-    password.length > 0 &&
-    confirmPassword.length > 0 &&
-    password === confirmPassword;
-  const allCriteriaMet =
-    hasMinLength &&
-    hasUppercase &&
-    hasLowercase &&
-    hasNumber &&
-    hasSpecialChar &&
-    passwordsMatch;
+  useEffect(() => {
+    if (locationState?.message) {
+      setSuccess(locationState.message);
+    }
+  }, [locationState?.message]);
+
+  const {
+    hasMinLength,
+    hasUppercase,
+    hasLowercase,
+    hasNumber,
+    hasSpecialChar,
+    passwordsMatch,
+    allCriteriaMet,
+  } = usePasswordValidation(password, confirmPassword);
 
   const showAuthFieldError =
     authPage === AuthPage.Login &&
     !!error &&
-    error !== 'Account created successfully! Please sign in.';
+    error !== 'Account created successfully! Please sign in.' &&
+    !success;
 
   const headerText = (() => {
     switch (authPage) {
@@ -105,7 +109,8 @@ export const LoginPage: React.FC = () => {
         navigate('/confirm-registered', { replace: true });
         setError('Account created successfully! Please sign in.');
       } else if (authPage === AuthPage.ForgotPassword) {
-        navigate('/confirm-sent-email', { replace: true });
+        await apiClient.forgotPassword(email);
+        navigate('/reset-password', { replace: true, state: { email } });
       }
     } catch (err: unknown) {
       console.error('Auth error:', err);
@@ -155,6 +160,12 @@ export const LoginPage: React.FC = () => {
             className="flex flex-col gap-4 mt-10"
             noValidate
           >
+            {success && (
+              <p className="text-sm text-[#12BA82] font-medium" role="status">
+                {success}
+              </p>
+            )}
+
             {authPage === AuthPage.Signup && (
               <div className="flex gap-4">
                 <div className="flex-1">
@@ -219,6 +230,12 @@ export const LoginPage: React.FC = () => {
                 Please enter a valid email address
               </span>
             </div>
+
+            {authPage === AuthPage.ForgotPassword && error && (
+              <p className="-mt-2 text-sm text-[#B4444D]" role="alert">
+                {error}
+              </p>
+            )}
 
             {authPage !== AuthPage.ForgotPassword && (
               <div>
