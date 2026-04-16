@@ -81,7 +81,7 @@ export class ApiClient {
       throw new Error('Failed to create payment intent');
     }
   }
-  
+
   public setAuthToken(token: string | null) {
     if (token) {
       this.axiosInstance.defaults.headers.common['Authorization'] =
