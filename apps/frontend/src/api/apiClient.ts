@@ -183,6 +183,8 @@ export class ApiClient {
     perPage?: number;
     donationType?: 'one_time' | 'recurring';
     status?: 'pending' | 'succeeded' | 'failed' | 'cancelled';
+    startDate?: string;
+    endDate?: string;
   }): Promise<{
     rows: Array<{
       id: number;
