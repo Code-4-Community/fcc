@@ -382,7 +382,6 @@ export class DonationsController {
       throw new UnauthorizedException('Admin access required');
     }
 
-    // Parse date strings to Date objects
     let startDate: Date | undefined;
     let endDate: Date | undefined;
 

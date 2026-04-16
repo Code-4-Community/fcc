@@ -86,7 +86,6 @@ export function YearMonthPickerPanel({
   const curMonth = now.getMonth(); // 0-indexed
 
   const [view, setView] = React.useState<'year' | 'month'>('year');
-  // Start the range so current year is bottom-right (position 11 in a 12-item grid)
   const [rangeStart, setRangeStart] = React.useState(() => curYear - 11);
   const [selectedYear, setSelectedYear] = React.useState<number | null>(
     value?.year ?? null,
@@ -143,7 +142,6 @@ export function YearMonthPickerPanel({
 
   return (
     <div className="p-4 w-[280px] bg-white rounded-md shadow-md">
-      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={handlePrev}
@@ -164,7 +162,6 @@ export function YearMonthPickerPanel({
         </button>
       </div>
 
-      {/* Grid */}
       {view === 'year' ? (
         <div className="grid grid-cols-3 gap-2 mb-4">
           {years.map((y) => {
@@ -215,7 +212,6 @@ export function YearMonthPickerPanel({
         </div>
       )}
 
-      {/* Footer */}
       <div className="flex flex-col gap-2">
         {view === 'year' && (
           <button
