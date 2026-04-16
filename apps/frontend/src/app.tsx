@@ -18,6 +18,7 @@ import { DonorStatsChart } from '@components/DonorStatsChart';
 import SidebarTester from '@containers/dashboard/sidebar/SidebarTester';
 import EditDonationGoalTester from '@components/DonationGoal/EditDonationGoalTester';
 import { AdminGrowingGoalTester } from '@containers/dashboard/AdminGrowingGoalTester';
+import ExportModalTester from '@components/DonationModals/ExportModalTester';
 
 const router = createBrowserRouter([
   {
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
   {
     path: '/sidebar-test',
     element: <SidebarTester />,
+  },
+  {
+    path: '/export-modal-test',
+    element: <ExportModalTester />,
   },
   {
     path: '/edit-donation-goal-test',
