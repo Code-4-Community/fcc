@@ -16,6 +16,7 @@ import {
   UseInterceptors,
   Req,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -316,6 +317,20 @@ export class DonationsController {
     type: Number,
     description: 'maximum donation amount',
   })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    description: 'filter by start date (YYYY-MM-DD format)',
+    example: '2026-01-01',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description: 'filter by end date (YYYY-MM-DD format)',
+    example: '2026-12-31',
+  })
   @ApiResponse({
     status: 200,
     description: 'paginated donation list',
@@ -351,6 +366,8 @@ export class DonationsController {
     minAmount?: number,
     @Query('maxAmount', new ParseIntPipe({ optional: true }))
     maxAmount?: number,
+    @Query('startDate') startDateStr?: string,
+    @Query('endDate') endDateStr?: string,
   ): Promise<{
     rows: DonationResponseDto[];
     total: number;
@@ -365,6 +382,28 @@ export class DonationsController {
       throw new UnauthorizedException('Admin access required');
     }
 
+    // Parse date strings to Date objects
+    let startDate: Date | undefined;
+    let endDate: Date | undefined;
+
+    if (startDateStr) {
+      startDate = new Date(startDateStr);
+      if (isNaN(startDate.getTime())) {
+        throw new BadRequestException(
+          'Invalid startDate format. Use YYYY-MM-DD',
+        );
+      }
+    }
+
+    if (endDateStr) {
+      endDate = new Date(endDateStr);
+      // Add one day to endDate to include the entire end date
+      endDate.setDate(endDate.getDate() + 1);
+      if (isNaN(endDate.getTime())) {
+        throw new BadRequestException('Invalid endDate format. Use YYYY-MM-DD');
+      }
+    }
+
     const filters: PaginationFilters = {
       donationType,
       status,
@@ -372,6 +411,8 @@ export class DonationsController {
       recurringInterval,
       minAmount,
       maxAmount,
+      startDate,
+      endDate,
     };
 
     const result = await this.donationsRepository.findPaginated(
