@@ -443,7 +443,7 @@ export default function RichTextEditor({
         </ToolBarButton>
       </div>
 
-      <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+      <div className="border border-slate-300 rounded-xl overflow-hidden bg-white shadow-sm">
         <EditorContent editor={editor} />
       </div>
     </div>

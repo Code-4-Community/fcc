@@ -72,7 +72,7 @@ export const DEFAULT_SIGNATURE: Signature = {
 export const TAB_CONFIG: { id: TabId; label: string }[] = [
   { id: 'donation', label: 'Donation Response' },
   { id: 'relapsed', label: 'Relapsed Donor Message' },
-  { id: 'mass', label: 'Mass Emaill' },
+  { id: 'mass', label: 'Mass Email' },
 ];
 
 export function buildSignatureHTML(sig: Signature): string {

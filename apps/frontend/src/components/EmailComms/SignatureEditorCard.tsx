@@ -9,13 +9,14 @@ export default function SignatureEditor({
   onChange: (s: Signature) => void;
 }) {
   const field = (label: string, key: keyof Signature, placeholder: string) => (
-    <div key={key} className="flex flex-col gap-">
+    <div key={key} className="flex flex-col gap-1.5">
       <Label>{label}</Label>
 
       <Input
         value={(sig[key] as string) || ''}
         onChange={(e) => onChange({ ...sig, [key]: e.target.value })}
         placeholder={placeholder}
+        className="bg-white border-slate-300 rounded-md px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-600 outline-none transition text-[#171717]"
       />
     </div>
   );

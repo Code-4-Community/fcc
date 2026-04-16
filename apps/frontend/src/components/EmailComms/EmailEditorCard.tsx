@@ -1,6 +1,7 @@
 import type { TabId, EmailData, EmailsState, Signature } from './types';
 import EmailTextEditor from './EmailTextEditor';
-import { Button } from './../ui/button';
+import { Button } from '@shared/src/components/button';
+import { Input } from '../ui/input';
 import SignatureEditorCard from './SignatureEditorCard';
 import { Label } from '../ui/label';
 
@@ -42,10 +43,10 @@ export default function EmailEditorCard({
       <div className="flex flex-col gap-1.5">
         <Label className="pb-2"> Subject Line</Label>
 
-        <input
+        <Input
           value={currentEmail.subject}
           onChange={(e) => onEmailChange(activeTab, 'subject', e.target.value)}
-          className="border border-slate-200 rounded-md px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-600 outline-none transition text-[#171717]"
+          className="bg-white border-slate-300 rounded-md px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-600 outline-none transition text-[#171717]"
           placeholder="Email subject…"
         />
       </div>
@@ -61,18 +62,18 @@ export default function EmailEditorCard({
 
         <Label className="pt-1 bg-slate"> Button Text </Label>
 
-        <input
+        <Input
           value={ctaText}
           onChange={(e) => onCtaChange(e.target.value)}
-          className="border border-slate-200 rounded-md px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-600 outline-none transition text-[#171717]"
+          className="bg-white border-slate-300 rounded-md px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-600 outline-none transition text-[#171717]"
         />
 
         <Label className="pt-2 bg-slate"> Button Link </Label>
 
-        <input
+        <Input
           value={ctaLink}
           onChange={(e) => onCtaLinkChange(e.target.value)}
-          className="border border-slate-200 rounded-md px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-600 outline-none transition text-[#171717]"
+          className="bg-white border-slate-300 rounded-md px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-600 outline-none transition text-[#171717]"
         />
       </div>
 
@@ -85,14 +86,14 @@ export default function EmailEditorCard({
       <div className="flex items-center gap-3 pt-1">
         <Button
           onClick={onSave}
-          className={`px-6 py-4 h-[44px] rounded-md text-white bg-[#007B64] font-semibold text-sm transition-all`}
+          className={`px-6 py-2 h-[38px] rounded-md text-white bg-[#007B64] font-medium text-sm transition-all`}
         >
           {saved ? 'Saved' : 'Save Changes'}
         </Button>
 
         <Button
           onClick={onSend}
-          className="px-6 py-4 h-[44px] rounded-md font-semibold text-sm bg-[#737373] text-white transition-all"
+          className="px-6 py-2 h-[38px] rounded-md font-medium text-sm bg-[#737373] text-white transition-all"
         >
           {sent ? 'Sent!' : 'Send Email'}
         </Button>
