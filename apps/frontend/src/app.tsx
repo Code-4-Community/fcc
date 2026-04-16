@@ -20,6 +20,7 @@ import EditDonationGoalTester from '@components/DonationGoal/EditDonationGoalTes
 import { AdminGrowingGoalTester } from '@containers/dashboard/AdminGrowingGoalTester';
 import ExportModalTester from '@components/DonationModals/ExportModalTester';
 import { DonationInformationModalTester } from '@components/DonationModals/DonationInformationModalTester';
+import { NewDonationModalTester } from '@components/DonationModals/NewDonationModalTester';
 
 const router = createBrowserRouter([
   {
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
   {
     path: '/admin-growing-goal-test',
     element: <AdminGrowingGoalTester />,
+  },
+  {
+    path: '/new-donation-modal-test',
+    element: <NewDonationModalTester />,
   },
   {
     path: '/chart',
