@@ -2,7 +2,7 @@ import { useState } from 'react';
 import EmailEditorCard from './EmailEditorCard';
 import EmailPreviewPanel from './EmailPreviewPanel';
 import type { TabId, EmailData, EmailsState, Signature } from './types';
-import { Button } from '@shared/src/components/button/Button';
+import { Button } from '../ui/button';
 import {
   defaultEmails,
   DEFAULT_SIGNATURE,

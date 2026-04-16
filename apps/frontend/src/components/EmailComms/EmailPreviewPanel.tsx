@@ -3,7 +3,7 @@ import { buildSignatureHTML } from './types';
 import FCCEmailHeader from './FCCEmailHeader.svg';
 import FCCEmailBg from './FCCEmailBg.png';
 import { Label } from '../ui/label';
-import { Button } from '@shared/src/components/button/Button';
+import { Button } from '../ui/button';
 
 type EmailPreviewPanelProps = {
   activeTab: EmailTabId;

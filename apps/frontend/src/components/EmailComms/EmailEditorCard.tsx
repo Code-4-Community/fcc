@@ -1,6 +1,6 @@
 import type { TabId, EmailData, EmailsState, Signature } from './types';
 import EmailTextEditor from './EmailTextEditor';
-import { Button } from '@shared/src/components/button/Button';
+import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import SignatureEditorCard from './SignatureEditorCard';
 import { Label } from '../ui/label';
