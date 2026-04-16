@@ -15,9 +15,10 @@ import { ResetPasswordPage } from '@containers/auth/ResetPasswordPage';
 import { ConfirmRegisteredPage } from '@containers/auth/ConfirmRegisteredPage';
 import { DashboardPage } from '@containers/dashboard/DashboardPage';
 import { DonorStatsChart } from '@components/DonorStatsChart';
-import SidebarTester from '@containers/dashboard/sidebar/SidebarTester';
-import EditDonationGoalTester from '@components/DonationGoal/EditDonationGoalTester';
+import DashboardOverview from '@containers/dashboard/sidebar/DashboardOverview';
+import { EmailEditor } from './components/EmailComms/EmailEditorOverviewPage';
 import { AdminGrowingGoalTester } from '@containers/dashboard/AdminGrowingGoalTester';
+import OverviewPage from '@containers/dashboard/OverviewPage';
 
 const router = createBrowserRouter([
   {
@@ -38,6 +39,25 @@ const router = createBrowserRouter([
     element: <ConfirmRegisteredPage />,
   },
   {
+    path: '/overview',
+    // element: <ProtectedRoute />,
+    children: [
+      {
+        element: <DashboardOverview />,
+        children: [
+          {
+            path: '',
+            element: <OverviewPage />,
+          },
+          {
+            path: 'email',
+            element: <EmailEditor />,
+          },
+        ],
+      },
+    ],
+  },
+  {
     path: '/dashboard',
     element: <ProtectedRoute />,
     children: [
@@ -46,14 +66,6 @@ const router = createBrowserRouter([
         element: <DashboardPage />,
       },
     ],
-  },
-  {
-    path: '/sidebar-test',
-    element: <SidebarTester />,
-  },
-  {
-    path: '/edit-donation-goal-test',
-    element: <EditDonationGoalTester />,
   },
   {
     path: '/test',
