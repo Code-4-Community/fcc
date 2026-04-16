@@ -75,6 +75,14 @@
         "buildTarget": "frontend:build"
       }
     },
+    "build-embed": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{workspaceRoot}/apps/wordpress-plugin/fcc-donation/assets"],
+      "options": {
+        "outputPath": "apps/wordpress-plugin/fcc-donation/assets",
+        "configFile": "apps/frontend/vite.embed.config.mts"
+      }
+    },
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {

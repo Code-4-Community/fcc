@@ -33,6 +33,7 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
+apps/wordpress-plugin/fcc-donation/assets/
 
 # System Files
 .DS_Store
