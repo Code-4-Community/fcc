@@ -21,6 +21,7 @@ import { AdminGrowingGoalTester } from '@containers/dashboard/AdminGrowingGoalTe
 import ExportModalTester from '@components/DonationModals/ExportModalTester';
 import { DonationInformationModalTester } from '@components/DonationModals/DonationInformationModalTester';
 import { NewDonationModalTester } from '@components/DonationModals/NewDonationModalTester';
+import { SortingModalTester } from '@components/DonationModals/SortingModalTester';
 
 const router = createBrowserRouter([
   {
@@ -81,6 +82,10 @@ const router = createBrowserRouter([
   {
     path: '/new-donation-modal-test',
     element: <NewDonationModalTester />,
+  },
+  {
+    path: '/sorting-modal-test',
+    element: <SortingModalTester />,
   },
   {
     path: '/chart',
