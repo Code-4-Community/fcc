@@ -17,6 +17,7 @@ export function EmailEditor() {
   const [sig, setSig] = useState<Signature>(defaultSignature);
   const [saved, setSaved] = useState(false);
   const [sent, setSent] = useState(false);
+  const [ctaText, setCtaText] = useState('Call to action button text');
 
   const handleEmailChange = (
     tab: TabId,
@@ -43,6 +44,7 @@ export function EmailEditor() {
       <html><body>
         ${email.body}
         ${buildSignatureHTML(sig)}
+        ${ctaText ? `<div style="text-align:center;margin:28px 0"><a href="#" style="background:#059669;color:white;padding:14px 32px;border-radius:8px;font-weight:700;text-decoration:none;font-size:14px;letter-spacing:0.05em">${ctaText}</a></div>` : ''}
       </body></html>
     `;
     console.log('[EmailEditor] Send payload:', {
@@ -58,7 +60,7 @@ export function EmailEditor() {
     <div className="relative flex flex-col gap-5 p-6 bg-slate-50 min-h-screen font-sans">
       <div className="flex items-center gap-1 bg-white rounded-2xl p-1.5 border border-slate-100 w-fit">
         {TAB_CONFIG.map((tab) => (
-          <button
+          <Button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center px-4 py-2 rounded-sm text-sm font-medium transition-all ${
@@ -68,7 +70,7 @@ export function EmailEditor() {
             }`}
           >
             {tab.label}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -79,13 +81,20 @@ export function EmailEditor() {
           onEmailChange={handleEmailChange}
           sig={sig}
           onSigChange={setSig}
+          ctaText={ctaText}
+          onCtaChange={setCtaText}
           saved={saved}
           sent={sent}
           onSave={handleSave}
           onSend={handleSend}
         />
 
-        <EmailPreviewPanel activeTab={activeTab} emails={emails} sig={sig} />
+        <EmailPreviewPanel
+          activeTab={activeTab}
+          emails={emails}
+          sig={sig}
+          ctaText={ctaText}
+        />
       </div>
     </div>
   );

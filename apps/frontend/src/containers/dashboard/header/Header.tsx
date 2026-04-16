@@ -13,7 +13,7 @@ function cn(...classes: Array<string | false | null | undefined>) {
 }
 
 export default function Header({
-  title = 'Dashboard Overview',
+  title,
   userName = 'F. N. Way',
   userRole = 'Admin/Standard',
   className,

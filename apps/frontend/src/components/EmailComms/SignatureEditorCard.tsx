@@ -1,4 +1,6 @@
+import { Input } from '../ui/input';
 import type { Signature } from './types';
+import { Label } from '../ui/label';
 export default function SignatureEditor({
   sig,
   onChange,
@@ -7,16 +9,13 @@ export default function SignatureEditor({
   onChange: (s: Signature) => void;
 }) {
   const field = (label: string, key: keyof Signature, placeholder: string) => (
-    <div key={key} className="flex flex-col gap-1">
-      <label className="text-xs font-medium text-slate-500 uppercase tracking-wide">
-        {label}
-      </label>
+    <div key={key} className="flex flex-col gap-">
+      <Label>{label}</Label>
 
-      <input
+      <Input
         value={(sig[key] as string) || ''}
         onChange={(e) => onChange({ ...sig, [key]: e.target.value })}
         placeholder={placeholder}
-        className="border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition bg-white"
       />
     </div>
   );

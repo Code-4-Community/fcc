@@ -1,3 +1,5 @@
+import FCCEmailHeader from './FCCEmailHeader.svg';
+import FCCEmailMallory from './FCCEmailMallory.png';
 export type EmailTabId = 'donation' | 'relapsed' | 'mass';
 export type TabId = EmailTabId;
 
@@ -23,7 +25,14 @@ export type EmailsState = Record<EmailTabId, EmailData>;
 export const defaultEmails: EmailsState = {
   donation: {
     subject: 'Thank You For Your Donation!',
-    body: '<p>Dear <strong>[Donor Name]</strong>,</p><p>Thank you sincerely for your generous donation of <strong>[Amount]</strong>. Your support makes a real difference in the lives of those we serve.</p><p>Because of donors like you, we can continue our mission to bring positive change to our community.</p><p>With gratitude,</p>',
+    body:
+      '<p>Dear Donor, </p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.' +
+      'Proin dictum gravida justo, nec porttitor sapien bibendum in.Cras sed quam nec' +
+      'lectus malesuada condimentum nec in urna.Ut volutpat nisi arcu, sit amet malesuada ipsum euismod sed.' +
+      'Vivamus ut cursus justo.Cras et libero congue, congue urna ac, vulputate urna.Nulla egestas semper sagittis.' +
+      'Nulla facilisi.Aenean semper fermentum euismod.Mauris ut velit nec neque tristique pretium.Nam luctus, orci ut rutrum pretium,' +
+      'risus leo pharetra enim, in auctor velit sapien sit amet arcu.Curabitur in viverra sem.Maecenas posuere dolor nulla.Aenean' +
+      'ultrices posuere convallis.Proin quis leo eget eros luctus efficitur.Proin eget velit ut tortor sollicitudin dignissim.Morbi pharetra consequat mi quis pharetra.</p>',
   },
   relapsed: {
     subject: "We've Missed You — Come Back!",
@@ -55,36 +64,50 @@ export const TAB_CONFIG: { id: TabId; label: string }[] = [
 
 export function buildSignatureHTML(sig: Signature): string {
   const socialHTML = [
-    sig.linkedin
-      ? `<a href="${sig.linkedin}"  style="display:inline-block;width:32px;height:32px;border-radius:6px;background:#e8eaf6;margin-right:6px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">in</a>`
+    sig.facebook
+      ? `<a href="${sig.facebook}" style="display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:50%;background:#1877F2;margin-right:6px;text-decoration:none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+         </a>`
       : '',
     sig.X
-      ? `<a href="${sig.X}"   style="display:inline-block;width:32px;height:32px;border-radius:6px;background:#e8eaf6;margin-right:6px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">𝕏</a>`
+      ? `<a href="${sig.X}" style="display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:50%;background:#000;margin-right:6px;text-decoration:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+         </a>`
       : '',
-    sig.facebook
-      ? `<a href="${sig.facebook}" style="display:inline-block;width:32px;height:32px;border-radius:6px;background:#e8eaf6;margin-right:6px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">◎</a>`
+    sig.linkedin
+      ? `<a href="${sig.linkedin}" style="display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:50%;background:#0A66C2;text-decoration:none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+         </a>`
       : '',
   ].join('');
 
   return `
-    <table cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;width:100%;font-family:Arial,sans-serif;">
+    <table cellpadding="0" cellspacing="0" border="0" style="width:100%;font-family:Arial,sans-serif;">
       <tr>
-        <td colspan="2" style="padding-bottom:16px;">
-          <p style="margin:0;font-size:14px;color:#334155;">We hope you will join us and stay safe.</p>
+        <!-- Photo -->
+        <td style="vertical-align:middle;width:90px;padding-right:16px;">
+          <img src="${FCCEmailMallory}" alt="${sig.name}"
+            style="width:80px;height:80px;border-radius:50%;object-fit:cover;object-position:top;border:3px solid white;display:block;" />
         </td>
-      </tr>
 
-      <tr>
-        <td style="vertical-align:top;">
-          <p style="margin:0 0 2px;font-size:17px;font-weight:700;color:#4f46e5;">${sig.name}</p>
+        <!-- Name / Title / Pronouns -->
+        <td style="vertical-align:middle;">
+          <p style="margin:0 0 2px;font-size:22px;font-weight:800;color:#1a1a1a;letter-spacing:-0.3px;">${sig.name}</p>
+          <p style="margin:0 0 2px;font-size:14px;font-weight:400;color:#334155;">${sig.position}</p>
+          <p style="margin:0;font-size:14px;font-weight:400;color:#334155;">${sig.pronouns}</p>
+        </td>
 
-          <p style="margin:0 0 1px;font-size:13px;color:#475569;">${sig.position}</p>
-          
-          <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#334155;">${sig.pronouns}</p>
-          ${sig.website ? `<p style="margin:0 0 8px;font-size:12px;"><a href="https://${sig.website}" style="color:#4f46e5;text-decoration:none;">${sig.website}</a></p>` : ''}
+        <!-- Website + Social -->
+        <td style="vertical-align:middle;text-align:right;white-space:nowrap;">
+          ${
+            sig.website
+              ? `<p style="margin:0 0 10px;font-size:14px;font-weight:700;color:#1a1a1a;">
+            <a href="${sig.website}" style="color:#1a1a1a;text-decoration:none;">${sig.website.replace(/^https?:\/\//, '')}</a>
+          </p>`
+              : ''
+          }
           <div>${socialHTML}</div>
         </td>
-
       </tr>
     </table>
   `;
