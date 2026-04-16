@@ -58,24 +58,24 @@ export function EmailEditor() {
 
   return (
     <div className="relative flex flex-col gap-5 p-6 bg-[#EEEEEE] min-h-screen font-sans">
-      <div className="flex items-center h-10 bg-white rounded-md border border-slate-100 w-fit">
-        {TAB_CONFIG.map((tab) => (
-          <Button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center h-10 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-              activeTab === tab.id
-                ? 'bg-emerald-700 text-white'
-                : 'text-neutral-700 hover:bg-neutral-100'
-            }`}
-          >
-            {tab.label}
-          </Button>
-        ))}
-      </div>
-
       <div className="flex flex-row flex-1 gap-14 items-start justify-center">
-        <div className="w-full max-w-[600px] flex-shrink-0">
+        <div className="w-full max-w-[600px] flex-shrink-0 flex flex-col gap-5">
+          <div className="flex items-center h-10 bg-white rounded-md border border-slate-100 w-fit">
+            {TAB_CONFIG.map((tab) => (
+              <Button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center h-10 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-emerald-700 text-white'
+                    : 'text-neutral-700 hover:bg-neutral-100'
+                }`}
+              >
+                {tab.label}
+              </Button>
+            ))}
+          </div>
+
           <EmailEditorCard
             activeTab={activeTab}
             emails={emails}
@@ -93,7 +93,7 @@ export function EmailEditor() {
           />
         </div>
 
-        <div className="w-full max-w-[600px] flex-shrink-0 sticky top-6">
+        <div className="w-full max-w-[600px] flex-shrink sticky top-6 overflow-hidden">
           <EmailPreviewPanel
             activeTab={activeTab}
             emails={emails}
