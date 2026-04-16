@@ -228,13 +228,42 @@ export class AuthController {
   }
 
   @Post('/forgotPassword')
-  forgotPassword(@Body() body: ForgotPasswordDto): Promise<void> {
-    return this.authService.forgotPassword(body.email);
+  async forgotPassword(@Body() body: ForgotPasswordDto): Promise<void> {
+    const registeredUsers = await this.usersService.find(body.email);
+
+    if (!registeredUsers.length) {
+      throw new BadRequestException('Account is not registered.');
+    }
+
+    try {
+      await this.authService.forgotPassword(body.email);
+    } catch (error: unknown) {
+      console.error('Forgot password error:', error);
+      throw new BadRequestException(this.getErrorMessage(error));
+    }
   }
 
   @Post('/confirmPassword')
-  confirmPassword(@Body() body: ConfirmPasswordDto): Promise<void> {
-    return this.authService.confirmForgotPassword(body);
+  async confirmPassword(@Body() body: ConfirmPasswordDto): Promise<void> {
+    try {
+      await this.authService.confirmForgotPassword(body);
+    } catch (error: unknown) {
+      console.error('Confirm password error:', error);
+      // Map Cognito errors to user-friendly messages
+      if (error instanceof Error) {
+        const errName = (error as any).name || '';
+        switch (errName) {
+          case 'InvalidVerificationCodeException':
+          case 'CodeMismatchException':
+            throw new BadRequestException('Confirmation code is incorrect');
+          case 'UserNotFoundException':
+            throw new BadRequestException('User not found');
+          case 'ExpiredCodeException':
+            throw new BadRequestException('Confirmation code has expired');
+        }
+      }
+      throw new BadRequestException(this.getErrorMessage(error));
+    }
   }
 
   @Post('/delete')
