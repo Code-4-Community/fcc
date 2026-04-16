@@ -127,7 +127,7 @@ export class ApiClient {
       this.handleAxiosError(err, 'Failed to reset password');
     }
   }
-  
+
   public async getActiveGoalSummary(): Promise<ActiveGoalResponse> {
     try {
       const res = await this.axiosInstance.get('/api/donations/goal/active');
