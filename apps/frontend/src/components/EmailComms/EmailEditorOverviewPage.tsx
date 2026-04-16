@@ -1,23 +1,23 @@
 import { useState } from 'react';
 import EmailEditorCard from './EmailEditorCard';
 import EmailPreviewPanel from './EmailPreviewPanel';
-
+import type { TabId, EmailData, EmailsState, Signature } from './types';
+import { Button } from '../ui/button';
 import {
   defaultEmails,
-  defaultSignature,
+  DEFAULT_SIGNATURE,
   TAB_CONFIG,
   buildSignatureHTML,
 } from './types';
-import type { TabId, EmailData, EmailsState, Signature } from './types';
-import { Button } from '../ui/button';
 
 export function EmailEditor() {
   const [activeTab, setActiveTab] = useState<TabId>('donation');
   const [emails, setEmails] = useState<EmailsState>(defaultEmails);
-  const [sig, setSig] = useState<Signature>(defaultSignature);
+  const [sig, setSig] = useState<Signature>(DEFAULT_SIGNATURE);
   const [saved, setSaved] = useState(false);
   const [sent, setSent] = useState(false);
-  const [ctaText, setCtaText] = useState('Call to action button text');
+  const [ctaText, setCtaText] = useState('DONATE AT OUR SITE!');
+  const [ctaLink, setCtaLink] = useState('https://fenwaycommunitycenter.org/');
 
   const handleEmailChange = (
     tab: TabId,
@@ -28,7 +28,7 @@ export function EmailEditor() {
   };
 
   const handleSave = () => {
-    console.log('[EmailEditor] Save payload:', {
+    console.log('[EmailEditorOverviewPage] Save payload:', {
       tab: activeTab,
       subject: emails[activeTab].subject,
       body: emails[activeTab].body,
@@ -47,7 +47,7 @@ export function EmailEditor() {
         ${ctaText ? `<div style="text-align:center;margin:28px 0"><a href="#" style="background:#059669;color:white;padding:14px 32px;border-radius:8px;font-weight:700;text-decoration:none;font-size:14px;letter-spacing:0.05em">${ctaText}</a></div>` : ''}
       </body></html>
     `;
-    console.log('[EmailEditor] Send payload:', {
+    console.log('[EmailEditorOverviewPage] Send payload:', {
       to: '[recipient]',
       subject: email.subject,
       html: fullHTML,
@@ -57,13 +57,13 @@ export function EmailEditor() {
   };
 
   return (
-    <div className="relative flex flex-col gap-5 p-6 bg-slate-50 min-h-screen font-sans">
-      <div className="flex items-center gap-1 bg-white rounded-2xl p-1.5 border border-slate-100 w-fit">
+    <div className="relative flex flex-col gap-5 p-6 bg-[#EEEEEE] min-h-screen font-sans">
+      <div className="flex items-center h-10 bg-white rounded-md border border-slate-100 w-fit">
         {TAB_CONFIG.map((tab) => (
           <Button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center px-4 py-2 rounded-sm text-sm font-medium transition-all ${
+            className={`flex items-center h-10 px-4 py-2 rounded-md text-sm font-medium transition-all ${
               activeTab === tab.id
                 ? 'bg-emerald-700 text-white'
                 : 'text-neutral-700 hover:bg-neutral-100'
@@ -74,7 +74,7 @@ export function EmailEditor() {
         ))}
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-row flex-1/2 gap-14">
         <EmailEditorCard
           activeTab={activeTab}
           emails={emails}
@@ -82,7 +82,9 @@ export function EmailEditor() {
           sig={sig}
           onSigChange={setSig}
           ctaText={ctaText}
-          onCtaChange={setCtaText}
+          onCtaTextChange={setCtaText}
+          ctaLink={ctaLink}
+          onLinkChange={setCtaLink}
           saved={saved}
           sent={sent}
           onSave={handleSave}
@@ -94,6 +96,7 @@ export function EmailEditor() {
           emails={emails}
           sig={sig}
           ctaText={ctaText}
+          ctaLink={ctaLink}
         />
       </div>
     </div>

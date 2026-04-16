@@ -1,12 +1,138 @@
 import ToolBarButton from './ToolBarButton';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
+import type { Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
-import Strike from '@tiptap/extension-strike';
+import Highlight from '@tiptap/extension-highlight';
+
+const ALIGNMENTS = [
+  {
+    value: 'left',
+    label: 'Align left',
+    icon: (
+      <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+        <rect x="1" y="3" width="14" height="1.5" rx="0.5" />
+
+        <rect x="1" y="6.5" width="9" height="1.5" rx="0.5" />
+
+        <rect x="1" y="10" width="12" height="1.5" rx="0.5" />
+      </svg>
+    ),
+  },
+  {
+    value: 'center',
+    label: 'Align center',
+    icon: (
+      <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+        <rect x="1" y="3" width="14" height="1.5" rx="0.5" />
+
+        <rect x="3.5" y="6.5" width="9" height="1.5" rx="0.5" />
+
+        <rect x="2" y="10" width="12" height="1.5" rx="0.5" />
+      </svg>
+    ),
+  },
+  {
+    value: 'right',
+    label: 'Align right',
+    icon: (
+      <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+        <rect x="1" y="3" width="14" height="1.5" rx="0.5" />
+
+        <rect x="6" y="6.5" width="9" height="1.5" rx="0.5" />
+
+        <rect x="3" y="10" width="12" height="1.5" rx="0.5" />
+      </svg>
+    ),
+  },
+  {
+    value: 'justify',
+    label: 'Justify',
+    icon: (
+      <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
+        <rect x="1" y="3" width="14" height="1.5" rx="0.5" />
+
+        <rect x="1" y="6.5" width="14" height="1.5" rx="0.5" />
+
+        <rect x="1" y="10" width="14" height="1.5" rx="0.5" />
+      </svg>
+    ),
+  },
+] as const;
+
+function AlignDropdown({ editor }: { editor: Editor }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const active =
+    ALIGNMENTS.find((a) => editor.isActive({ textAlign: a.value })) ??
+    ALIGNMENTS[0];
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative flex items-center">
+      <button
+        title={active.label}
+        onClick={() => setOpen((o) => !o)}
+        className={`flex items-center gap-0.5 rounded p-1 transition-colors ${
+          open ? 'bg-[#212529]/10' : 'hover:bg-[#212529]/10'
+        }`}
+      >
+        {active.icon}
+        <svg
+          viewBox="0 0 16 16"
+          fill="currentColor"
+          className="w-2.5 h-2.5 text-[#212529]"
+        >
+          <path
+            d="M4 6l4 4 4-4"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-slate-200 rounded-lg shadow-md py-1 min-w-[140px]">
+          {ALIGNMENTS.map((a) => (
+            <button
+              key={a.value}
+              title={a.label}
+              onClick={() => {
+                editor.chain().focus().setTextAlign(a.value).run();
+                setOpen(false);
+              }}
+              className={`flex items-center gap-2 w-full px-3 py-1.5 text-sm text-left transition-colors ${
+                editor.isActive({ textAlign: a.value })
+                  ? 'bg-[#212529]/10 text-[#212529] font-medium'
+                  : 'text-[#212529] hover:bg-[#212529]/5'
+              }`}
+            >
+              {a.icon}
+              <span>{a.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function RichTextEditor({
   content,
@@ -26,6 +152,7 @@ export default function RichTextEditor({
         strike: {},
       }),
       Underline,
+      Highlight,
       Link.configure({ openOnClick: false }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Placeholder.configure({ placeholder: 'Type your message here…' }),
@@ -42,9 +169,11 @@ export default function RichTextEditor({
 
   const setLink = useCallback(() => {
     if (!editor) return;
+
     const prev = editor.getAttributes('link').href ?? '';
     const url = window.prompt('Enter URL', prev);
     if (url === null) return;
+
     if (url === '') {
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
       return;
@@ -125,16 +254,20 @@ export default function RichTextEditor({
             <option value="p" className="bg-[#D4D4D4]">
               Normal text
             </option>
+
             <option value="h1" className="bg-[#D4D4D4]">
               Heading 1
             </option>
+
             <option value="h2" className="bg-[#D4D4D4]">
               Heading 2
             </option>
+
             <option value="h3" className="bg-[#D4D4D4]">
               Heading 3
             </option>
           </select>
+
           <svg
             className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#212529]"
             viewBox="0 0 16 16"
@@ -153,17 +286,7 @@ export default function RichTextEditor({
 
         <div className="w-px h-5 bg-[#212529]/20 mx-1" />
 
-        <ToolBarButton
-          title="Align left"
-          active={editor.isActive({ textAlign: 'left' })}
-          onClick={() => editor.chain().focus().setTextAlign('left').run()}
-        >
-          <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
-            <rect x="1" y="3" width="14" height="1.5" rx="0.5" />
-            <rect x="1" y="6.5" width="9" height="1.5" rx="0.5" />
-            <rect x="1" y="10" width="12" height="1.5" rx="0.5" />
-          </svg>
-        </ToolBarButton>
+        <AlignDropdown editor={editor} />
 
         <div className="w-px h-5 bg-[#212529]/20 mx-1" />
 
@@ -227,7 +350,7 @@ export default function RichTextEditor({
         <ToolBarButton
           title="Highlight"
           active={editor.isActive('highlight')}
-          onClick={() => editor.chain().focus().toggleCode().run()}
+          onClick={() => editor.chain().focus().toggleHighlight().run()}
         >
           <svg
             viewBox="0 0 16 16"
@@ -237,6 +360,7 @@ export default function RichTextEditor({
             strokeWidth="1.4"
           >
             <path d="M3 13h4l6-6-4-4-6 6v4z" strokeLinejoin="round" />
+
             <path d="M9 5l2 2" />
           </svg>
         </ToolBarButton>
@@ -250,10 +374,15 @@ export default function RichTextEditor({
         >
           <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4">
             <circle cx="2.5" cy="4.5" r="1.2" />
+
             <rect x="5" y="3.75" width="9" height="1.5" rx="0.5" />
+
             <circle cx="2.5" cy="8.5" r="1.2" />
+
             <rect x="5" y="7.75" width="9" height="1.5" rx="0.5" />
+
             <circle cx="2.5" cy="12.5" r="1.2" />
+
             <rect x="5" y="11.75" width="9" height="1.5" rx="0.5" />
           </svg>
         </ToolBarButton>
@@ -273,7 +402,9 @@ export default function RichTextEditor({
             >
               1.
             </text>
+
             <rect x="5" y="3.75" width="9" height="1.5" rx="0.5" />
+
             <text
               x="0.5"
               y="9.5"
@@ -283,6 +414,7 @@ export default function RichTextEditor({
             >
               2.
             </text>
+
             <rect x="5" y="7.75" width="9" height="1.5" rx="0.5" />
           </svg>
         </ToolBarButton>

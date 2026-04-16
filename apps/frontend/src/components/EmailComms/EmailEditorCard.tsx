@@ -1,9 +1,8 @@
 import type { TabId, EmailData, EmailsState, Signature } from './types';
-import RichTextEditor from './RichTextEditor';
+import EmailTextEditor from './EmailTextEditor';
 import { Button } from './../ui/button';
 import SignatureEditorCard from './SignatureEditorCard';
 import { Label } from '../ui/label';
-import { Input } from '../ui/input';
 
 type EmailEditorCardProps = {
   activeTab: TabId;
@@ -12,7 +11,9 @@ type EmailEditorCardProps = {
   sig: Signature;
   onSigChange: (sig: Signature) => void;
   ctaText: string;
-  onCtaChange: (val: string) => void;
+  onCtaTextChange: (val: string) => void;
+  ctaLink: string;
+  onLinkChange: (val: string) => void;
   saved: boolean;
   sent: boolean;
   onSave: () => void;
@@ -25,7 +26,10 @@ export default function EmailEditorCard({
   onEmailChange,
   sig,
   onSigChange,
-  onCtaChange,
+  ctaText,
+  onCtaTextChange: onCtaChange,
+  ctaLink,
+  onLinkChange: onCtaLinkChange,
   saved,
   sent,
   onSave,
@@ -36,12 +40,12 @@ export default function EmailEditorCard({
   return (
     <div className="flex flex-col gap-5 max-w-3xl">
       <div className="flex flex-col gap-1.5">
-        <Label> Subject Line</Label>
+        <Label className="pb-2"> Subject Line</Label>
 
         <input
           value={currentEmail.subject}
           onChange={(e) => onEmailChange(activeTab, 'subject', e.target.value)}
-          className="border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-600 outline-none transition"
+          className="border border-slate-200 rounded-md px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-600 outline-none transition text-[#171717]"
           placeholder="Email subject…"
         />
       </div>
@@ -49,21 +53,30 @@ export default function EmailEditorCard({
       <div className="flex flex-col gap-1.5">
         <Label> Body Text</Label>
 
-        <RichTextEditor
+        <EmailTextEditor
           key={activeTab}
           content={currentEmail.body}
           onUpdate={(html) => onEmailChange(activeTab, 'body', html)}
         />
 
-        <Label className="bg-slate"> Button Text </Label>
+        <Label className="pt-1 bg-slate"> Button Text </Label>
 
-        <Input
-          value={'Button Link'}
+        <input
+          value={ctaText}
           onChange={(e) => onCtaChange(e.target.value)}
+          className="border border-slate-200 rounded-md px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-600 outline-none transition text-[#171717]"
+        />
+
+        <Label className="pt-2 bg-slate"> Button Link </Label>
+
+        <input
+          value={ctaLink}
+          onChange={(e) => onCtaLinkChange(e.target.value)}
+          className="border border-slate-200 rounded-md px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-600 outline-none transition text-[#171717]"
         />
       </div>
 
-      <div className="flex flex-col gap-3 bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
+      <div className="flex flex-col gap-3 bg-white border border-slate-100 rounded-md p-5 shadow-sm">
         <Label className="pb-2"> Email Signature </Label>
 
         <SignatureEditorCard sig={sig} onChange={onSigChange} />
@@ -72,14 +85,14 @@ export default function EmailEditorCard({
       <div className="flex items-center gap-3 pt-1">
         <Button
           onClick={onSave}
-          className={`px-6 py-4 rounded-med text-white bg-[#007B64] font-semibold text-sm transition-all`}
+          className={`px-6 py-4 h-[44px] rounded-md text-white bg-[#007B64] font-semibold text-sm transition-all`}
         >
           {saved ? 'Saved' : 'Save Changes'}
         </Button>
 
         <Button
           onClick={onSend}
-          className="px-6 py-4 rounded-med font-semibold text-sm bg-[#737373] text-white transition-all"
+          className="px-6 py-4 h-[44px] rounded-md font-semibold text-sm bg-[#737373] text-white transition-all"
         >
           {sent ? 'Sent!' : 'Send Email'}
         </Button>

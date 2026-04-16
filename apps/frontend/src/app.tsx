@@ -16,7 +16,7 @@ import { ConfirmRegisteredPage } from '@containers/auth/ConfirmRegisteredPage';
 import { DashboardPage } from '@containers/dashboard/DashboardPage';
 import { DonorStatsChart } from '@components/DonorStatsChart';
 import DashboardOverview from '@containers/dashboard/sidebar/DashboardOverview';
-import { EmailEditor } from './components/EmailComms/EmailEditor';
+import { EmailEditor } from './components/EmailComms/EmailEditorOverviewPage';
 import { AdminGrowingGoalTester } from '@containers/dashboard/AdminGrowingGoalTester';
 import OverviewPage from '@containers/dashboard/OverviewPage';
 
