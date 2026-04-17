@@ -23,6 +23,8 @@ import { DonationInformationModalTester } from '@components/DonationModals/Donat
 import { NewDonationModalTester } from '@components/DonationModals/NewDonationModalTester';
 import { SortingModalTester } from '@components/DonationModals/SortingModalTester';
 import OverviewPage from '@containers/dashboard/OverviewPage';
+import EditDonationGoalTester from '@components/DonationGoal/EditDonationGoalTester';
+import Sidebar from '@containers/dashboard/sidebar/Sidebar';
 
 const router = createBrowserRouter([
   {
@@ -73,7 +75,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/sidebar-test',
-    element: <SidebarTester />,
+    element: <Sidebar />,
   },
   {
     path: '/export-modal-test',
