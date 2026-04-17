@@ -7,6 +7,7 @@ import { DonationsService } from './donations.service';
 import { CreateDonationRequest } from './mappers';
 import { DonationResponseDto } from './dtos/donation-response-dto';
 import { DonationsRepository } from './donations.repository';
+import { Goal } from './goal.entity';
 // mock donations
 
 // invalid donation: non positive donation amount
@@ -122,8 +123,7 @@ const validDonation1: Donation = {
   createdAt: new Date(2025, 6, 4),
 
   updatedAt: new Date(2026, 7, 1),
-
-  recurringInterval: undefined,
+  recurringInterval: null,
 };
 
 const validDonation2: Donation = {
@@ -150,8 +150,7 @@ const validDonation2: Donation = {
   createdAt: new Date(2025, 6, 4),
 
   updatedAt: new Date(2026, 7, 1),
-
-  recurringInterval: undefined,
+  recurringInterval: null,
 
   dedicationMessage: 'I love fcc!',
 };
@@ -180,8 +179,7 @@ const validDonation3: Donation = {
   createdAt: new Date(2025, 6, 4),
 
   updatedAt: new Date(2026, 7, 1),
-
-  recurringInterval: undefined,
+  recurringInterval: null,
 
   dedicationMessage: 'I love fcc!',
 };
@@ -202,11 +200,11 @@ const expectedDonations: DonationResponseDto[] = allDonations.map(
       amount: donation.amount,
       isAnonymous: donation.isAnonymous,
       donationType: donation.donationType,
-      recurringInterval: donation.recurringInterval,
-      dedicationMessage: donation.dedicationMessage,
+      recurringInterval: donation.recurringInterval ?? undefined,
+      dedicationMessage: donation.dedicationMessage ?? undefined,
       showDedicationPublicly: donation.showDedicationPublicly,
       status: donation.status,
-      transactionId: donation.transactionId,
+      transactionId: donation.transactionId ?? undefined,
       createdAt: donation.createdAt,
       updatedAt: donation.updatedAt,
     };
@@ -215,22 +213,21 @@ const expectedDonations: DonationResponseDto[] = allDonations.map(
 
 describe('DonationsService', () => {
   let service: DonationsService;
-  let repo: jest.Mocked<Partial<Repository<Donation>>>;
+  let repo: any;
   let mockDonationsRepository: jest.Mocked<
     Pick<DonationsRepository, 'findLapsedDonors'>
   >;
   beforeAll(async () => {
+    const statsRow = {
+      count: '3',
+      total: '1300',
+      yearToDate: '800',
+      monthToDate: '100',
+    };
+
     const repoMock = {
       manager: {
-        query: jest.fn().mockResolvedValue([
-          {
-            count: allDonations.length,
-            total: allDonations.reduce(
-              (total, current) => total + current.amount,
-              0,
-            ),
-          },
-        ]),
+        query: jest.fn().mockResolvedValue([statsRow]),
       },
       save: jest.fn().mockResolvedValue(validDonation1),
       create: jest.fn(),
@@ -246,7 +243,7 @@ describe('DonationsService', () => {
       providers: [
         DonationsService,
         { provide: getRepositoryToken(Donation), useValue: repoMock },
-
+        { provide: getRepositoryToken(Goal), useValue: {} },
         { provide: DonationsRepository, useValue: mockDonationsRepository },
       ],
     }).compile();
@@ -392,13 +389,19 @@ describe('DonationsService', () => {
   });
 
   describe('Get total donations method', () => {
-    it('should find total amount and count of all donations', async () => {
-      const { total, count } = await service.getTotalDonations();
-      expect({ total, count }).toEqual({
-        total:
-          validDonation1.amount + validDonation2.amount + validDonation3.amount,
+    it('should find total amount, count, and date-window aggregates for successful donations', async () => {
+      const stats = await service.getTotalDonations();
+
+      expect(stats).toEqual({
+        total: 1300,
         count: 3,
+        yearToDate: 800,
+        monthToDate: 100,
       });
+      expect(repo.manager.query).toHaveBeenCalledWith(
+        expect.stringContaining('WHERE "status" = $1'),
+        [DonationStatus.SUCCEEDED, expect.any(Date), expect.any(Date)],
+      );
     });
   });
 

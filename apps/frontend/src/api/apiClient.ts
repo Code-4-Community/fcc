@@ -16,6 +16,32 @@ export type DonationCreateRequest = {
 };
 
 export type CreateDonationResponse = { id: string };
+export type DonationStatsResponse = {
+  total: number;
+  count: number;
+  yearToDate: number;
+  monthToDate: number;
+};
+
+export type ActiveGoalResponse = {
+  goal: {
+    id: number;
+    title: string;
+    targetAmount: number;
+    startDate: string;
+    endDate: string;
+    dateRangeLabel: string;
+  } | null;
+  amountRaised: number;
+  progressPercent: number;
+};
+
+export type UpdateGoalRequest = {
+  title?: string;
+  targetAmount: number;
+  startDate: string;
+  endDate: string;
+};
 
 export type CreatePaymentIntentRequest = {
   amount: number; // in cents
@@ -47,6 +73,11 @@ export type AuthResponse = {
 };
 
 export type RefreshRequest = { refreshToken: string; userSub: string };
+export type ConfirmPasswordRequest = {
+  email: string;
+  confirmationCode: string;
+  newPassword: string;
+};
 
 type ApiError = { error?: string; message?: string };
 
@@ -118,6 +149,43 @@ export class ApiClient {
     }
   }
 
+  public async forgotPassword(email: string): Promise<void> {
+    try {
+      await this.axiosInstance.post('/api/auth/forgotPassword', { email });
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to send password reset email');
+    }
+  }
+
+  public async confirmPassword(body: ConfirmPasswordRequest): Promise<void> {
+    try {
+      await this.axiosInstance.post('/api/auth/confirmPassword', body);
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to reset password');
+    }
+  }
+
+  public async getActiveGoalSummary(): Promise<ActiveGoalResponse> {
+    try {
+      const res = await this.axiosInstance.get('/api/donations/goal/active');
+      return res.data;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to fetch active goal');
+    }
+  }
+
+  public async updateGoal(
+    id: number | null,
+    body: UpdateGoalRequest,
+  ): Promise<void> {
+    try {
+      const url = id ? `/api/donations/goal/${id}` : '/api/donations/goal';
+      await this.axiosInstance.patch(url, body);
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to update goal');
+    }
+  }
+
   private handleAxiosError(err: unknown, defaultMsg: string): never {
     if (axios.isAxiosError<ApiError>(err)) {
       const data = err.response?.data;
@@ -152,6 +220,8 @@ export class ApiClient {
     perPage?: number;
     donationType?: 'one_time' | 'recurring';
     status?: 'pending' | 'succeeded' | 'failed' | 'cancelled';
+    startDate?: string;
+    endDate?: string;
   }): Promise<{
     rows: Array<{
       id: number;
@@ -175,6 +245,26 @@ export class ApiClient {
       return res.data;
     } catch (err: unknown) {
       this.handleAxiosError(err, 'Failed to fetch donations');
+    }
+  }
+
+  public async getDonationStats(): Promise<DonationStatsResponse> {
+    try {
+      const res = await this.axiosInstance.get('/api/donations/stats');
+      return res.data as DonationStatsResponse;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to fetch donation stats');
+    }
+  }
+
+  public async updateUserStatus(
+    id: number,
+    status: 'ADMIN' | 'STANDARD',
+  ): Promise<void> {
+    try {
+      await this.axiosInstance.patch(`/api/users/${id}/status`, { status });
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to update user status');
     }
   }
 

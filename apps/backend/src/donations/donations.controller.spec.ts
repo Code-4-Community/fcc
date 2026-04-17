@@ -237,7 +237,12 @@ describe('DonationsController', () => {
 
   describe('getStats', () => {
     it('should return donation statistics', async () => {
-      const mockStats = { total: 10000, count: 50 };
+      const mockStats = {
+        total: 10000,
+        count: 50,
+        yearToDate: 7000,
+        monthToDate: 2500,
+      };
       mockService.getTotalDonations.mockResolvedValue(mockStats);
 
       const result = await controller.getStats();
@@ -247,13 +252,20 @@ describe('DonationsController', () => {
     });
 
     it('should handle zero donations', async () => {
-      const mockStats = { total: 0, count: 0 };
+      const mockStats = {
+        total: 0,
+        count: 0,
+        yearToDate: 0,
+        monthToDate: 0,
+      };
       mockService.getTotalDonations.mockResolvedValue(mockStats);
 
       const result = await controller.getStats();
 
       expect(result.total).toBe(0);
       expect(result.count).toBe(0);
+      expect(result.yearToDate).toBe(0);
+      expect(result.monthToDate).toBe(0);
     });
   });
 
@@ -460,7 +472,12 @@ describe('Donation Integration', () => {
           (d) => d.status === DonationStatus.SUCCEEDED,
         );
         const total = succeeded.reduce((s, d) => s + (d.amount || 0), 0);
-        return { total, count: succeeded.length };
+        return {
+          total,
+          count: succeeded.length,
+          yearToDate: total,
+          monthToDate: total,
+        };
       }),
     };
 
@@ -995,7 +1012,12 @@ describe('Donation Integration', () => {
         .get('/api/donations/stats')
         .expect(200);
 
-      expect(res.body).toEqual({ total: 25, count: 2 });
+      expect(res.body).toEqual({
+        total: 25,
+        count: 2,
+        yearToDate: 25,
+        monthToDate: 25,
+      });
     });
 
     it('successfully returns the correct total and count even if the database is empty', async () => {
@@ -1004,7 +1026,12 @@ describe('Donation Integration', () => {
         .get('/api/donations/stats')
         .expect(200);
 
-      expect(res.body).toEqual({ total: 0, count: 0 });
+      expect(res.body).toEqual({
+        total: 0,
+        count: 0,
+        yearToDate: 0,
+        monthToDate: 0,
+      });
     });
 
     it('throws 500 server error if the database errors', async () => {

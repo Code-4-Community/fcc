@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Param,
   Body,
   Query,
   ParseIntPipe,
@@ -14,6 +16,7 @@ import {
   UseInterceptors,
   Req,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -25,9 +28,12 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { DonationsService } from './donations.service';
 import { DonationsRepository, PaginationFilters } from './donations.repository';
-import { CreateDonationDto } from './dtos/create-donation-dto';
-import { DonationResponseDto } from './dtos/donation-response-dto';
-import { PublicDonationDto } from './dtos/public-donation-dto';
+import {
+  CreateDonationDto,
+  DonationResponseDto,
+  PublicDonationDto,
+  UpdateGoalDto,
+} from './dtos';
 import { DonationMappers } from './mappers';
 import {
   DonationType,
@@ -36,6 +42,7 @@ import {
 } from './donation.entity';
 import { CurrentUserInterceptor } from '../interceptors/current-user.interceptor';
 import { Status } from '../users/types';
+import { Goal } from './goal.entity';
 
 @ApiTags('Donations')
 @Controller('donations')
@@ -99,7 +106,7 @@ export class DonationsController {
   @ApiOperation({
     summary: 'get donation statistics',
     description:
-      'retrieve aggregate donation statistics including total amount and count',
+      'retrieve aggregate donation statistics for successful donations, including lifetime total, year-to-date total, and month-to-date total',
   })
   @ApiResponse({
     status: 200,
@@ -109,20 +116,111 @@ export class DonationsController {
       properties: {
         total: {
           type: 'number',
-          description: 'total donation amount in dollars',
+          description: 'lifetime total amount from successful donations',
           example: 25000.0,
         },
         count: {
           type: 'number',
-          description: 'total number of donations',
+          description: 'total number of successful donations',
           example: 150,
+        },
+        yearToDate: {
+          type: 'number',
+          description:
+            'successful donation amount from January 1st of the current year through now',
+          example: 18000.0,
+        },
+        monthToDate: {
+          type: 'number',
+          description:
+            'successful donation amount from the first day of the current month through now',
+          example: 4200.0,
         },
       },
     },
   })
-  async getStats(): Promise<{ total: number; count: number }> {
+  async getStats(): Promise<{
+    total: number;
+    count: number;
+    yearToDate: number;
+    monthToDate: number;
+  }> {
     const stats = await this.donationsService.getTotalDonations();
     return stats;
+  }
+
+  @Get('goal/active')
+  @ApiOperation({
+    summary: 'get active growing goal summary',
+    description:
+      'retrieve the active goal, the amount raised during that goal period, and progress percentage',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'active goal summary',
+    schema: {
+      type: 'object',
+      properties: {
+        goal: {
+          nullable: true,
+          type: 'object',
+          properties: {
+            id: { type: 'number', example: 1 },
+            targetAmount: { type: 'number', example: 50000 },
+            startDate: { type: 'string', example: '2026-01-01' },
+            endDate: { type: 'string', example: '2026-06-30' },
+            dateRangeLabel: {
+              type: 'string',
+              example: 'January - June 2026',
+            },
+          },
+        },
+        amountRaised: { type: 'number', example: 31336 },
+        progressPercent: { type: 'number', example: 62.67 },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'unauthorized',
+  })
+  async getActiveGoalSummary(@Req() req: any): Promise<{
+    goal: {
+      id: number;
+      targetAmount: number;
+      startDate: string;
+      endDate: string;
+      dateRangeLabel: string;
+    } | null;
+    amountRaised: number;
+    progressPercent: number;
+  }> {
+    return this.donationsService.getActiveGoalSummary();
+  }
+
+  @Patch('goal/:id?')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'update an existing goal (admin)',
+    description:
+      'update the details of a specific donation goal. If no ID is provided, the current active goal is updated. Requires authentication.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'goal successfully updated',
+    type: Goal,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'goal not found',
+  })
+  async updateGoal(
+    @Param('id', new ParseIntPipe({ optional: true })) id: number | null,
+    @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+    updateGoalDto: UpdateGoalDto,
+  ): Promise<Goal> {
+    return this.donationsService.updateGoal(id, updateGoalDto);
   }
 
   @Get('lapsed')
@@ -219,6 +317,20 @@ export class DonationsController {
     type: Number,
     description: 'maximum donation amount',
   })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    description: 'filter by start date (YYYY-MM-DD format)',
+    example: '2026-01-01',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description: 'filter by end date (YYYY-MM-DD format)',
+    example: '2026-12-31',
+  })
   @ApiResponse({
     status: 200,
     description: 'paginated donation list',
@@ -254,6 +366,8 @@ export class DonationsController {
     minAmount?: number,
     @Query('maxAmount', new ParseIntPipe({ optional: true }))
     maxAmount?: number,
+    @Query('startDate') startDateStr?: string,
+    @Query('endDate') endDateStr?: string,
   ): Promise<{
     rows: DonationResponseDto[];
     total: number;
@@ -268,6 +382,27 @@ export class DonationsController {
       throw new UnauthorizedException('Admin access required');
     }
 
+    let startDate: Date | undefined;
+    let endDate: Date | undefined;
+
+    if (startDateStr) {
+      startDate = new Date(startDateStr);
+      if (isNaN(startDate.getTime())) {
+        throw new BadRequestException(
+          'Invalid startDate format. Use YYYY-MM-DD',
+        );
+      }
+    }
+
+    if (endDateStr) {
+      endDate = new Date(endDateStr);
+      // Add one day to endDate to include the entire end date
+      endDate.setDate(endDate.getDate() + 1);
+      if (isNaN(endDate.getTime())) {
+        throw new BadRequestException('Invalid endDate format. Use YYYY-MM-DD');
+      }
+    }
+
     const filters: PaginationFilters = {
       donationType,
       status,
@@ -275,6 +410,8 @@ export class DonationsController {
       recurringInterval,
       minAmount,
       maxAmount,
+      startDate,
+      endDate,
     };
 
     const result = await this.donationsRepository.findPaginated(

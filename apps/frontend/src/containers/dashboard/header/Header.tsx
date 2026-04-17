@@ -1,4 +1,5 @@
 import { useAuth } from '../../../components/AuthProvider';
+import { getDisplayName } from '../../../utils/user';
 
 type HeaderProps = {
   title?: string;
@@ -12,17 +13,14 @@ function cn(...classes: Array<string | false | null | undefined>) {
 }
 
 export default function Header({
-  title = 'Dashboard Overview',
+  title,
   userName = 'F. N. Way',
   userRole = 'Admin/Standard',
   className,
 }: HeaderProps) {
   const { user } = useAuth();
 
-  const displayUserName =
-    user?.firstName && user?.lastName
-      ? `${user.firstName} ${user.lastName}`
-      : userName;
+  const displayUserName = getDisplayName(user) || userName;
 
   const displayUserRole = user?.status
     ? user.status.charAt(0).toUpperCase() + user.status.slice(1).toLowerCase()

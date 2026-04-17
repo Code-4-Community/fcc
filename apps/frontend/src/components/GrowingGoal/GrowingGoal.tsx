@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import styles from './GrowingGoal.module.css';
 import Plant from './Plant';
+import { Pencil } from 'lucide-react';
+import { Button } from '../ui/button';
 
 export type SampleDonation = {
   name: string;
@@ -13,17 +15,28 @@ export type GrowingGoalProps = {
   total: number;
   goal: number;
   sampleDonation?: SampleDonation;
+  variant?: 'default' | 'admin';
+  subMessage?: string;
+  onEdit?: () => void;
 };
 
 export const GrowingGoal = (props: GrowingGoalProps) => {
-  const { message, total, goal } = props;
+  const {
+    message,
+    total,
+    goal,
+    variant = 'default',
+    subMessage,
+    onEdit,
+  } = props;
   const growthContainerRef = useRef<HTMLDivElement>(null);
   const [radius, setRadius] = useState(0);
   const [endHandle, setEndHandle] = useState({
     top: 0,
     left: 0,
   });
-  const progress = Math.floor((total / goal) * 360);
+  const progress = goal > 0 ? Math.floor((total / goal) * 360) : 0;
+  const percentage = goal > 0 ? Math.round((total / goal) * 100) : 0;
 
   // calculate gradient color of growth container handles
   const getGradientColor = (degree: number): string => {
@@ -95,8 +108,53 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
   };
 
   return (
-    <div className={styles['goal-container']}>
-      <div className={styles['description-label']}>{message}</div>
+    <div className={styles['goal-container']} style={{ background: '#FCFCFC' }}>
+      <div
+        className={styles['description-label']}
+        style={
+          variant === 'admin'
+            ? {
+                backgroundColor: '#FCFCFC',
+                color: '#000',
+                borderBottom: '1px solid #E5E5E5',
+                height: 'auto',
+                padding: '4% 4%',
+                alignItems: 'flex-start',
+                textAlign: 'left',
+                position: 'relative',
+              }
+            : {}
+        }
+      >
+        <span style={variant === 'admin' ? { fontWeight: 600 } : {}}>
+          {message}
+        </span>
+        {subMessage && (
+          <span
+            style={{
+              fontSize: '3.5cqw',
+              color: variant === 'admin' ? '#666' : '#FFFFFF',
+              fontWeight: 400,
+              display: 'block',
+            }}
+          >
+            {subMessage}
+          </span>
+        )}
+
+        {variant === 'admin' && onEdit && (
+          <Button
+            onClick={onEdit}
+            variant="outline"
+            className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-2 border-[#E5E5E5] bg-white px-3 py-1 shadow-sm hover:bg-neutral-50"
+          >
+            <Pencil size={14} className="text-[#404040]" />
+            <span className="text-[14px] font-normal leading-6 text-black">
+              Edit
+            </span>
+          </Button>
+        )}
+      </div>
 
       <div className={styles['growth-container']}>
         <div
@@ -127,8 +185,28 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
         </div>
       </div>
       <div className={styles['total-donation-label']}>
-        <span style={{ fontWeight: '700' }}>${total.toFixed(0)}</span>{' '}
-        <span style={{ fontSize: '4cqw' }}>raised of</span> ${goal.toFixed(0)}
+        <div style={{ marginBottom: variant === 'admin' ? '2%' : '0' }}>
+          <span style={{ fontWeight: '700' }}>${total.toLocaleString()}</span>{' '}
+          <span style={{ fontSize: '4cqw' }}>raised of</span> $
+          {goal.toLocaleString()}
+        </div>
+        {variant === 'admin' && (
+          <div
+            style={{
+              display: 'inline-flex',
+              padding: '2% 6%',
+              backgroundColor: '#F2F2F2',
+              borderRadius: '999px',
+              fontSize: '3.5cqw',
+              color: '#000',
+              fontWeight: 400,
+              marginTop: '2%',
+              fontFamily: "'Source Sans Pro', sans-serif",
+            }}
+          >
+            {percentage}% complete
+          </div>
+        )}
       </div>
       <div className={styles['sample-donor-container']}>
         {props.sampleDonation && (
