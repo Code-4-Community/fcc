@@ -278,35 +278,40 @@ function DonationTrackerToolbar({
 
   return (
     <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-      <div className="flex w-full max-w-[280px] items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-2 shadow-sm">
-        <Search className="h-4 w-4 shrink-0 text-neutral-400" />
+      <div className="flex w-full max-w-[340px] items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2.5 shadow-sm">
+        <Search className="h-5 w-5 shrink-0 text-neutral-400" />
         <Input
           type="search"
           placeholder="Search donations"
           value={searchValue}
           onChange={(event) => onSearchChange(event.target.value)}
-          className="h-8 border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0"
+          className="h-9 border-0 bg-transparent px-0 text-base shadow-none focus-visible:ring-0"
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <Button variant="success" size="lg" onClick={onAddDonation}>
-          <Plus className="h-4 w-4" />
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          variant="success"
+          size="lg"
+          className="h-12 px-6 text-base"
+          onClick={onAddDonation}
+        >
+          <Plus className="h-5 w-5" />
           Add Donation
         </Button>
 
         <Popover open={isSortOpen} onOpenChange={setIsSortOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="lg">
-              <ArrowDownUp className="h-4 w-4" />
+            <Button variant="outline" size="lg" className="h-12 px-6 text-base">
+              <ArrowDownUp className="h-5 w-5" />
               Sort: {SORT_LABELS[sortKey]}
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-64 space-y-2 border-neutral-200 bg-white p-3"
+            className="w-72 space-y-2 border-neutral-200 bg-white p-4"
             align="start"
           >
-            <p className="text-sm font-medium text-neutral-900">
+            <p className="text-base font-medium text-neutral-900">
               Sort donations
             </p>
             {[
@@ -323,7 +328,7 @@ function DonationTrackerToolbar({
                   setIsSortOpen(false);
                 }}
                 className={cn(
-                  'flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition-colors',
+                  'flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left text-base transition-colors',
                   sortKey === option.key
                     ? 'border-emerald-500 bg-emerald-50 text-emerald-800'
                     : 'border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50',
@@ -337,35 +342,41 @@ function DonationTrackerToolbar({
 
         <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="lg">
-              <SlidersHorizontal className="h-4 w-4" />
+            <Button variant="outline" size="lg" className="h-12 px-6 text-base">
+              <SlidersHorizontal className="h-5 w-5" />
               Filter
               {activeFilterCount > 0 ? (
-                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-600 px-1 text-xs font-semibold text-white">
+                <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-emerald-600 px-1.5 text-xs font-semibold text-white ml-1">
                   {activeFilterCount}
                 </span>
               ) : null}
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-80 space-y-4 border-neutral-200 bg-white p-4"
+            className="w-96 space-y-5 border-neutral-200 bg-white p-5"
             align="start"
           >
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-medium text-neutral-900">Filters</p>
-              <Button variant="ghost" size="sm" onClick={onResetFilters}>
+              <p className="text-base font-medium text-neutral-900">Filters</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-sm"
+                onClick={onResetFilters}
+              >
                 Reset
               </Button>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-sm font-medium text-neutral-800">
-                <CalendarDays className="h-4 w-4" />
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-base font-medium text-neutral-800">
+                <CalendarDays className="h-5 w-5" />
                 Date range
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 <Input
                   type="date"
+                  className="h-11 text-base"
                   value={filters.dateFrom}
                   onChange={(event) =>
                     updateFilters({
@@ -376,6 +387,7 @@ function DonationTrackerToolbar({
                 />
                 <Input
                   type="date"
+                  className="h-11 text-base"
                   value={filters.dateTo}
                   onChange={(event) =>
                     updateFilters({
@@ -387,9 +399,11 @@ function DonationTrackerToolbar({
               </div>
             </div>
 
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-neutral-800">Recurrence</p>
-              <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="space-y-3">
+              <p className="text-base font-medium text-neutral-800">
+                Recurrence
+              </p>
+              <div className="grid grid-cols-2 gap-3 text-base">
                 {[
                   { key: 'one_time', label: 'One-Time' },
                   { key: 'weekly', label: 'Weekly' },
@@ -421,7 +435,7 @@ function DonationTrackerToolbar({
                         });
                       }}
                       className={cn(
-                        'rounded-lg border px-3 py-2 text-left transition-colors',
+                        'rounded-lg border px-4 py-2.5 text-left transition-colors',
                         active
                           ? 'border-emerald-500 bg-emerald-50 text-emerald-800'
                           : 'border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50',
@@ -434,13 +448,14 @@ function DonationTrackerToolbar({
               </div>
             </div>
 
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-neutral-800">Amount</p>
-              <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-3">
+              <p className="text-base font-medium text-neutral-800">Amount</p>
+              <div className="grid grid-cols-2 gap-3">
                 <Input
                   type="number"
                   min="0"
                   placeholder="Min"
+                  className="h-11 text-base"
                   value={filters.amountMin}
                   onChange={(event) =>
                     updateFilters({
@@ -453,6 +468,7 @@ function DonationTrackerToolbar({
                   type="number"
                   min="0"
                   placeholder="Max"
+                  className="h-11 text-base"
                   value={filters.amountMax}
                   onChange={(event) =>
                     updateFilters({
@@ -467,7 +483,8 @@ function DonationTrackerToolbar({
             <div className="flex justify-end">
               <Button
                 variant="outline"
-                size="sm"
+                size="default"
+                className="text-base"
                 onClick={() => setIsFilterOpen(false)}
               >
                 Close
@@ -478,13 +495,13 @@ function DonationTrackerToolbar({
 
         <Popover open={isExportOpen} onOpenChange={setIsExportOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="lg">
-              <Download className="h-4 w-4" />
+            <Button variant="outline" size="lg" className="h-12 px-6 text-base">
+              <Download className="h-5 w-5" />
               Export
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-48 border-neutral-200 bg-white p-2"
+            className="w-56 border-neutral-200 bg-white p-2"
             align="end"
           >
             <button
@@ -493,7 +510,7 @@ function DonationTrackerToolbar({
                 onExport();
                 setIsExportOpen(false);
               }}
-              className="block w-full rounded-md px-3 py-2 text-left text-sm text-neutral-700 hover:bg-neutral-50"
+              className="block w-full rounded-md px-4 py-3 text-left text-base text-neutral-700 hover:bg-neutral-50"
             >
               Export as CSV
             </button>
@@ -519,17 +536,17 @@ function DonationTable({ rows }: { rows: DonationListRow[] }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
-        <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
+        <table className="min-w-full border-separate border-spacing-0 text-left text-base">
           <thead className="bg-[#E7E7E7] text-neutral-600">
             <tr>
-              <th className="px-4 py-4 text-[13px] font-medium">First Name</th>
-              <th className="px-4 py-4 text-[13px] font-medium">Last Name</th>
-              <th className="px-4 py-4 text-[13px] font-medium">Email</th>
-              <th className="px-4 py-4 text-[13px] font-medium">Amount</th>
-              <th className="px-4 py-4 text-[13px] font-medium">Recurrence</th>
-              <th className="px-4 py-4 text-[13px] font-medium">Date</th>
-              <th className="px-4 py-4 text-[13px] font-medium">Fee</th>
-              <th className="px-4 py-4 text-[13px] font-medium">Reason</th>
+              <th className="px-4 py-4 text-[15px] font-medium">First Name</th>
+              <th className="px-4 py-4 text-[15px] font-medium">Last Name</th>
+              <th className="px-4 py-4 text-[15px] font-medium">Email</th>
+              <th className="px-4 py-4 text-[15px] font-medium">Amount</th>
+              <th className="px-4 py-4 text-[15px] font-medium">Recurrence</th>
+              <th className="px-4 py-4 text-[15px] font-medium">Date</th>
+              <th className="px-4 py-4 text-[15px] font-medium">Fee</th>
+              <th className="px-4 py-4 text-[15px] font-medium">Reason</th>
             </tr>
           </thead>
           <tbody>
@@ -538,30 +555,30 @@ function DonationTable({ rows }: { rows: DonationListRow[] }) {
 
               return (
                 <tr key={donation.id} className="hover:bg-neutral-50/70">
-                  <td className="border-t border-neutral-100 px-4 py-3 text-neutral-700">
+                  <td className="border-t border-neutral-100 px-4 py-4 text-neutral-700">
                     {donation.firstName}
                   </td>
-                  <td className="border-t border-neutral-100 px-4 py-3 text-neutral-700">
+                  <td className="border-t border-neutral-100 px-4 py-4 text-neutral-700">
                     {donation.lastName}
                   </td>
-                  <td className="border-t border-neutral-100 px-4 py-3 text-neutral-700">
+                  <td className="border-t border-neutral-100 px-4 py-4 text-neutral-700">
                     {donation.email}
                   </td>
-                  <td className="border-t border-neutral-100 px-4 py-3 font-medium text-neutral-800">
+                  <td className="border-t border-neutral-100 px-4 py-4 font-medium text-neutral-800">
                     {formatCurrency(donation.amount)}
                   </td>
-                  <td className="border-t border-neutral-100 px-4 py-3">
-                    <span className="inline-flex rounded-full bg-[#DDC8BF] px-3 py-1.5 text-xs font-medium text-neutral-700">
+                  <td className="border-t border-neutral-100 px-4 py-4">
+                    <span className="inline-flex rounded-full bg-[#DDC8BF] px-4 py-2 text-sm font-medium text-neutral-700">
                       {getRecurrenceLabel(donation)}
                     </span>
                   </td>
-                  <td className="border-t border-neutral-100 px-4 py-3 text-neutral-700">
+                  <td className="border-t border-neutral-100 px-4 py-4 text-neutral-700">
                     {formatDate(donation.createdAt)}
                   </td>
-                  <td className="border-t border-neutral-100 px-4 py-3">
+                  <td className="border-t border-neutral-100 px-4 py-4">
                     <span
                       className={cn(
-                        'inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-semibold text-white',
+                        'inline-flex h-6 w-6 items-center justify-center rounded-full text-[13px] font-semibold text-white',
                         feeIndicator.className,
                       )}
                       title={feeIndicator.label}
@@ -569,8 +586,8 @@ function DonationTable({ rows }: { rows: DonationListRow[] }) {
                       ✓
                     </span>
                   </td>
-                  <td className="border-t border-neutral-100 px-4 py-3">
-                    <span className="text-sm text-neutral-700">
+                  <td className="border-t border-neutral-100 px-4 py-4">
+                    <span className="text-base text-neutral-700">
                       {getReasonLabel(donation)}
                     </span>
                   </td>
@@ -792,8 +809,8 @@ export default function DonationTrackerPage() {
       : 0;
 
   return (
-    <main className="min-h-screen bg-[#F5F5F5] p-5 text-neutral-900">
-      <section className="space-y-5 rounded-[20px] border border-neutral-200 bg-white/90 p-5 shadow-[0_1px_3px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+    <main className="h-full bg-[#F5F5F5] p-8 text-neutral-900">
+      <section className="space-y-6 rounded-[24px] border border-neutral-200 bg-white/90 p-8 shadow-[0_4px_12px_rgba(15,23,42,0.08)] backdrop-blur-sm">
         <DonationTrackerToolbar
           totalCount={filteredRows.length}
           visibleCount={visibleRows.length}
@@ -815,20 +832,20 @@ export default function DonationTrackerPage() {
         />
 
         {error ? (
-          <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-base text-rose-700">
             {error}
           </div>
         ) : null}
 
         {loading ? (
           <Card className="border-neutral-200">
-            <CardContent className="px-4 py-10 text-center text-sm text-neutral-500">
+            <CardContent className="px-4 py-20 text-center text-lg text-neutral-500">
               Loading donations...
             </CardContent>
           </Card>
         ) : visibleRows.length === 0 ? (
           <Card className="border-neutral-200">
-            <CardContent className="px-4 py-10 text-center text-sm text-neutral-500">
+            <CardContent className="px-4 py-20 text-center text-lg text-neutral-500">
               No donations found for this page.
             </CardContent>
           </Card>
@@ -836,8 +853,8 @@ export default function DonationTrackerPage() {
           <DonationTable rows={visibleRows} />
         )}
 
-        <div className="flex flex-col gap-4 border-t border-neutral-200 pt-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-neutral-500">
+        <div className="flex flex-col gap-4 border-t border-neutral-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-base text-neutral-500">
             Showing {startItem} - {endItem} of {filteredRows.length} donations
           </p>
 
@@ -847,7 +864,8 @@ export default function DonationTrackerPage() {
           >
             <Button
               variant="ghost"
-              size="sm"
+              size="default"
+              className="h-10 px-4 text-base"
               onClick={() =>
                 setPage((currentPage) => Math.max(1, currentPage - 1))
               }
@@ -860,7 +878,7 @@ export default function DonationTrackerPage() {
               item === 'ellipsis' ? (
                 <span
                   key={`ellipsis-${index}`}
-                  className="px-2 text-neutral-400"
+                  className="px-2 text-base text-neutral-400"
                 >
                   ...
                 </span>
@@ -868,10 +886,11 @@ export default function DonationTrackerPage() {
                 <Button
                   key={item}
                   variant={item === page ? 'outline' : 'ghost'}
-                  size="sm"
+                  size="default"
                   className={cn(
+                    'h-10 w-10 p-0 text-base',
                     item === page &&
-                      'border-neutral-300 bg-white text-neutral-900',
+                      'border-neutral-300 bg-white font-semibold text-neutral-900',
                   )}
                   onClick={() => setPage(item)}
                   disabled={loading}
@@ -883,7 +902,8 @@ export default function DonationTrackerPage() {
 
             <Button
               variant="ghost"
-              size="sm"
+              size="default"
+              className="h-10 px-4 text-base"
               onClick={() =>
                 setPage((currentPage) => Math.min(totalPages, currentPage + 1))
               }

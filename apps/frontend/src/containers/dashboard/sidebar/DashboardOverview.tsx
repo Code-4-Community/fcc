@@ -20,7 +20,7 @@ export default function DashboardOverview() {
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header title={title} />
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-auto">
           <Outlet />
         </div>
       </div>

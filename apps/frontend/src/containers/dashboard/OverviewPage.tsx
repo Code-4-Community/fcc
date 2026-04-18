@@ -51,7 +51,7 @@ export default function OverviewPage() {
     }).format(amount);
 
   return (
-    <div className="flex bg-white">
+    <div className="flex h-full bg-white">
       <main className="flex-1 bg-[#F5F5F5] p-5">
         <h2 className="mb-3 text-[30px] leading-9 font-semibold tracking-[-0.6px] text-black">
           Donations Raised
