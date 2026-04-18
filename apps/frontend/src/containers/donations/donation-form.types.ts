@@ -1,4 +1,4 @@
-export type RecurringInterval = 'weekly' | 'monthly' | 'yearly';
+export type RecurringInterval = 'weekly' | 'monthly' | 'annually';
 
 export type DedicationKind = 'honor' | 'memory';
 

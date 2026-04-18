@@ -11,7 +11,7 @@ export type DonationCreateRequest = {
   donationType: 'one_time' | 'recurring';
   dedicationMessage: string;
   showDedicationPublicly: boolean;
-  recurringInterval?: 'weekly' | 'monthly' | 'yearly';
+  recurringInterval?: 'weekly' | 'monthly' | 'annually';
   paymentIntentId?: string;
 };
 
