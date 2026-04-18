@@ -15,6 +15,7 @@ export type GrowingGoalProps = {
   total: number;
   goal: number;
   sampleDonation?: SampleDonation;
+  donorCycles?: SampleDonation[];
   variant?: 'default' | 'admin';
   subMessage?: string;
   onEdit?: () => void;
@@ -28,6 +29,7 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
     variant = 'default',
     subMessage,
     onEdit,
+    donorCycles,
   } = props;
   const growthContainerRef = useRef<HTMLDivElement>(null);
   const [radius, setRadius] = useState(0);
@@ -35,6 +37,32 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
     top: 0,
     left: 0,
   });
+  const [currentDonorIndex, setCurrentDonorIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // When donorCycles changes (e.g., after a new donation), reset the cycle to the latest donor
+  useEffect(() => {
+    setCurrentDonorIndex(0);
+  }, [donorCycles]);
+
+  const displayDonor =
+    donorCycles && donorCycles.length > 0
+      ? donorCycles[currentDonorIndex]
+      : props.sampleDonation;
+
+  useEffect(() => {
+    if (donorCycles && donorCycles.length > 1) {
+      const interval = setInterval(() => {
+        setIsAnimating(true);
+        setTimeout(() => {
+          setCurrentDonorIndex((prev) => (prev + 1) % donorCycles.length);
+          setIsAnimating(false);
+        }, 500); // Wait for fade out
+      }, 8000);
+      return () => clearInterval(interval);
+    }
+  }, [donorCycles]);
+
   const progress = goal > 0 ? Math.floor((total / goal) * 360) : 0;
   const percentage = goal > 0 ? Math.round((total / goal) * 100) : 0;
 
@@ -215,12 +243,16 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
         )}
       </div>
       <div className={styles['sample-donor-container']}>
-        {props.sampleDonation && (
-          <div className={styles['sample-donor-label']}>
-            {props.sampleDonation.profile ? (
+        {displayDonor && (
+          <div
+            className={`${styles['sample-donor-label']} ${
+              isAnimating ? styles['fade-out'] : styles['fade-in']
+            }`}
+          >
+            {displayDonor.profile ? (
               <div
                 style={{
-                  backgroundImage: `url("${props.sampleDonation.profile}")`,
+                  backgroundImage: `url("${displayDonor.profile}")`,
                   backgroundSize: 'cover',
                 }}
                 className={styles['sample-donor-profile']}
@@ -231,12 +263,12 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
 
             <div className={styles['sample-donor-amount']}>
               <b>
-                {props.sampleDonation.name.length > 8
-                  ? props.sampleDonation.name.slice(0, 8) + '...'
-                  : props.sampleDonation.name}
+                {displayDonor.name.length > 8
+                  ? displayDonor.name.slice(0, 8) + '...'
+                  : displayDonor.name}
               </b>
               {' donated $'}
-              <b>{props.sampleDonation.amount.toFixed(2)}</b>!
+              <b>{displayDonor.amount.toFixed(2)}</b>!
             </div>
           </div>
         )}

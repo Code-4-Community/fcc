@@ -60,7 +60,7 @@ export class Donation {
   @Column({ default: false })
   showDedicationPublicly: boolean;
 
-  @Column({ type: 'varchar', default: DonationStatus.PENDING })
+  @Column({ type: 'varchar', default: DonationStatus.SUCCEEDED })
   status: DonationStatus;
 
   @Column({ nullable: true })
