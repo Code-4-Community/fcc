@@ -167,6 +167,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
   };
 
   const handleNext = async () => {
+    setSubmitError(null);
     if (!validateStep(currentStep)) {
       return;
     }
@@ -195,6 +196,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
   };
 
   const handleBack = () => {
+    setSubmitError(null);
     setCurrentStep((prev) => clampStep(prev - 1));
   };
 
