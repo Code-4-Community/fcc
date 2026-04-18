@@ -172,8 +172,8 @@ export const UserManagement: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="h-full bg-[#F5F5F5] p-8">
-        <div className="flex flex-col h-full rounded-[24px] border border-neutral-200 bg-white/90 shadow-[0_4px_12px_rgba(15,23,42,0.08)] backdrop-blur-sm overflow-hidden">
+      <div className="flex flex-col h-full bg-[#F5F5F5] p-8">
+        <div className="flex flex-col flex-1 rounded-[24px] border border-neutral-200 bg-white/90 shadow-[0_4px_12px_rgba(15,23,42,0.08)] backdrop-blur-sm overflow-hidden">
           <div className="flex items-center justify-center flex-1">
             <p className="text-base text-[#737373]">Loading users...</p>
           </div>
@@ -184,8 +184,8 @@ export const UserManagement: React.FC = () => {
 
   if (error) {
     return (
-      <div className="h-full bg-[#F5F5F5] p-8">
-        <div className="flex flex-col h-full rounded-[24px] border border-neutral-200 bg-white/90 shadow-[0_4px_12px_rgba(15,23,42,0.08)] backdrop-blur-sm overflow-hidden">
+      <div className="flex flex-col h-full bg-[#F5F5F5] p-8">
+        <div className="flex flex-col flex-1 rounded-[24px] border border-neutral-200 bg-white/90 shadow-[0_4px_12px_rgba(15,23,42,0.08)] backdrop-blur-sm overflow-hidden">
           <div className="flex items-center justify-center flex-1">
             <p className="text-base text-red-500">{error}</p>
           </div>
@@ -195,8 +195,8 @@ export const UserManagement: React.FC = () => {
   }
 
   return (
-    <div className="h-full bg-[#F5F5F5] p-8">
-      <div className="flex flex-col h-full rounded-[24px] border border-neutral-200 bg-white/90 shadow-[0_4px_12px_rgba(15,23,42,0.08)] backdrop-blur-sm overflow-hidden">
+    <div className="flex flex-col h-full bg-[#F5F5F5] p-8">
+      <div className="flex flex-col flex-1 rounded-[24px] border border-neutral-200 bg-white/90 shadow-[0_4px_12px_rgba(15,23,42,0.08)] backdrop-blur-sm overflow-hidden">
         {/* Table header bar */}
         <div className="flex flex-col gap-6 p-8 border-b border-[#e5e5e5]">
           <div className="flex flex-row items-center justify-between gap-4">

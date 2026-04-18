@@ -15,12 +15,12 @@ export default function DashboardOverview() {
   const title = ROUTE_TITLES[pathname] ?? 'Dashboard Overview';
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white">
+    <div className="flex h-screen overflow-hidden bg-[#F5F5F5]">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header title={title} />
 
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto bg-[#F5F5F5]">
           <Outlet />
         </div>
       </div>

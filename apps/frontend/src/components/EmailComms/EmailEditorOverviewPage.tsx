@@ -57,7 +57,7 @@ export function EmailEditor() {
   };
 
   return (
-    <div className="relative flex flex-col gap-6 p-8 bg-[#EEEEEE] h-full font-sans">
+    <div className="relative flex flex-col gap-6 p-8 bg-[#F5F5F5] min-h-full font-sans">
       <div className="flex flex-row flex-1 gap-14 items-start justify-center">
         <div className="w-full max-w-[700px] flex-shrink-0 flex flex-col gap-6">
           <div className="flex items-center h-12 bg-white rounded-md border border-slate-100 w-fit">

@@ -11,7 +11,6 @@ import {
 
 import apiClient, { type DonationListRow } from '@api/apiClient';
 import { Button } from '@components/ui/button';
-import { Card, CardContent } from '@components/ui/card';
 import { Input } from '@components/ui/input';
 import {
   Popover,
@@ -809,8 +808,8 @@ export default function DonationTrackerPage() {
       : 0;
 
   return (
-    <main className="h-full bg-[#F5F5F5] p-8 text-neutral-900">
-      <section className="space-y-6 rounded-[24px] border border-neutral-200 bg-white/90 p-8 shadow-[0_4px_12px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+    <div className="flex flex-col h-full bg-[#F5F5F5] p-8 text-neutral-900">
+      <section className="flex flex-col flex-1 rounded-[24px] border border-neutral-200 bg-white/90 p-8 shadow-[0_4px_12px_rgba(15,23,42,0.08)] backdrop-blur-sm overflow-hidden">
         <DonationTrackerToolbar
           totalCount={filteredRows.length}
           visibleCount={visibleRows.length}
@@ -831,29 +830,29 @@ export default function DonationTrackerPage() {
           onResetFilters={resetFilters}
         />
 
-        {error ? (
-          <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-base text-rose-700">
-            {error}
-          </div>
-        ) : null}
+        <div className="flex-1 flex flex-col min-h-0 gap-6">
+          {error ? (
+            <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4 text-base text-rose-700">
+              {error}
+            </div>
+          ) : null}
 
-        {loading ? (
-          <Card className="border-neutral-200">
-            <CardContent className="px-4 py-20 text-center text-lg text-neutral-500">
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center p-20 text-center text-lg text-neutral-500">
               Loading donations...
-            </CardContent>
-          </Card>
-        ) : visibleRows.length === 0 ? (
-          <Card className="border-neutral-200">
-            <CardContent className="px-4 py-20 text-center text-lg text-neutral-500">
+            </div>
+          ) : visibleRows.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center p-20 text-center text-lg text-neutral-500">
               No donations found for this page.
-            </CardContent>
-          </Card>
-        ) : (
-          <DonationTable rows={visibleRows} />
-        )}
+            </div>
+          ) : (
+            <div className="flex-1 overflow-auto min-h-0">
+              <DonationTable rows={visibleRows} />
+            </div>
+          )}
+        </div>
 
-        <div className="flex flex-col gap-4 border-t border-neutral-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 border-t border-neutral-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-base text-neutral-500">
             Showing {startItem} - {endItem} of {filteredRows.length} donations
           </p>
@@ -1105,6 +1104,6 @@ export default function DonationTrackerPage() {
           </div>
         </div>
       ) : null}
-    </main>
+    </div>
   );
 }
