@@ -288,7 +288,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
         );
       case 4:
       default:
-        return <Step4Receipt receiptId={receiptId} />;
+        return <Step4Receipt receiptId={receiptId} onReset={resetForm} />;
     }
   };
 
@@ -302,25 +302,27 @@ export const DonationForm: React.FC<DonationFormProps> = ({
         onSubmit={(e) => e.preventDefault()}
         noValidate
       >
-        <div className="flex w-full flex-row justify-center items-center gap-[3%] mb-[8%] font-sans">
-          <div
-            className={`w-[31%] aspect-[14/1] rounded-[10px] ${
-              currentStep === 1 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
-            }`}
-          ></div>
+        {currentStep < 4 && (
+          <div className="flex w-full flex-row justify-center items-center gap-[3%] mb-[8%] font-sans">
+            <div
+              className={`w-[31%] aspect-[14/1] rounded-[10px] ${
+                currentStep === 1 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
+              }`}
+            ></div>
 
-          <div
-            className={`w-[31%] aspect-[14/1] rounded-[10px] ${
-              currentStep === 2 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
-            }`}
-          ></div>
+            <div
+              className={`w-[31%] aspect-[14/1] rounded-[10px] ${
+                currentStep === 2 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
+              }`}
+            ></div>
 
-          <div
-            className={`w-[31%] aspect-[14/1] rounded-[10px] ${
-              currentStep === 3 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
-            }`}
-          ></div>
-        </div>
+            <div
+              className={`w-[31%] aspect-[14/1] rounded-[10px] ${
+                currentStep === 3 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
+              }`}
+            ></div>
+          </div>
+        )}
         {submitError && (
           <div className="error-banner" role="alert" aria-live="assertive">
             {submitError}
@@ -357,16 +359,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
             </Button>
           )}
 
-          {currentStep === 4 && (
-            <Button
-              variant="default"
-              type="button"
-              className="primary font-semibold"
-              onClick={resetForm}
-            >
-              Make another donation
-            </Button>
-          )}
+          {currentStep === 4 && null}
         </div>
       </form>
     </div>
