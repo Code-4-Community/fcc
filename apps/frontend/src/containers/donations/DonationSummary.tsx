@@ -28,7 +28,7 @@ export const DonationSummary = ({
     setCurrentAmount?.(next ? baseAmount + feeTotal : baseAmount);
   };
 
-  const feeText = `Add $${feeTotal.toFixed(2)} to cover transaction fees and tip the fundraising platform to help keep it `;
+  const feeText = `Add $${feeTotal.toFixed(2)} to cover transaction fees and help keep it `;
 
   const toggleClass = feeApplied
     ? 'border-2 border-[#2C8974] bg-[#F0F0F0]'
@@ -67,13 +67,6 @@ export const DonationSummary = ({
           </a>
         </p>
       </div>
-
-      <button
-        type="button"
-        className="self-start ml-[52px] px-4 py-1.5 rounded-full bg-gray-100 text-sm text-gray-500 font-medium hover:bg-gray-200 transition-colors"
-      >
-        Edit Fees &amp; Tips
-      </button>
     </div>
   );
 };
