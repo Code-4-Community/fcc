@@ -1,5 +1,9 @@
 import { useEffect } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from 'react-router-dom';
 import './styles.css';
 import apiClient from '@api/apiClient';
 import Root from '@containers/root';
@@ -20,6 +24,7 @@ import DonationTrackerPage from '@containers/dashboard/donations/DonationTracker
 import { EmailEditor } from './components/EmailComms/EmailEditorOverviewPage';
 import { AdminGrowingGoalTester } from '@containers/dashboard/AdminGrowingGoalTester';
 import OverviewPage from '@containers/dashboard/OverviewPage';
+import { UserManagement } from '@containers/dashboard/UserManagement';
 
 const router = createBrowserRouter([
   {
@@ -40,40 +45,41 @@ const router = createBrowserRouter([
     element: <ConfirmRegisteredPage />,
   },
   {
-    path: '/overview',
-    // element: <ProtectedRoute />,
-    children: [
-      {
-        element: <DashboardOverview />,
-        children: [
-          {
-            path: '',
-            element: <OverviewPage />,
-          },
-          {
-            path: 'donations',
-            element: <ProtectedRoute />,
-            children: [
-              {
-                path: '',
-                element: <DonationTrackerPage />,
-              },
-            ],
-          },
-          {
-            path: 'email',
-            element: <EmailEditor />,
-          },
-        ],
-      },
-    ],
-  },
-  {
     path: '/dashboard',
     element: <ProtectedRoute />,
     children: [
       {
         path: '',
+        element: <Navigate to="/dashboard/overview" replace />,
+      },
+      {
+        path: '',
+        element: <DashboardOverview />,
+        children: [
+          {
+            path: 'overview',
+            element: <OverviewPage />,
+          },
+          {
+            path: 'donations',
+            element: <DonationTrackerPage />,
+          },
+          {
+            path: 'email',
+            element: <EmailEditor />,
+          },
+          {
+            path: 'approval',
+            element: <UserManagement />,
+          },
+          {
+            path: 'settings',
+            element: <div>Settings (Placeholder)</div>,
+          },
+        ],
+      },
+      {
+        path: 'old',
         element: <DashboardPage />,
       },
     ],

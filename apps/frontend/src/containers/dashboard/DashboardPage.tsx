@@ -20,7 +20,7 @@ export const DashboardPage: React.FC = () => {
           marginBottom: '2rem',
         }}
       >
-        <h1>Dashboard</h1>
+        <h1>Dashboard Overview</h1>
         <Button onClick={logout} variant="outline">
           Sign out
         </Button>

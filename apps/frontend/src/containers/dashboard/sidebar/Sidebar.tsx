@@ -26,27 +26,27 @@ type NavItem = {
 const navItems: NavItem[] = [
   {
     label: 'Dashboard Overview',
-    href: '/overview',
+    href: '/dashboard/overview',
     icon: Bookmark,
   },
   {
     label: 'Donation Tracker',
-    href: '/overview/donations',
+    href: '/dashboard/donations',
     icon: ListFilter,
   },
   {
     label: 'Email Communication',
-    href: '/overview/email',
+    href: '/dashboard/email',
     icon: Mail,
   },
   {
     label: 'Admin Approval',
-    href: '/overview/approval',
+    href: '/dashboard/approval',
     icon: BadgeCheck,
   },
   {
     label: 'Settings',
-    href: '/overview/settings',
+    href: '/dashboard/settings',
     icon: Settings,
   },
 ];
