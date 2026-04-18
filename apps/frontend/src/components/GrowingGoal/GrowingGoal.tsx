@@ -108,7 +108,13 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
   };
 
   return (
-    <div className={styles['goal-container']} style={{ background: '#FCFCFC' }}>
+    <div
+      className={styles['goal-container']}
+      style={{
+        background: '#FCFCFC',
+        aspectRatio: variant === 'admin' ? '7 / 9' : '7 / 10',
+      }}
+    >
       <div
         className={styles['description-label']}
         style={
