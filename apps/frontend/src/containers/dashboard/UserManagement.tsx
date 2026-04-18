@@ -72,6 +72,7 @@ export const UserManagement: React.FC = () => {
   const [denyingUser, setDenyingUser] = useState<CombinedUser | null>(null);
   const [verifyingUser, setVerifyingUser] = useState<CombinedUser | null>(null);
   const [modalPosition, setModalPosition] = useState<
+    // eslint-disable-next-line no-restricted-globals
     { top: number; right: number } | undefined
   >(undefined);
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
