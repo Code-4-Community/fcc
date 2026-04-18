@@ -1,3 +1,4 @@
+import React from 'react';
 import { ToggleSwitch } from '@components/ToggleSwitch';
 import { DonationRecurrence } from './DonationRecurrence';
 import { DonationAmount } from './DonationAmount';

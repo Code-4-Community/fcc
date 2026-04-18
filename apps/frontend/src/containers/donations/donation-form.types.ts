@@ -1,4 +1,4 @@
-export type RecurringInterval = 'weekly' | 'monthly' | 'yearly';
+export type RecurringInterval = 'weekly' | 'monthly' | 'annually';
 
 export type DedicationKind = 'honor' | 'memory';
 
@@ -16,9 +16,6 @@ export interface DonationFormData {
   isAnonymous: boolean;
   dedicationMessage: string;
   showDedicationPublicly: boolean;
-  cardNumber: string;
-  cardExpiry: string;
-  cardCvc: string;
   coverFees: boolean;
 }
 
