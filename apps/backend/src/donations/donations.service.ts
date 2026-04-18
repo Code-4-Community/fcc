@@ -381,17 +381,10 @@ export class DonationsService {
       };
     }
 
-    // 2. sum donations in goal period
     const result = await this.donationRepository
       .createQueryBuilder('donation')
-      .select('COALESCE(SUM(donation.amount), 0)', 'amount')
+      .select('SUM(donation.amount)', 'amount')
       .where('donation.status = :status', { status: DonationStatus.SUCCEEDED })
-      .andWhere(goal.startDate ? 'donation.createdAt >= :startDate' : '1=1', {
-        startDate: goal.startDate,
-      })
-      .andWhere(goal.endDate ? 'donation.createdAt <= :endDate' : '1=1', {
-        endDate: `${goal.endDate} 23:59:59`,
-      })
       .getRawOne<{ amount: string }>();
 
     const amountRaised = Number(result?.amount ?? 0);
