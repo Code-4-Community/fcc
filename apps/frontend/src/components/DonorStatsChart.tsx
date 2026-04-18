@@ -220,10 +220,10 @@ export function DonorStatsChart({ className }: { className?: string }) {
     >
       <CardHeader className="flex flex-col items-stretch border-b !p-0 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 flex-col justify-center gap-1 px-8 pb-4 sm:pb-0 my-2">
-          <CardTitle className="text-2xl font-semibold">
+          <CardTitle className="text-3xl font-semibold">
             Donation Overview
           </CardTitle>
-          <CardDescription className="text-sm text-neutral-500">
+          <CardDescription className="text-lg text-neutral-500">
             Showing total and recurring donations.
           </CardDescription>
         </div>
@@ -232,7 +232,7 @@ export function DonorStatsChart({ className }: { className?: string }) {
             <div className="inline-flex border border-gray-300 rounded-lg overflow-hidden">
               <button
                 data-active={timeframeType === 'year-to-date'}
-                className="data-[active=true]:bg-gray-200 data-[active=false]:hover:bg-muted/50 px-5 py-2.5 text-base font-medium transition-colors border-r border-gray-300"
+                className="data-[active=true]:bg-gray-200 data-[active=false]:hover:bg-muted/50 px-5 py-2.5 text-lg font-medium transition-colors border-r border-gray-300"
                 onClick={() => setTimeframeType('year-to-date')}
               >
                 Year-to-date
@@ -240,7 +240,7 @@ export function DonorStatsChart({ className }: { className?: string }) {
               <PopoverTrigger asChild>
                 <button
                   data-active={customPickerOpen || timeframeType === 'custom'}
-                  className="data-[active=true]:bg-gray-200 data-[active=false]:hover:bg-muted/50 px-5 py-2.5 text-base font-medium transition-colors flex items-center gap-1"
+                  className="data-[active=true]:bg-gray-200 data-[active=false]:hover:bg-muted/50 px-5 py-2.5 text-lg font-medium transition-colors flex items-center gap-1"
                 >
                   Custom
                   <ChevronDownIcon className="h-5 w-5" />
@@ -282,7 +282,7 @@ export function DonorStatsChart({ className }: { className?: string }) {
               axisLine={false}
               tickMargin={12}
               minTickGap={32}
-              tick={{ fontSize: 14, fill: '#666' }}
+              tick={{ fontSize: 16, fill: '#666' }}
               tickFormatter={(value) => {
                 const date = parseDateKey(value);
                 return date.toLocaleDateString('en-US', {
@@ -295,7 +295,7 @@ export function DonorStatsChart({ className }: { className?: string }) {
               tickLine={false}
               axisLine={false}
               tickMargin={12}
-              tick={{ fontSize: 14, fill: '#666' }}
+              tick={{ fontSize: 16, fill: '#666' }}
               tickFormatter={(value) => {
                 // Format as currency for both donations and recurring donations
                 return `$${(value / 100).toLocaleString()}`;
@@ -341,7 +341,7 @@ export function DonorStatsChart({ className }: { className?: string }) {
                   <button
                     key={String(chart)}
                     data-active={activeChart === chart}
-                    className="data-[active=true]:bg-gray-200 data-[active=false]:hover:bg-muted/50 px-6 py-3 text-base font-medium transition-colors"
+                    className="data-[active=true]:bg-gray-200 data-[active=false]:hover:bg-muted/50 px-6 py-3 text-lg font-medium transition-colors"
                     style={{
                       borderRight: index === 0 ? '1px solid #d1d5db' : 'none',
                     }}
