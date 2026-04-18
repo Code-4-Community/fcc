@@ -23,6 +23,37 @@ export type DonationStatsResponse = {
   monthToDate: number;
 };
 
+export type DonationListRow = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  amount: number;
+  donationType: 'one_time' | 'recurring';
+  recurringInterval?:
+    | 'weekly'
+    | 'monthly'
+    | 'yearly'
+    | 'bimonthly'
+    | 'quarterly'
+    | 'annually';
+  dedicationMessage?: string;
+  showDedicationPublicly: boolean;
+  status: 'pending' | 'succeeded' | 'failed' | 'cancelled';
+  createdAt: string;
+  updatedAt: string;
+  transactionId?: string;
+  isAnonymous: boolean;
+};
+
+export type DonationListResponse = {
+  rows: DonationListRow[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+};
+
 export type ActiveGoalResponse = {
   goal: {
     id: number;
@@ -222,22 +253,7 @@ export class ApiClient {
     status?: 'pending' | 'succeeded' | 'failed' | 'cancelled';
     startDate?: string;
     endDate?: string;
-  }): Promise<{
-    rows: Array<{
-      id: number;
-      firstName: string;
-      lastName: string;
-      email: string;
-      amount: number;
-      donationType: 'one_time' | 'recurring';
-      status: string;
-      createdAt: string;
-    }>;
-    total: number;
-    page: number;
-    perPage: number;
-    totalPages: number;
-  }> {
+  }): Promise<DonationListResponse> {
     try {
       const res = await this.axiosInstance.get('/api/donations', {
         params,
@@ -254,6 +270,17 @@ export class ApiClient {
       return res.data as DonationStatsResponse;
     } catch (err: unknown) {
       this.handleAxiosError(err, 'Failed to fetch donation stats');
+    }
+  }
+
+  public async exportDonationsCsv(): Promise<Blob> {
+    try {
+      const res = await this.axiosInstance.get('/api/donations/export', {
+        responseType: 'blob',
+      });
+      return res.data as Blob;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to export donations');
     }
   }
 

@@ -16,6 +16,7 @@ import { ConfirmRegisteredPage } from '@containers/auth/ConfirmRegisteredPage';
 import { DashboardPage } from '@containers/dashboard/DashboardPage';
 import { DonorStatsChart } from '@components/DonorStatsChart';
 import DashboardOverview from '@containers/dashboard/sidebar/DashboardOverview';
+import DonationTrackerPage from '@containers/dashboard/donations/DonationTrackerPage';
 import { EmailEditor } from './components/EmailComms/EmailEditorOverviewPage';
 import { AdminGrowingGoalTester } from '@containers/dashboard/AdminGrowingGoalTester';
 import OverviewPage from '@containers/dashboard/OverviewPage';
@@ -48,6 +49,16 @@ const router = createBrowserRouter([
           {
             path: '',
             element: <OverviewPage />,
+          },
+          {
+            path: 'donations',
+            element: <ProtectedRoute />,
+            children: [
+              {
+                path: '',
+                element: <DonationTrackerPage />,
+              },
+            ],
           },
           {
             path: 'email',
