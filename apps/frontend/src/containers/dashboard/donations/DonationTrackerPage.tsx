@@ -48,7 +48,7 @@ type CreateDonationState = {
   amount: string;
   reason: string;
   donationType: 'one_time' | 'recurring';
-  recurringInterval: 'weekly' | 'monthly' | 'yearly';
+  recurringInterval: 'weekly' | 'monthly' | 'annually';
   isAnonymous: boolean;
   showDedicationPublicly: boolean;
 };
@@ -1037,7 +1037,7 @@ export default function DonationTrackerPage() {
                 >
                   <option value="weekly">Weekly</option>
                   <option value="monthly">Monthly</option>
-                  <option value="yearly">Yearly</option>
+                  <option value="annually">Annually</option>
                 </select>
               </label>
               <label className="flex items-center gap-2 text-sm text-neutral-700">
