@@ -4,6 +4,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 
 const ROUTE_TITLES: Record<string, string> = {
   '/overview': 'Dashboard Overview',
+  '/overview/donations': 'Donation Tracker',
   '/overview/email': 'Email Overview',
 };
 
