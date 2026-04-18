@@ -189,10 +189,24 @@ export function DonorStatsChart({ className }: { className?: string }) {
           endDate: endDateStr,
         });
 
-        const donationsProcessed = processDonationsData(response.rows);
-        const recurringDonationsProcessed = processRecurringDonationsData(
+        let donationsProcessed = processDonationsData(response.rows);
+        let recurringDonationsProcessed = processRecurringDonationsData(
           response.rows,
         );
+
+        // If no data, add start and end points with 0 value to show the empty chart
+        if (donationsProcessed.length === 0) {
+          donationsProcessed = [
+            { date: startDateStr, value: 0 },
+            { date: endDateStr, value: 0 },
+          ];
+        }
+        if (recurringDonationsProcessed.length === 0) {
+          recurringDonationsProcessed = [
+            { date: startDateStr, value: 0 },
+            { date: endDateStr, value: 0 },
+          ];
+        }
 
         setDonationsData(donationsProcessed);
         setRecurringDonationsData(recurringDonationsProcessed);
