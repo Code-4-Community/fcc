@@ -39,7 +39,7 @@ export const DonationSummary = ({
     : 'bg-white left-[10%]';
 
   return (
-    <div className="w-full border border-black rounded-xl p-4 flex flex-col gap-3">
+    <div className="w-full border-[#4E4E4E] border-[1.5px] rounded-lg p-4 flex flex-col gap-3">
       <div className="flex items-start gap-3 w-full">
         <div
           data-testid="fee-toggle"

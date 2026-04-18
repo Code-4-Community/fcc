@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useStripe } from '@stripe/react-stripe-js';
 import type { DonationFormData } from '../donation-form.types';
 import apiClient from '../../../api/apiClient';
@@ -11,6 +11,7 @@ interface Step3ConfirmProps {
   onPaymentError: (error: string) => void;
   isSubmitting: boolean;
   setIsSubmitting: (value: boolean) => void;
+  onSubmitRef?: React.MutableRefObject<(() => void) | null>;
 }
 
 export const Step3Confirm: React.FC<Step3ConfirmProps> = ({
@@ -18,15 +19,16 @@ export const Step3Confirm: React.FC<Step3ConfirmProps> = ({
   paymentMethodId,
   onPaymentSuccess,
   onPaymentError,
-  isSubmitting,
+  isSubmitting, // eslint-disable-line @typescript-eslint/no-unused-vars
   setIsSubmitting,
+  onSubmitRef,
 }) => {
   const stripe = useStripe();
   const [error, setError] = useState<string | null>(null);
 
   const amount = parseFloat(formData.amount) || 0;
 
-  const handleConfirmPayment = async () => {
+  const handleConfirmPayment = useCallback(async () => {
     if (!stripe) {
       setError('Stripe has not loaded yet. Please try again.');
       return;
@@ -81,15 +83,30 @@ export const Step3Confirm: React.FC<Step3ConfirmProps> = ({
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [
+    stripe,
+    paymentMethodId,
+    amount,
+    formData.email,
+    formData.donationType,
+    setIsSubmitting,
+    onPaymentSuccess,
+    onPaymentError,
+  ]);
+
+  useEffect(() => {
+    if (onSubmitRef) {
+      onSubmitRef.current = handleConfirmPayment;
+    }
+  }, [onSubmitRef, handleConfirmPayment]);
 
   return (
-    <section className="font-['Source_Sans_3']">
+    <section className="font-sans">
       <h1 className="font-semibold text-2xl">Confirm Payment</h1>
       <h3 className="text-[#55565A] font-light">
         Please confirm your information before proceeding.
       </h3>
-      <Card className="p-5 mt-4 mb-4 bg-[#EFEFEF] rounded-none shadow-none ring-0">
+      <Card className="p-5 mt-4 mb-4 bg-[#EFEFEF] rounded-lg shadow-none ring-0">
         <h2 className="self-start text-s font-bold">Transaction Details</h2>
         <dl className="flex flex-col justify-between gap-4">
           <div className="flex justify-between">
@@ -127,15 +144,6 @@ export const Step3Confirm: React.FC<Step3ConfirmProps> = ({
           {error}
         </div>
       )}
-
-      <button
-        type="button"
-        onClick={handleConfirmPayment}
-        disabled={isSubmitting || !stripe}
-        className="w-full py-3 bg-[#007b64] text-white font-bold rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
-      >
-        {isSubmitting ? 'Processing...' : 'Confirm Donation'}
-      </button>
     </section>
   );
 };

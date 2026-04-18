@@ -103,7 +103,7 @@ export const Step2Details = forwardRef<Step2DetailsRef, Step2DetailsProps>(
                 aria-describedby={
                   errors.firstName ? 'firstName-error' : undefined
                 }
-                className="border border-black"
+                className="border-[#4E4E4E] border-[1.5px] rounded-lg shadow-none focus-visible:ring-0"
               />
             </FormField>
 
@@ -122,8 +122,10 @@ export const Step2Details = forwardRef<Step2DetailsRef, Step2DetailsProps>(
                 onChange={onChange}
                 disabled={isSubmitting}
                 aria-invalid={!!errors.lastName}
-                aria-describedby={errors.lastName ? 'lastName-error' : undefined}
-                className="border border-black"
+                aria-describedby={
+                  errors.lastName ? 'lastName-error' : undefined
+                }
+                className="border-[#4E4E4E] border-[1.5px] rounded-lg shadow-none focus-visible:ring-0"
               />
             </FormField>
           </div>
@@ -144,7 +146,7 @@ export const Step2Details = forwardRef<Step2DetailsRef, Step2DetailsProps>(
               disabled={isSubmitting}
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? 'email-error' : undefined}
-              className="border border-black"
+              className="border-[#4E4E4E] border-[1.5px] rounded-lg shadow-none focus-visible:ring-0"
             />
           </FormField>
 
@@ -154,7 +156,7 @@ export const Step2Details = forwardRef<Step2DetailsRef, Step2DetailsProps>(
             required
             error={cardError ?? undefined}
           >
-            <div className="w-full border border-black rounded px-3 py-2 bg-white">
+            <div className="w-full border-[#4E4E4E] border-[1.5px] rounded-lg px-3 py-2 bg-white">
               <CardElement
                 options={cardElementOptions}
                 onChange={(event) => {

@@ -51,6 +51,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [paymentMethodId, setPaymentMethodId] = useState<string | null>(null);
   const step2Ref = useRef<Step2DetailsRef>(null);
+  const step3SubmitRef = useRef<(() => void) | null>(null);
   const [receiptId, setReceiptId] = useState<string | null>(
     searchParams.get('receiptId'),
   );
@@ -184,6 +185,12 @@ export const DonationForm: React.FC<DonationFormProps> = ({
         return;
       }
     }
+    if (currentStep === 3) {
+      if (step3SubmitRef.current) {
+        step3SubmitRef.current();
+      }
+      return;
+    }
     setCurrentStep((prev) => clampStep(prev + 1));
   };
 
@@ -275,6 +282,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
               onPaymentError={(error) => setSubmitError(error)}
               isSubmitting={isSubmitting}
               setIsSubmitting={setIsSubmitting}
+              onSubmitRef={step3SubmitRef}
             />
           </StripeProvider>
         );
@@ -285,7 +293,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
   };
 
   const showBackButton = currentStep > 1 && currentStep < 4;
-  const showNextButton = currentStep < 3;
+  const showNextButton = currentStep < 4;
 
   return (
     <div className="donation-form-container">
@@ -294,9 +302,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
         onSubmit={(e) => e.preventDefault()}
         noValidate
       >
-        <div
-          className={`flex w-full flex-row justify-center items-center gap-[3%] mb-[8%] ${currentStep === 1 || currentStep === 3 ? 'font-sans' : ''}`}
-        >
+        <div className="flex w-full flex-row justify-center items-center gap-[3%] mb-[8%] font-sans">
           <div
             className={`w-[31%] aspect-[14/1] rounded-[10px] ${
               currentStep === 1 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
@@ -323,9 +329,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
 
         {renderStep()}
 
-        <div
-          className={`flex flex-row items-center justify-center w-full gap-[7%] pt-6 mt-auto ${currentStep === 1 || currentStep === 3 ? 'font-sans' : ''}`}
-        >
+        <div className="flex flex-row items-center justify-center w-full gap-[7%] pt-6 mt-auto font-sans">
           {showBackButton && (
             <Button
               variant="unstyled"
@@ -337,14 +341,19 @@ export const DonationForm: React.FC<DonationFormProps> = ({
             </Button>
           )}
 
-          {showNextButton && (
+          {showNextButton && currentStep < 4 && (
             <Button
               variant="unstyled"
               type="button"
               className="flex-1 rounded-[2cqh] bg-[#007b64] text-white font-semibold h-[2.5rem] flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#006b54]"
               onClick={handleNext}
+              disabled={isSubmitting}
             >
-              Next
+              {currentStep === 3
+                ? isSubmitting
+                  ? 'Processing...'
+                  : 'Confirm Donation'
+                : 'Next'}
             </Button>
           )}
 

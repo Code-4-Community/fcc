@@ -33,10 +33,10 @@ export const DonationRecurrence = ({
             key={option.label}
             type="button"
             className={cn(
-              'flex-1 h-12 px-4 whitespace-nowrap rounded border text-base cursor-pointer transition-colors duration-150 ease-in-out font-semibold disabled:opacity-60 disabled:cursor-not-allowed',
+              'flex-1 h-12 px-4 whitespace-nowrap rounded-lg border-[1.5px] text-base cursor-pointer transition-colors duration-150 ease-in-out font-semibold disabled:opacity-60 disabled:cursor-not-allowed',
               isRecurrenceSelected(option)
                 ? 'bg-[#007b64] text-white border-[#007b64]'
-                : 'bg-white text-black border-gray-300',
+                : 'bg-white text-black border-[#4E4E4E]',
             )}
             onClick={() => onRecurrenceClick(option)}
             disabled={isSubmitting}
