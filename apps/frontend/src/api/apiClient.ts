@@ -6,12 +6,13 @@ export type DonationCreateRequest = {
   firstName: string;
   lastName: string;
   email: string;
-  amount: number; // parsed to number in the form
+  amount: number;
   isAnonymous: boolean;
   donationType: 'one_time' | 'recurring';
-  dedicationMessage: string; // allow '' from ui
+  dedicationMessage: string;
   showDedicationPublicly: boolean;
-  recurringInterval?: 'weekly' | 'monthly' | 'yearly';
+  recurringInterval?: 'weekly' | 'monthly' | 'annually';
+  paymentIntentId?: string;
 };
 
 export type CreateDonationResponse = { id: string };
@@ -42,18 +43,35 @@ export type UpdateGoalRequest = {
   endDate: string;
 };
 
+export type CreatePaymentIntentRequest = {
+  amount: number; // in cents
+  currency: string;
+  metadata?: Record<string, unknown>;
+};
+
+export type PaymentIntentResponse = {
+  id: string;
+  clientSecret: string;
+  amount: number;
+  currency: string;
+  status: string;
+};
+
 export type SignInRequest = { email: string; password: string };
+
 export type SignUpRequest = {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
 };
+
 export type AuthResponse = {
   accessToken: string;
   refreshToken: string;
   idToken: string;
 };
+
 export type RefreshRequest = { refreshToken: string; userSub: string };
 export type ConfirmPasswordRequest = {
   email: string;
@@ -71,9 +89,28 @@ export class ApiClient {
   }
 
   public async getHello(): Promise<string> {
-    //return this.get('/api') as Promise<string>;
     const res = await this.axiosInstance.get<string>('/api');
     return res.data;
+  }
+
+  public async createPaymentIntent(
+    body: CreatePaymentIntentRequest,
+  ): Promise<PaymentIntentResponse> {
+    try {
+      const res = await this.axiosInstance.post('/api/payments/intent', body);
+      return res.data as PaymentIntentResponse;
+    } catch (err: unknown) {
+      if (axios.isAxiosError<ApiError>(err)) {
+        const data = err.response?.data;
+        const msg =
+          data?.error ??
+          data?.message ??
+          err.message ??
+          'Failed to create payment intent';
+        throw new Error(msg);
+      }
+      throw new Error('Failed to create payment intent');
+    }
   }
 
   public setAuthToken(token: string | null) {

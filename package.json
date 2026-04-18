@@ -48,6 +48,8 @@
     "@radix-ui/react-primitive": "^2.1.4",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.4",
+    "@stripe/react-stripe-js": "^5.6.0",
+    "@stripe/stripe-js": "^8.7.0",
     "@tailwindcss/typography": "^0.5.19",
     "@tiptap/extension-highlight": "^3.22.3",
     "@tiptap/extension-link": "^3.22.3",

@@ -102,7 +102,7 @@ services:
 
       VITE_API_BASE_URL: http://localhost:3000
 
-      STRIPE_SECRET_KEY: 'sk_test_1234567890'
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
 
       AWS_SES_REGION: us-east-2
       AWS_SES_ACCESS_KEY_ID: ${AWS_SES_ACCESS_KEY_ID}
