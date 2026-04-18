@@ -172,99 +172,98 @@ export const UserManagement: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 bg-white rounded-xl">
-        <p className="text-sm text-[#737373]">Loading users...</p>
+      <div className="h-full bg-[#F5F5F5] p-8">
+        <div className="flex flex-col h-full rounded-[24px] border border-neutral-200 bg-white/90 shadow-[0_4px_12px_rgba(15,23,42,0.08)] backdrop-blur-sm overflow-hidden">
+          <div className="flex items-center justify-center flex-1">
+            <p className="text-base text-[#737373]">Loading users...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-64 bg-white rounded-xl">
-        <p className="text-sm text-red-500">{error}</p>
+      <div className="h-full bg-[#F5F5F5] p-8">
+        <div className="flex flex-col h-full rounded-[24px] border border-neutral-200 bg-white/90 shadow-[0_4px_12px_rgba(15,23,42,0.08)] backdrop-blur-sm overflow-hidden">
+          <div className="flex items-center justify-center flex-1">
+            <p className="text-base text-red-500">{error}</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-[#171717]">
-          {activeTab === 'pending' ? 'Pending Approval' : 'Approved Users'}
-        </h1>
-        <p className="text-sm text-[#737373] mt-1">
-          {activeTab === 'pending'
-            ? 'Showing user accounts awaiting approval for admin or standard roles.'
-            : 'Showing approved user accounts for admin or standard roles.'}
-        </p>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm border border-[#e5e5e5] w-full overflow-hidden">
+    <div className="h-full bg-[#F5F5F5] p-8">
+      <div className="flex flex-col h-full rounded-[24px] border border-neutral-200 bg-white/90 shadow-[0_4px_12px_rgba(15,23,42,0.08)] backdrop-blur-sm overflow-hidden">
         {/* Table header bar */}
-        <div className="flex items-center justify-between px-4 py-4">
-          {/* Search */}
-          <div className="flex items-center gap-1 border border-[rgba(1,1,46,0.08)] rounded-lg px-[10px] w-[310px] bg-white">
-            <Search
-              className="text-[#737373] shrink-0"
-              size={16}
-              strokeWidth={1.5}
-            />
-            <Input
-              type="text"
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm text-[#737373] leading-6 tracking-[0.07px] placeholder:text-[#737373] h-auto py-[10px] px-0 bg-transparent"
-            />
-          </div>
+        <div className="flex flex-col gap-6 p-8 border-b border-[#e5e5e5]">
+          <div className="flex flex-row items-center justify-between gap-4">
+            {/* Search */}
+            <div className="flex items-center gap-2 border border-neutral-200 rounded-full px-4 w-[400px] bg-white">
+              <Search
+                className="text-neutral-400 shrink-0"
+                size={20}
+                strokeWidth={1.5}
+              />
+              <Input
+                type="text"
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-base text-[#171717] leading-6 tracking-[0.07px] placeholder:text-neutral-400 h-12 px-0 bg-transparent"
+              />
+            </div>
 
-          {/* Toggle */}
-          <div className="flex h-10">
-            <button
-              onClick={() => {
-                setActiveTab('pending');
-                setCurrentPage(1);
-              }}
-              className={`flex items-center justify-center px-4 py-2 text-sm leading-6 text-[#171717] border border-[#e5e5e5] rounded-l-lg transition-colors ${
-                activeTab === 'pending' ? 'bg-[#e5e5e5]' : 'bg-white'
-              }`}
-            >
-              Pending Approval
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('approved');
-                setCurrentPage(1);
-              }}
-              className={`flex items-center justify-center px-4 py-2 text-sm leading-6 text-[#171717] border border-[#e5e5e5] border-l-0 rounded-r-lg transition-colors ${
-                activeTab === 'approved' ? 'bg-[#e5e5e5]' : 'bg-white'
-              }`}
-            >
-              Approved Users
-            </button>
+            {/* Toggle */}
+            <div className="flex">
+              <button
+                onClick={() => {
+                  setActiveTab('pending');
+                  setCurrentPage(1);
+                }}
+                className={`flex items-center justify-center px-6 py-3 text-base font-medium text-[#171717] border border-[#e5e5e5] rounded-l-lg transition-colors ${
+                  activeTab === 'pending' ? 'bg-[#e5e5e5]' : 'bg-white'
+                }`}
+              >
+                Pending Approval
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('approved');
+                  setCurrentPage(1);
+                }}
+                className={`flex items-center justify-center px-6 py-3 text-base font-medium text-[#171717] border border-[#e5e5e5] border-l-0 rounded-r-lg transition-colors ${
+                  activeTab === 'approved' ? 'bg-[#e5e5e5]' : 'bg-white'
+                }`}
+              >
+                Approved Users
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Table */}
-        <div className="px-4 overflow-x-auto pb-4">
-          <table className="w-full min-w-[700px] border-collapse">
-            <thead>
+        <div className="flex-1 px-8 overflow-y-auto min-h-0">
+          <table className="w-full min-w-[700px] border-separate border-spacing-0">
+            <thead className="sticky top-0 z-10 bg-white">
               {/* Header row */}
-              <tr className="bg-[#f5f5f5] h-11">
-                <th className="w-8 rounded-tl-lg"></th>
-                <th className="px-2 font-normal text-sm text-[#171717] tracking-[0.07px] text-left">
+              <tr className="bg-[#f5f5f5] h-14">
+                <th className="w-8 rounded-tl-lg border-b border-[#e5e5e5]"></th>
+                <th className="px-4 font-normal text-base text-[#171717] tracking-[0.07px] text-left border-b border-[#e5e5e5]">
                   Username
                 </th>
-                <th className="px-2 font-normal text-sm text-[#171717] tracking-[0.07px] text-left">
+                <th className="px-4 font-normal text-base text-[#171717] tracking-[0.07px] text-left border-b border-[#e5e5e5]">
                   Email
                 </th>
-                <th className="px-2 font-normal text-sm text-[#171717] tracking-[0.07px] text-left">
+                <th className="px-4 font-normal text-base text-[#171717] tracking-[0.07px] text-left border-b border-[#e5e5e5]">
                   Role
                 </th>
-                <th className="px-2 font-normal text-sm text-[#171717] tracking-[0.07px] text-right rounded-tr-lg">
+                <th className="px-4 font-normal text-base text-[#171717] tracking-[0.07px] text-right rounded-tr-lg border-b border-[#e5e5e5]">
                   Actions
                 </th>
               </tr>
@@ -275,29 +274,29 @@ export const UserManagement: React.FC = () => {
                 paginatedUsers.map((user, index) => (
                   <tr
                     key={user.username}
-                    className={`h-[44px] border-b border-[#e5e5e5] ${
+                    className={`h-[64px] border-b border-[#e5e5e5] transition-colors hover:bg-neutral-50/50 ${
                       index % 2 === 0 ? 'bg-white' : 'bg-[#fcfcfc]'
                     }`}
                   >
-                    <td className="w-8"></td>
-                    <td className="px-2 max-w-[150px]">
-                      <div className="text-sm text-[#171717] tracking-[0.07px] truncate">
+                    <td className="w-8 border-b border-[#e5e5e5]"></td>
+                    <td className="px-4 max-w-[200px] border-b border-[#e5e5e5]">
+                      <div className="text-base text-[#171717] tracking-[0.07px] truncate">
                         {user.name ?? user.username}
                       </div>
                     </td>
-                    <td className="px-2 max-w-[250px]">
-                      <div className="text-sm text-[#171717] tracking-[0.07px] truncate">
+                    <td className="px-4 max-w-[300px] border-b border-[#e5e5e5]">
+                      <div className="text-base text-[#171717] tracking-[0.07px] truncate">
                         {user.email}
                       </div>
                     </td>
-                    <td className="px-2">
+                    <td className="px-4 border-b border-[#e5e5e5]">
                       <RoleBadge
                         role={user.dbUser?.status}
                         isApproved={activeTab === 'approved'}
                       />
                     </td>
-                    <td className="px-2 text-right">
-                      <div className="flex items-center justify-end gap-2 shrink-0">
+                    <td className="px-4 text-right border-b border-[#e5e5e5]">
+                      <div className="flex items-center justify-end gap-3 shrink-0">
                         {currentUser?.status === 'ADMIN' && (
                           <>
                             {activeTab === 'pending' ? (
@@ -313,7 +312,7 @@ export const UserManagement: React.FC = () => {
                                     });
                                     setVerifyingUser(user);
                                   }}
-                                  className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6"
+                                  className="rounded-[10px] px-4 py-2 h-10 text-base font-medium"
                                 >
                                   Approve
                                 </Button>
@@ -328,7 +327,7 @@ export const UserManagement: React.FC = () => {
                                     });
                                     setDenyingUser(user);
                                   }}
-                                  className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 border-[#e5e5e5] text-black bg-white hover:bg-gray-50 shadow-sm"
+                                  className="rounded-[10px] px-4 py-2 h-10 text-base font-medium border-[#e5e5e5] text-black bg-white hover:bg-gray-50 shadow-sm"
                                 >
                                   Deny
                                 </Button>
@@ -346,7 +345,7 @@ export const UserManagement: React.FC = () => {
                                     });
                                     setEditingUser(user);
                                   }}
-                                  className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 font-['Source_Sans_Pro'] border-[#e5e5e5] text-black bg-white hover:bg-gray-50 shadow-sm"
+                                  className="rounded-[10px] px-4 py-2 h-10 text-base font-medium font-['Source_Sans_Pro'] border-[#e5e5e5] text-black bg-white hover:bg-gray-50 shadow-sm"
                                 >
                                   Edit Role
                                 </Button>
@@ -360,7 +359,7 @@ export const UserManagement: React.FC = () => {
                                     });
                                     setDenyingUser(user);
                                   }}
-                                  className="rounded-[10px] px-3 py-1 h-auto text-sm leading-6 bg-[#893C27] text-white hover:bg-[#6c2f1f] border-0 outline-none"
+                                  className="rounded-[10px] px-4 py-2 h-10 text-base font-medium bg-[#893C27] text-white hover:bg-[#6c2f1f] border-0"
                                 >
                                   Delete User
                                 </Button>
@@ -376,7 +375,9 @@ export const UserManagement: React.FC = () => {
                 <tr>
                   <td colSpan={5}>
                     <div className="flex items-center justify-center h-48">
-                      <p className="text-sm text-[#737373]">No users found.</p>
+                      <p className="text-base text-[#737373]">
+                        No users found.
+                      </p>
                     </div>
                   </td>
                 </tr>
@@ -387,14 +388,14 @@ export const UserManagement: React.FC = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-end px-4 py-3 gap-2">
+          <div className="flex items-center justify-end px-8 py-8 gap-3 border-t border-[#e5e5e5] bg-white">
             <Button
               variant="ghost"
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="gap-2 px-4 py-[7.5px] h-auto text-base text-[#171717]"
+              className="gap-2 px-6 h-12 text-base text-[#171717] font-medium"
             >
-              <ChevronLeft size={13} />
+              <ChevronLeft size={18} />
               Previous
             </Button>
 
@@ -402,7 +403,7 @@ export const UserManagement: React.FC = () => {
               page === '...' ? (
                 <span
                   key={`ellipsis-${i}`}
-                  className="flex items-center justify-center w-9 h-9 text-base text-[#171717] select-none"
+                  className="flex items-center justify-center w-10 h-10 text-base text-[#171717]"
                 >
                   ···
                 </span>
@@ -411,8 +412,10 @@ export const UserManagement: React.FC = () => {
                   key={page}
                   variant={currentPage === page ? 'outline' : 'ghost'}
                   onClick={() => setCurrentPage(page as number)}
-                  className={`w-[34px] min-h-9 h-auto py-[7.5px] text-base text-[#171717] ${
-                    currentPage === page ? 'border-[#e5e5e5] shadow-sm' : ''
+                  className={`w-12 h-12 text-base font-medium text-[#171717] ${
+                    currentPage === page
+                      ? 'border-[#e5e5e5] shadow-sm bg-white'
+                      : ''
                   }`}
                 >
                   {page}
@@ -424,10 +427,10 @@ export const UserManagement: React.FC = () => {
               variant="ghost"
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="gap-2 px-4 py-[7.5px] h-auto text-base text-[#171717]"
+              className="gap-2 px-6 h-12 text-base text-[#171717] font-medium"
             >
               Next
-              <ChevronRight size={13} />
+              <ChevronRight size={18} />
             </Button>
           </div>
         )}
