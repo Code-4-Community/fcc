@@ -6,12 +6,13 @@ export type DonationCreateRequest = {
   firstName: string;
   lastName: string;
   email: string;
-  amount: number; // parsed to number in the form
+  amount: number;
   isAnonymous: boolean;
   donationType: 'one_time' | 'recurring';
-  dedicationMessage: string; // allow '' from ui
+  dedicationMessage: string;
   showDedicationPublicly: boolean;
-  recurringInterval?: 'weekly' | 'monthly' | 'yearly';
+  recurringInterval?: 'weekly' | 'monthly' | 'annually';
+  paymentIntentId?: string;
 };
 
 export type CreateDonationResponse = { id: string };
@@ -20,6 +21,37 @@ export type DonationStatsResponse = {
   count: number;
   yearToDate: number;
   monthToDate: number;
+};
+
+export type DonationListRow = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  amount: number;
+  donationType: 'one_time' | 'recurring';
+  recurringInterval?:
+    | 'weekly'
+    | 'monthly'
+    | 'yearly'
+    | 'bimonthly'
+    | 'quarterly'
+    | 'annually';
+  dedicationMessage?: string;
+  showDedicationPublicly: boolean;
+  status: 'pending' | 'succeeded' | 'failed' | 'cancelled';
+  createdAt: string;
+  updatedAt: string;
+  transactionId?: string;
+  isAnonymous: boolean;
+};
+
+export type DonationListResponse = {
+  rows: DonationListRow[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
 };
 
 export type ActiveGoalResponse = {
@@ -42,18 +74,35 @@ export type UpdateGoalRequest = {
   endDate: string;
 };
 
+export type CreatePaymentIntentRequest = {
+  amount: number; // in cents
+  currency: string;
+  metadata?: Record<string, unknown>;
+};
+
+export type PaymentIntentResponse = {
+  id: string;
+  clientSecret: string;
+  amount: number;
+  currency: string;
+  status: string;
+};
+
 export type SignInRequest = { email: string; password: string };
+
 export type SignUpRequest = {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
 };
+
 export type AuthResponse = {
   accessToken: string;
   refreshToken: string;
   idToken: string;
 };
+
 export type RefreshRequest = { refreshToken: string; userSub: string };
 export type ConfirmPasswordRequest = {
   email: string;
@@ -71,9 +120,28 @@ export class ApiClient {
   }
 
   public async getHello(): Promise<string> {
-    //return this.get('/api') as Promise<string>;
     const res = await this.axiosInstance.get<string>('/api');
     return res.data;
+  }
+
+  public async createPaymentIntent(
+    body: CreatePaymentIntentRequest,
+  ): Promise<PaymentIntentResponse> {
+    try {
+      const res = await this.axiosInstance.post('/api/payments/intent', body);
+      return res.data as PaymentIntentResponse;
+    } catch (err: unknown) {
+      if (axios.isAxiosError<ApiError>(err)) {
+        const data = err.response?.data;
+        const msg =
+          data?.error ??
+          data?.message ??
+          err.message ??
+          'Failed to create payment intent';
+        throw new Error(msg);
+      }
+      throw new Error('Failed to create payment intent');
+    }
   }
 
   public setAuthToken(token: string | null) {
@@ -185,22 +253,7 @@ export class ApiClient {
     status?: 'pending' | 'succeeded' | 'failed' | 'cancelled';
     startDate?: string;
     endDate?: string;
-  }): Promise<{
-    rows: Array<{
-      id: number;
-      firstName: string;
-      lastName: string;
-      email: string;
-      amount: number;
-      donationType: 'one_time' | 'recurring';
-      status: string;
-      createdAt: string;
-    }>;
-    total: number;
-    page: number;
-    perPage: number;
-    totalPages: number;
-  }> {
+  }): Promise<DonationListResponse> {
     try {
       const res = await this.axiosInstance.get('/api/donations', {
         params,
@@ -217,6 +270,17 @@ export class ApiClient {
       return res.data as DonationStatsResponse;
     } catch (err: unknown) {
       this.handleAxiosError(err, 'Failed to fetch donation stats');
+    }
+  }
+
+  public async exportDonationsCsv(): Promise<Blob> {
+    try {
+      const res = await this.axiosInstance.get('/api/donations/export', {
+        responseType: 'blob',
+      });
+      return res.data as Blob;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to export donations');
     }
   }
 

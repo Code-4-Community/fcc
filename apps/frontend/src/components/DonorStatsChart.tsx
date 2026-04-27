@@ -152,7 +152,7 @@ function processRecurringDonationsData(
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-export function DonorStatsChart() {
+export function DonorStatsChart({ className }: { className?: string }) {
   const [activeChart, setActiveChart] = React.useState<DataType>('donations');
   const [timeframeType, setTimeframeType] =
     React.useState<TimeframeType>('year-to-date');
@@ -189,10 +189,24 @@ export function DonorStatsChart() {
           endDate: endDateStr,
         });
 
-        const donationsProcessed = processDonationsData(response.rows);
-        const recurringDonationsProcessed = processRecurringDonationsData(
+        let donationsProcessed = processDonationsData(response.rows);
+        let recurringDonationsProcessed = processRecurringDonationsData(
           response.rows,
         );
+
+        // If no data, add start and end points with 0 value to show the empty chart
+        if (donationsProcessed.length === 0) {
+          donationsProcessed = [
+            { date: startDateStr, value: 0 },
+            { date: endDateStr, value: 0 },
+          ];
+        }
+        if (recurringDonationsProcessed.length === 0) {
+          recurringDonationsProcessed = [
+            { date: startDateStr, value: 0 },
+            { date: endDateStr, value: 0 },
+          ];
+        }
 
         setDonationsData(donationsProcessed);
         setRecurringDonationsData(recurringDonationsProcessed);
@@ -215,22 +229,24 @@ export function DonorStatsChart() {
   }, [activeChart, donationsData, recurringDonationsData]);
 
   return (
-    <Card className="m-3 py-4 sm:py-0 !ring-slate-300">
+    <Card
+      className={`flex h-full flex-col rounded-[10px] border border-[#E5E5E5] bg-white shadow-none ${className}`}
+    >
       <CardHeader className="flex flex-col items-stretch border-b !p-0 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 flex-col justify-center gap-1 px-6 pb-4 sm:pb-0 my-2">
-          <CardTitle className="text-xl font-semibold">
+        <div className="flex flex-1 flex-col justify-center gap-1 px-8 pb-4 sm:pb-0 my-2">
+          <CardTitle className="text-3xl font-semibold">
             Donation Overview
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-lg text-neutral-500">
             Showing total and recurring donations.
           </CardDescription>
         </div>
         <Popover open={customPickerOpen} onOpenChange={setCustomPickerOpen}>
-          <div className="px-6">
+          <div className="px-8">
             <div className="inline-flex border border-gray-300 rounded-lg overflow-hidden">
               <button
                 data-active={timeframeType === 'year-to-date'}
-                className="data-[active=true]:bg-gray-200 data-[active=false]:hover:bg-muted/50 px-4 py-2 text-sm font-medium transition-colors border-r border-gray-300"
+                className="data-[active=true]:bg-gray-200 data-[active=false]:hover:bg-muted/50 px-5 py-2.5 text-lg font-medium transition-colors border-r border-gray-300"
                 onClick={() => setTimeframeType('year-to-date')}
               >
                 Year-to-date
@@ -238,10 +254,10 @@ export function DonorStatsChart() {
               <PopoverTrigger asChild>
                 <button
                   data-active={customPickerOpen || timeframeType === 'custom'}
-                  className="data-[active=true]:bg-gray-200 data-[active=false]:hover:bg-muted/50 px-4 py-2 text-sm font-medium transition-colors flex items-center gap-1"
+                  className="data-[active=true]:bg-gray-200 data-[active=false]:hover:bg-muted/50 px-5 py-2.5 text-lg font-medium transition-colors flex items-center gap-1"
                 >
                   Custom
-                  <ChevronDownIcon className="h-4 w-4" />
+                  <ChevronDownIcon className="h-5 w-5" />
                 </button>
               </PopoverTrigger>
             </div>
@@ -258,19 +274,19 @@ export function DonorStatsChart() {
           </PopoverContent>
         </Popover>
       </CardHeader>
-      <CardContent className="px-2 sm:p-6">
+      <CardContent className="flex flex-1 flex-col px-2 sm:p-6 min-h-0">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
+          className="w-full flex-1 min-h-0 aspect-auto"
         >
           <AreaChart
             accessibilityLayer
             data={chartData}
             margin={{
               left: 20,
-              right: 12,
-              top: 5,
-              bottom: 5,
+              right: 25,
+              top: 20,
+              bottom: 0,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -278,8 +294,9 @@ export function DonorStatsChart() {
               dataKey="date"
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
+              tickMargin={12}
               minTickGap={32}
+              tick={{ fontSize: 16, fill: '#666' }}
               tickFormatter={(value) => {
                 const date = parseDateKey(value);
                 return date.toLocaleDateString('en-US', {
@@ -291,7 +308,8 @@ export function DonorStatsChart() {
             <YAxis
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
+              tickMargin={12}
+              tick={{ fontSize: 16, fill: '#666' }}
               tickFormatter={(value) => {
                 // Format as currency for both donations and recurring donations
                 return `$${(value / 100).toLocaleString()}`;
@@ -337,7 +355,7 @@ export function DonorStatsChart() {
                   <button
                     key={String(chart)}
                     data-active={activeChart === chart}
-                    className="data-[active=true]:bg-gray-200 data-[active=false]:hover:bg-muted/50 px-4 py-2 text-sm font-medium transition-colors"
+                    className="data-[active=true]:bg-gray-200 data-[active=false]:hover:bg-muted/50 px-6 py-3 text-lg font-medium transition-colors"
                     style={{
                       borderRight: index === 0 ? '1px solid #d1d5db' : 'none',
                     }}
