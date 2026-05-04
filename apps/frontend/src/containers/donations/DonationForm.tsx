@@ -2,7 +2,8 @@ import apiClient, {
   type CreateDonationResponse,
   type CreateDonationRequest,
 } from '../../api/apiClient';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { type Step2DetailsRef } from './steps/Step2Details';
 import { useSearchParams } from 'react-router-dom';
 import './donations.css';
 import {
@@ -15,6 +16,7 @@ import { Step1Amount } from './steps/Step1Amount';
 import { Step2Details } from './steps/Step2Details';
 import { Step3Confirm } from './steps/Step3Confirm';
 import { Step4Receipt } from './steps/Step4Receipt';
+import { StripeProvider } from './StripeProvider';
 import { Button } from '@components/ui/button';
 
 export const DonationForm: React.FC<DonationFormProps> = ({
@@ -41,15 +43,15 @@ export const DonationForm: React.FC<DonationFormProps> = ({
     recurringInterval: 'monthly',
     isDedicated: false,
     dedicationKind: null,
-    cardNumber: '',
-    cardExpiry: '',
-    cardCvc: '',
     coverFees: false,
   });
 
   const [errors, setErrors] = useState<Partial<FormErrors>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [paymentMethodId, setPaymentMethodId] = useState<string | null>(null);
+  const step2Ref = useRef<Step2DetailsRef>(null);
+  const step3SubmitRef = useRef<(() => void) | null>(null);
   const [receiptId, setReceiptId] = useState<string | null>(
     searchParams.get('receiptId'),
   );
@@ -164,14 +166,37 @@ export const DonationForm: React.FC<DonationFormProps> = ({
     setSubmitError(null);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    setSubmitError(null);
     if (!validateStep(currentStep)) {
+      return;
+    }
+    if (currentStep === 2) {
+      try {
+        const pmId = await step2Ref.current?.createPaymentMethod();
+        if (!pmId) {
+          setSubmitError('Could not process card. Please try again.');
+          return;
+        }
+        setPaymentMethodId(pmId);
+      } catch (err) {
+        setSubmitError(
+          err instanceof Error ? err.message : 'Could not process card.',
+        );
+        return;
+      }
+    }
+    if (currentStep === 3) {
+      if (step3SubmitRef.current) {
+        step3SubmitRef.current();
+      }
       return;
     }
     setCurrentStep((prev) => clampStep(prev + 1));
   };
 
   const handleBack = () => {
+    setSubmitError(null);
     setCurrentStep((prev) => clampStep(prev - 1));
   };
 
@@ -186,9 +211,6 @@ export const DonationForm: React.FC<DonationFormProps> = ({
       dedicationMessage: '',
       showDedicationPublicly: false,
       recurringInterval: 'monthly',
-      cardNumber: '',
-      cardExpiry: '',
-      cardCvc: '',
       coverFees: false,
     });
     setErrors({});
@@ -197,27 +219,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
     setCurrentStep(1);
   };
 
-  const handleSubmit = async () => {
-    if (isSubmitting) {
-      return;
-    }
-
-    const step1Valid = validateStep(1);
-
-    if (!step1Valid) {
-      setCurrentStep(1);
-      return;
-    }
-
-    const step2Valid = validateStep(2);
-    if (!step2Valid) {
-      setCurrentStep(2);
-      return;
-    }
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
     try {
       const payload: CreateDonationRequest = {
         firstName: formData.firstName.trim(),
@@ -228,6 +230,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
         donationType: formData.donationType,
         dedicationMessage: formData.dedicationMessage,
         showDedicationPublicly: formData.showDedicationPublicly,
+        paymentIntentId,
         ...(formData.donationType === 'recurring' && {
           recurringInterval: formData.recurringInterval,
         }),
@@ -241,10 +244,8 @@ export const DonationForm: React.FC<DonationFormProps> = ({
       setCurrentStep(4);
     } catch (error) {
       const err = error as Error;
-      setSubmitError(err.message || 'Failed to submit donation');
+      setSubmitError(err.message || 'Failed to record donation');
       onError(err);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -262,24 +263,39 @@ export const DonationForm: React.FC<DonationFormProps> = ({
 
       case 2:
         return (
-          <Step2Details
-            formData={formData}
-            errors={errors}
-            isSubmitting={isSubmitting}
-            onChange={handleInputChange}
-          />
+          <StripeProvider>
+            <Step2Details
+              ref={step2Ref}
+              formData={formData}
+              errors={errors}
+              isSubmitting={isSubmitting}
+              onChange={handleInputChange}
+            />
+          </StripeProvider>
         );
 
       case 3:
-        return <Step3Confirm formData={formData} />;
-
+        return (
+          <StripeProvider>
+            <Step3Confirm
+              formData={formData}
+              paymentMethodId={paymentMethodId}
+              onPaymentSuccess={handlePaymentSuccess}
+              onPaymentError={(error) => setSubmitError(error)}
+              isSubmitting={isSubmitting}
+              setIsSubmitting={setIsSubmitting}
+              onSubmitRef={step3SubmitRef}
+            />
+          </StripeProvider>
+        );
+      case 4:
       default:
-        return <Step4Receipt receiptId={receiptId} />;
+        return <Step4Receipt receiptId={receiptId} onReset={resetForm} />;
     }
   };
 
   const showBackButton = currentStep > 1 && currentStep < 4;
-  const showNextButton = currentStep < 3;
+  const showNextButton = currentStep < 4;
 
   return (
     <div className="donation-form-container">
@@ -288,27 +304,27 @@ export const DonationForm: React.FC<DonationFormProps> = ({
         onSubmit={(e) => e.preventDefault()}
         noValidate
       >
-        <div
-          className={`flex w-full flex-row justify-center items-center gap-[3%] mb-[8%] ${currentStep === 1 || currentStep === 3 ? 'font-sans' : ''}`}
-        >
-          <div
-            className={`w-[31%] aspect-[14/1] rounded-[10px] ${
-              currentStep === 1 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
-            }`}
-          ></div>
+        {currentStep < 4 && (
+          <div className="flex w-full flex-row justify-center items-center gap-[3%] mb-[8%] font-sans">
+            <div
+              className={`w-[31%] aspect-[14/1] rounded-[10px] ${
+                currentStep === 1 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
+              }`}
+            ></div>
 
-          <div
-            className={`w-[31%] aspect-[14/1] rounded-[10px] ${
-              currentStep === 2 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
-            }`}
-          ></div>
+            <div
+              className={`w-[31%] aspect-[14/1] rounded-[10px] ${
+                currentStep === 2 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
+              }`}
+            ></div>
 
-          <div
-            className={`w-[31%] aspect-[14/1] rounded-[10px] ${
-              currentStep === 3 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
-            }`}
-          ></div>
-        </div>
+            <div
+              className={`w-[31%] aspect-[14/1] rounded-[10px] ${
+                currentStep === 3 ? 'bg-[#650D77]' : 'bg-[#B3B3B3]'
+              }`}
+            ></div>
+          </div>
+        )}
         {submitError && (
           <div className="error-banner" role="alert" aria-live="assertive">
             {submitError}
@@ -317,9 +333,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
 
         {renderStep()}
 
-        <div
-          className={`flex flex-row items-center justify-center w-full gap-[7%] pt-6 mt-auto ${currentStep === 1 || currentStep === 3 ? 'font-sans' : ''}`}
-        >
+        <div className="flex flex-row items-center justify-center w-full gap-[7%] pt-6 mt-auto font-sans">
           {showBackButton && (
             <Button
               variant="unstyled"
@@ -331,39 +345,23 @@ export const DonationForm: React.FC<DonationFormProps> = ({
             </Button>
           )}
 
-          {showNextButton && (
+          {showNextButton && currentStep < 4 && (
             <Button
               variant="unstyled"
               type="button"
               className="flex-1 rounded-[2cqh] bg-[#007b64] text-white font-semibold h-[2.5rem] flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#006b54]"
               onClick={handleNext}
-            >
-              Next
-            </Button>
-          )}
-
-          {currentStep === 3 && (
-            <Button
-              variant="unstyled"
-              type="button"
-              className="flex-1 rounded-[4px] bg-[#007b64] hover:bg-[#006b54] text-white h-[2.5rem] px-3 text-base font-semibold disabled:bg-[#aaa]"
-              onClick={handleSubmit}
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Processing...' : 'Donate'}
+              {currentStep === 3
+                ? isSubmitting
+                  ? 'Processing...'
+                  : 'Confirm Donation'
+                : 'Next'}
             </Button>
           )}
 
-          {currentStep === 4 && (
-            <Button
-              variant="default"
-              type="button"
-              className="primary font-semibold"
-              onClick={resetForm}
-            >
-              Make another donation
-            </Button>
-          )}
+          {currentStep === 4 && null}
         </div>
       </form>
     </div>

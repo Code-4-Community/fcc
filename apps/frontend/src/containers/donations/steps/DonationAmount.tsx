@@ -38,10 +38,10 @@ export const DonationAmount = ({
             key={preset}
             type="button"
             className={cn(
-              'flex-1 h-12 px-4 rounded border text-base font-semibold cursor-pointer transition-colors duration-150 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed',
+              'flex-1 h-12 px-4 rounded-lg border-[1.5px] text-base font-semibold cursor-pointer transition-colors duration-150 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed',
               isAmountSelected(preset)
                 ? 'bg-[#007b64] text-white border-[#007b64]'
-                : 'bg-white text-black border-gray-300',
+                : 'bg-white text-black border-[#4E4E4E]',
             )}
             onClick={() => onPresetClick(preset)}
             disabled={isSubmitting}
@@ -71,7 +71,7 @@ export const DonationAmount = ({
             onChange={onChange}
             onBlur={onAmountBlur}
             className={cn(
-              'pl-7 pr-12 h-10 text-base font-normal',
+              'pl-7 pr-12 h-10 text-base font-normal border-[#4E4E4E] border-[1.5px] shadow-none focus-visible:ring-0 rounded-lg',
               error ? 'border-[#d93025] bg-[#fff6f6]' : '',
             )}
             disabled={isSubmitting}

@@ -10,6 +10,7 @@ import CarouselImage3 from '@components/testimonials/TestimonialImages/Carousel_
 
 interface Step4ReceiptProps {
   receiptId?: string | null;
+  onReset: () => void;
 }
 
 const TESTIMONIAL_SLIDES = [
@@ -30,7 +31,10 @@ const TESTIMONIAL_SLIDES = [
   },
 ];
 
-export const Step4Receipt: React.FC<Step4ReceiptProps> = ({ receiptId }) => {
+export const Step4Receipt: React.FC<Step4ReceiptProps> = ({
+  receiptId,
+  onReset,
+}) => {
   const [feedback, setFeedback] = useState('');
 
   const handleSpreadTheWord = () => {
@@ -84,12 +88,29 @@ export const Step4Receipt: React.FC<Step4ReceiptProps> = ({ receiptId }) => {
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
           placeholder="Share with us here"
-          className="min-h-[120px]"
+          className="min-h-[120px] border-[#4E4E4E] border-[1.5px] rounded-lg shadow-none focus-visible:ring-0"
           rows={4}
         />
       </div>
-      <div className="mt-8 mb-8">
+      <div className="mt-8 mb-4">
         <TestimonialCarousel slides={TESTIMONIAL_SLIDES} />
+      </div>
+      <div className="flex justify-center gap-4 mb-8">
+        <Button
+          variant="unstyled"
+          withShareIcon
+          className="flex-1 rounded-[2cqh] bg-[#007b64] text-white font-semibold h-[2.5rem] flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#006b54] gap-2"
+          onClick={handleSpreadTheWord}
+        >
+          Spread the word!
+        </Button>
+        <Button
+          variant="unstyled"
+          className="flex-1 rounded-[2cqh] bg-[#007b64] text-white font-semibold h-[2.5rem] flex justify-center items-center text-center text-[2.5cqh] hover:bg-[#006b54]"
+          onClick={onReset}
+        >
+          Donate again
+        </Button>
       </div>
       <div className="flex justify-center gap-10 mb-8">
         <a
@@ -124,11 +145,6 @@ export const Step4Receipt: React.FC<Step4ReceiptProps> = ({ receiptId }) => {
             className="w-12 h-12"
           />
         </a>
-      </div>
-      <div className="mt-8 flex justify-center">
-        <Button variant="share" withShareIcon onClick={handleSpreadTheWord}>
-          Spread the word!
-        </Button>
       </div>
     </div>
   );

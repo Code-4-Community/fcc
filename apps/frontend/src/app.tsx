@@ -1,5 +1,9 @@
 import { useEffect } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from 'react-router-dom';
 import './styles.css';
 import apiClient from '@api/apiClient';
 import Root from '@containers/root';
@@ -15,9 +19,12 @@ import { ResetPasswordPage } from '@containers/auth/ResetPasswordPage';
 import { ConfirmRegisteredPage } from '@containers/auth/ConfirmRegisteredPage';
 import { DashboardPage } from '@containers/dashboard/DashboardPage';
 import { DonorStatsChart } from '@components/DonorStatsChart';
-import SidebarTester from '@containers/dashboard/sidebar/SidebarTester';
-import EditDonationGoalTester from '@components/DonationGoal/EditDonationGoalTester';
+import DashboardOverview from '@containers/dashboard/sidebar/DashboardOverview';
+import DonationTrackerPage from '@containers/dashboard/donations/DonationTrackerPage';
+import { EmailEditor } from './components/EmailComms/EmailEditorOverviewPage';
 import { AdminGrowingGoalTester } from '@containers/dashboard/AdminGrowingGoalTester';
+import OverviewPage from '@containers/dashboard/OverviewPage';
+import { UserManagement } from '@containers/dashboard/UserManagement';
 
 const router = createBrowserRouter([
   {
@@ -43,17 +50,39 @@ const router = createBrowserRouter([
     children: [
       {
         path: '',
+        element: <Navigate to="/dashboard/overview" replace />,
+      },
+      {
+        path: '',
+        element: <DashboardOverview />,
+        children: [
+          {
+            path: 'overview',
+            element: <OverviewPage />,
+          },
+          {
+            path: 'donations',
+            element: <DonationTrackerPage />,
+          },
+          {
+            path: 'email',
+            element: <EmailEditor />,
+          },
+          {
+            path: 'approval',
+            element: <UserManagement />,
+          },
+          {
+            path: 'settings',
+            element: <div>Settings (Placeholder)</div>,
+          },
+        ],
+      },
+      {
+        path: 'old',
         element: <DashboardPage />,
       },
     ],
-  },
-  {
-    path: '/sidebar-test',
-    element: <SidebarTester />,
-  },
-  {
-    path: '/edit-donation-goal-test',
-    element: <EditDonationGoalTester />,
   },
   {
     path: '/test',

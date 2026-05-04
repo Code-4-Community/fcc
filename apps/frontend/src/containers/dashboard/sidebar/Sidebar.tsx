@@ -26,7 +26,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   {
     label: 'Dashboard Overview',
-    href: '/dashboard',
+    href: '/dashboard/overview',
     icon: Bookmark,
   },
   {
@@ -66,7 +66,6 @@ export default function Sidebar({ className }: SidebarProps) {
         className,
       )}
     >
-      {/*Top Logo Section */}
       <div className="flex h-[103px] w-full items-center gap-[11px] px-[22px] py-[9px]">
         <img src={FCCLogo} alt="FCC Logo" className="w-[56px] shrink-0" />
         <img
@@ -76,7 +75,6 @@ export default function Sidebar({ className }: SidebarProps) {
         />
       </div>
 
-      {/*Navigation */}
       <nav className="flex w-full flex-col gap-0.05 px-4 pt-8">
         {navItems.map((item) => {
           const isActive = pathname === item.href;

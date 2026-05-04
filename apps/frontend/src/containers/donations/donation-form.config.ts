@@ -25,7 +25,7 @@ export const DONATION_RECURRENCE_OPTIONS: DonationRecurrenceOption[] = [
   },
   {
     donationType: 'recurring',
-    label: 'Yearly',
-    recurringInterval: 'yearly',
+    label: 'Annually',
+    recurringInterval: 'annually',
   },
 ];

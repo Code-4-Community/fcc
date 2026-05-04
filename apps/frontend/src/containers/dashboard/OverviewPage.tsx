@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import Sidebar from './Sidebar';
-import Header from '../header/Header';
-import { useAuth } from '../../../components/AuthProvider';
-import apiClient from '../../../api/apiClient';
-import DonationStatCard from './DonationStatCard';
-import { getDisplayName } from '../../../utils/user';
+import { useAuth } from '../../components/AuthProvider';
+import apiClient from '../../api/apiClient';
+import DonationStatCard from './sidebar/DonationStatCard';
+import { getDisplayName } from '../../utils/user';
 import { PiggyBank, Clock, CalendarDays } from 'lucide-react';
-import welcomeBackground from '../../../assets/green-boston-background.png';
+import welcomeBackground from '../../assets/green-boston-background.png';
+import { AdminGrowingGoal } from './AdminGrowingGoal';
+import { DonorStatsChart } from '../../components/DonorStatsChart';
 
 type DonationStats = {
   total: number;
@@ -20,7 +20,7 @@ const defaultStats: DonationStats = {
   monthToDate: 0,
 };
 
-export default function SidebarTester() {
+export default function OverviewPage() {
   const { user } = useAuth();
   const [stats, setStats] = useState<DonationStats>(defaultStats);
 
@@ -51,16 +51,14 @@ export default function SidebarTester() {
     }).format(amount);
 
   return (
-    <div className="flex min-h-screen bg-white">
-      <Sidebar />
-      <div className="flex flex-1 flex-col">
-        <Header />
-        <main className="flex-1 bg-[#F5F5F5] p-5">
-          <h2 className="mb-3 text-[30px] leading-9 font-semibold tracking-[-0.6px] text-black">
-            Donations Raised
-          </h2>
+    <div className="flex min-h-full bg-[#F5F5F5]">
+      <main className="flex-1 p-5">
+        <h2 className="mb-3 text-[30px] leading-9 font-semibold tracking-[-0.6px] text-black">
+          Donations Raised
+        </h2>
 
-          <section className="grid grid-cols-1 items-start gap-4 md:grid-cols-[minmax(0,1fr)_clamp(350px,31vw,520px)]">
+        <section className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-[minmax(0,1fr)_clamp(350px,31vw,520px)]">
+          <div className="flex flex-col gap-4 min-h-0">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <DonationStatCard
                 Icon={PiggyBank}
@@ -86,8 +84,13 @@ export default function SidebarTester() {
                 value={formatCurrency(stats.monthToDate)}
               />
             </div>
+            <div className="flex flex-1 flex-col min-h-0">
+              <DonorStatsChart className="h-full min-h-0" />
+            </div>
+          </div>
 
-            <aside className="relative h-[350px] overflow-hidden rounded-[10px] bg-[#409887] p-5 text-white md:h-[clamp(350px,31vw,520px)]">
+          <div className="flex flex-col gap-4 min-h-0">
+            <aside className="relative aspect-square overflow-hidden rounded-[10px] bg-[#409887] p-5 text-white">
               <img
                 src={welcomeBackground}
                 alt="Boston skyline"
@@ -101,9 +104,10 @@ export default function SidebarTester() {
                 {displayUserName}
               </p>
             </aside>
-          </section>
-        </main>
-      </div>
+            <AdminGrowingGoal />
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
