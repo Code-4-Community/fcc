@@ -4,7 +4,7 @@ Embeds the FCC donation form and growing goal widget into any WordPress page via
 
 ## How the shortcode works
 
-Add `[fcc_donation]` to any WordPress page or post body
+Add `[fcc_donation]` to any WordPress page or post body.
 
 When the page renders, WordPress replaces the shortcode with a `<div>` mount point and automatically enqueues the JS and CSS — only on pages where the shortcode is present, not sitewide.
 
@@ -41,25 +41,12 @@ After making changes to any frontend code (donation form, growing goal, styles, 
 nx build-embed frontend
 ```
 
-Output lands directly in `apps/wordpress-plugin/fcc-donation/assets/`. Then copy the updated `assets/` folder to the WordPress server:
+This outputs updated files to `apps/wordpress-plugin/fcc-donation/assets/`. Copy the new file contents into WordPress using the Plugin File Editor:
 
-```bash
-cp -r apps/wordpress-plugin/fcc-donation/assets/ \
-  /path/to/wordpress/wp-content/plugins/fcc-donation/assets/
-```
+1. In the WordPress admin, go to **Plugins → Plugin File Editor**.
+2. In the top-right dropdown labeled **"Select plugin to edit:"**, choose **FCC Donation Embed** and click **Select**.
+3. Expand the `assets/` folder in the file tree.
+4. Click **fcc-donation.css** and replace its contents with those of the newly-generated `fcc-donation.css`.
+5. Click **fcc-donation.iife.js** and replace its contents with those of the newly-generated `fcc-donation.iife.js`.
 
 No changes to the PHP file or WordPress plugin settings are needed unless the shortcode interface itself changes.
-
----
-
-## Installing the plugin
-
-1. Copy the entire `fcc-donation/` directory (including built assets) to your WordPress plugins folder:
-   ```
-   wp-content/plugins/fcc-donation/
-   ```
-2. In the WordPress admin, go to **Plugins → Installed Plugins** and activate **FCC Donation Embed**.
-3. Add the shortcode to any page:
-   ```
-   [fcc_donation]
-   ```
