@@ -13,6 +13,14 @@
   text-align: center;
 }
 
+#fcc-donation-embed input#amount {
+  padding-left: 1.5rem !important;
+}
+
+#fcc-donation-embed button {
+  min-width: 0 !important;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -328,7 +336,7 @@
   width: 31%;
   aspect-ratio: 14 / 1;
   border-radius: 10px;
-  background: #3D3E6E;
+  background: #3d3e6e;
 }
 
 .step2-container {

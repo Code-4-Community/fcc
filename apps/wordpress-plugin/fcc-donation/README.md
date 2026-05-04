@@ -11,7 +11,7 @@ When the page renders, WordPress replaces the shortcode with a `<div>` mount poi
 ### What gets rendered
 
 The shortcode renders the same layout as the main app's home page:
-- Testimonial carousel at the top
+- "Make a Difference" banner at the top
 - Growing goal widget and donation form side by side below
 
 The growing goal data (amount raised, target, title) is fetched live from the backend's `/api/donations/goal/active` endpoint on page load.
