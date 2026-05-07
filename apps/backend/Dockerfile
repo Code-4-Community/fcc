@@ -1,5 +1,5 @@
 # Simplified Dockerfile for NestJS backend
-FROM node:20 AS build
+FROM node:26 AS build
 WORKDIR /app
 
 # Copy package files
@@ -15,7 +15,7 @@ COPY . .
 RUN npx nx build backend
 
 # Production stage
-FROM node:20-slim AS runtime
+FROM node:26-slim AS runtime
 WORKDIR /app
 
 # Install only production dependencies
