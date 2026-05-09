@@ -71,7 +71,7 @@ export const DonationAmount = ({
             onChange={onChange}
             onBlur={onAmountBlur}
             className={cn(
-              'pl-7 pr-12 h-10 text-base font-normal border-[#4E4E4E] border-[1.5px] shadow-none focus-visible:ring-0 rounded-lg',
+              'pl-8 pr-12 h-10 text-base font-normal border-[#4E4E4E] border-[1.5px] shadow-none focus-visible:ring-0 rounded-lg',
               error ? 'border-[#d93025] bg-[#fff6f6]' : '',
             )}
             disabled={isSubmitting}

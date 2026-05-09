@@ -1,6 +1,7 @@
 /* Outer card */
 .testimonial-carousel {
-  width: 1200px;
+  width: 100%;
+  max-width: 1200px;
   height: 395px;
   border-radius: 10px;
   overflow: hidden;
@@ -67,8 +68,8 @@
   font-size: 20px;
   font-weight: 500;
   line-height: 100%;
-  color: #ffffff;
-  text-decoration-line: underline;
+  color: #ffffff !important;
+  text-decoration-line: underline !important;
   text-decoration-style: solid;
   text-decoration-skip-ink: auto;
   text-decoration-color: rgba(255, 255, 255, 0.58);
