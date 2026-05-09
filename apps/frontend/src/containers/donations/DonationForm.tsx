@@ -219,34 +219,34 @@ export const DonationForm: React.FC<DonationFormProps> = ({
     setCurrentStep(1);
   };
 
-  const handlePaymentSuccess = async (paymentIntentId: string) => {
-    try {
-      const payload: CreateDonationRequest = {
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
-        email: formData.email.trim(),
-        amount: parseFloat(formData.amount),
-        isAnonymous: formData.isAnonymous,
-        donationType: formData.donationType,
-        dedicationMessage: formData.dedicationMessage,
-        showDedicationPublicly: formData.showDedicationPublicly,
-        paymentIntentId,
-        ...(formData.donationType === 'recurring' && {
-          recurringInterval: formData.recurringInterval,
-        }),
-      };
+  const handleBeforePayment = async (
+    paymentIntentId: string,
+  ): Promise<string> => {
+    const payload: CreateDonationRequest = {
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      email: formData.email.trim(),
+      amount: parseFloat(formData.amount),
+      isAnonymous: formData.isAnonymous,
+      donationType: formData.donationType,
+      dedicationMessage: formData.dedicationMessage,
+      showDedicationPublicly: formData.showDedicationPublicly,
+      paymentIntentId,
+      ...(formData.donationType === 'recurring' && {
+        recurringInterval: formData.recurringInterval,
+      }),
+    };
 
-      const response: CreateDonationResponse =
-        await apiClient.createDonation(payload);
+    const response: CreateDonationResponse =
+      await apiClient.createDonation(payload);
 
-      onSuccess(response.id);
-      setReceiptId(response.id);
-      setCurrentStep(4);
-    } catch (error) {
-      const err = error as Error;
-      setSubmitError(err.message || 'Failed to record donation');
-      onError(err);
-    }
+    return response.id;
+  };
+
+  const handlePaymentSuccess = async (donationId: string) => {
+    onSuccess(donationId);
+    setReceiptId(donationId);
+    setCurrentStep(4);
   };
 
   const renderStep = () => {
@@ -280,6 +280,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
             <Step3Confirm
               formData={formData}
               paymentMethodId={paymentMethodId}
+              onBeforePayment={handleBeforePayment}
               onPaymentSuccess={handlePaymentSuccess}
               onPaymentError={(error) => setSubmitError(error)}
               isSubmitting={isSubmitting}

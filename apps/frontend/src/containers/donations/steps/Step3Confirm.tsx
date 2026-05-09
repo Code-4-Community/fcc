@@ -7,7 +7,8 @@ import { Card } from '@components/ui/card';
 interface Step3ConfirmProps {
   formData: DonationFormData;
   paymentMethodId: string | null;
-  onPaymentSuccess: (paymentIntentId: string) => void;
+  onBeforePayment: (paymentIntentId: string) => Promise<string>;
+  onPaymentSuccess: (donationId: string) => void;
   onPaymentError: (error: string) => void;
   isSubmitting: boolean;
   setIsSubmitting: (value: boolean) => void;
@@ -17,6 +18,7 @@ interface Step3ConfirmProps {
 export const Step3Confirm: React.FC<Step3ConfirmProps> = ({
   formData,
   paymentMethodId,
+  onBeforePayment,
   onPaymentSuccess,
   onPaymentError,
   isSubmitting, // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -56,7 +58,8 @@ export const Step3Confirm: React.FC<Step3ConfirmProps> = ({
         },
       });
 
-      // Step 2: Confirm the payment with Stripe
+      const donationId = await onBeforePayment(paymentIntentResponse.id);
+
       const { error: stripeError, paymentIntent } =
         await stripe.confirmCardPayment(paymentIntentResponse.clientSecret, {
           payment_method: paymentMethodId,
@@ -69,8 +72,13 @@ export const Step3Confirm: React.FC<Step3ConfirmProps> = ({
       }
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Step 3: Payment successful - notify parent
-        onPaymentSuccess(paymentIntent.id);
+        // Explicitly trigger a backend sync for localhost environments without webhooks listening
+        try {
+          await apiClient.syncPaymentIntent(paymentIntentResponse.id);
+        } catch (e) {
+          console.warn('Failed to explicitly sync payment intent', e);
+        }
+        onPaymentSuccess(donationId);
       } else {
         setError('Payment was not completed. Please try again.');
         onPaymentError('Payment was not completed');

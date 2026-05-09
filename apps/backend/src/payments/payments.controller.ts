@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Post,
   Req,
+  Param,
   RawBodyRequest,
   ValidationPipe,
 } from '@nestjs/common';
@@ -19,6 +20,7 @@ import { PaymentIntentResponseDto } from './dtos/payment-intent-response-dto';
 import { CreatePaymentIntentDto } from './dtos/create-payment-intent-dto';
 import { PaymentMappers } from './mappers';
 import { DonationsService } from '../donations/donations.service';
+import { DonationStatus } from '../donations/donation.entity';
 
 @ApiTags('Payments')
 @Controller('payments')
@@ -58,6 +60,20 @@ export class PaymentsController {
     return PaymentMappers.toPaymentIntentResponseDto(paymentIntentResponse);
   }
 
+  @Post('/intent/:id/sync')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'manually trigger a sync for a payment intent status',
+    description:
+      'fetches the latest intent status from Stripe and syncs the associated donation manually (useful for frontend checks or when webhooks miss)',
+  })
+  async syncIntent(@Param('id') intentId: string) {
+    const paymentIntentResponse =
+      await this.paymentsService.retrievePaymentIntent(intentId);
+    await this.syncDonationFromPaymentIntent(paymentIntentResponse);
+    return { success: true, status: paymentIntentResponse.status };
+  }
+
   @Post('/webhook')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -83,6 +99,9 @@ export class PaymentsController {
 
     let event: Stripe.Event;
     try {
+      if (!req.rawBody) {
+        throw new BadRequestException('Request raw body is missing');
+      }
       event = this.paymentsService.constructWebhookEvent(
         req.rawBody,
         stripeSignature,
@@ -97,6 +116,23 @@ export class PaymentsController {
       const response =
         this.paymentsService.mapPaymentIntentToResponse(paymentIntent);
       await this.syncDonationFromPaymentIntent(response);
+    } else if (
+      event.type === 'charge.dispute.created' ||
+      event.type === 'charge.refunded'
+    ) {
+      const charge = event.data.object as Stripe.Charge;
+      if (charge.payment_intent) {
+        await this.syncDonationFromPaymentIntent({
+          id: charge.payment_intent as string,
+          status: DonationStatus.CANCELLED,
+          amount: charge.amount,
+          currency: charge.currency,
+          clientSecret: '',
+          paymentMethodTypes: [],
+          created: charge.created,
+          requiresAction: false,
+        });
+      }
     }
 
     return { received: true };

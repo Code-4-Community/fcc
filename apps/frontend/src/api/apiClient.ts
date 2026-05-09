@@ -156,6 +156,14 @@ export class ApiClient {
     }
   }
 
+  public async syncPaymentIntent(intentId: string): Promise<void> {
+    try {
+      await this.axiosInstance.post(`/api/payments/intent/${intentId}/sync`);
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to sync payment intent');
+    }
+  }
+
   public setAuthToken(token: string | null) {
     if (token) {
       this.axiosInstance.defaults.headers.common['Authorization'] =
