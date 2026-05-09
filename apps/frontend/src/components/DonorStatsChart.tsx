@@ -183,6 +183,7 @@ export function DonorStatsChart({ className }: { className?: string }) {
 
         // Fetch donations with date range filter
         const response = await apiClient.getDonations({
+          page: 1,
           perPage: 10000,
           status: 'succeeded',
           startDate: startDateStr,
@@ -312,7 +313,7 @@ export function DonorStatsChart({ className }: { className?: string }) {
               tick={{ fontSize: 16, fill: '#666' }}
               tickFormatter={(value) => {
                 // Format as currency for both donations and recurring donations
-                return `$${(value / 100).toLocaleString()}`;
+                return `$${value.toLocaleString()}`;
               }}
             />
             <ChartTooltip
@@ -329,7 +330,7 @@ export function DonorStatsChart({ className }: { className?: string }) {
                   }}
                   formatter={(value: any) => {
                     // Format as currency for both donations and recurring donations
-                    return `$${(value / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    return `$${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                   }}
                 />
               }

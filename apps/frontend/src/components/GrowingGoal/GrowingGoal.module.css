@@ -99,6 +99,17 @@
   font-family: 'Source Sans Pro', sans-serif;
   font-size: 4cqw;
   overflow: hidden;
+  white-space: nowrap;
+}
+
+.fade-in {
+  opacity: 1;
+  transition: opacity 0.5s ease-in;
+}
+
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
 }
 
 .growth-container-solid-white {

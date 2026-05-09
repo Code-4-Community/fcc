@@ -46,6 +46,18 @@ export type DonationListRow = {
   isAnonymous: boolean;
 };
 
+export type PublicDonationRow = {
+  id: number;
+  donorName?: string;
+  amount: number;
+  isAnonymous: boolean;
+  donationType: 'one_time' | 'recurring';
+  recurringInterval?: 'weekly' | 'monthly' | 'yearly' | 'annually';
+  dedicationMessage?: string;
+  status: 'pending' | 'succeeded' | 'failed' | 'cancelled';
+  createdAt: string;
+};
+
 export type DonationListResponse = {
   rows: DonationListRow[];
   total: number;
@@ -243,6 +255,19 @@ export class ApiClient {
         throw new Error(msg);
       }
       throw new Error('Failed to create donation');
+    }
+  }
+
+  public async getPublicDonations(params?: {
+    limit?: number;
+  }): Promise<PublicDonationRow[]> {
+    try {
+      const res = await this.axiosInstance.get('/api/donations/public', {
+        params,
+      });
+      return res.data;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to fetch public donations');
     }
   }
 
