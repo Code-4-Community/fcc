@@ -28,6 +28,7 @@
   background-color: #006b54;
   color: #ffffff;
   text-decoration: none;
+  outline: none;
 }
 
 #fcc-donation-embed button[class*='bg-white']:hover,
@@ -35,6 +36,7 @@
   background-color: #ffffff;
   color: inherit;
   text-decoration: none;
+  outline: none;
 }
 
 .form-group {
