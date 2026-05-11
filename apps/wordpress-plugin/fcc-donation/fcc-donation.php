@@ -22,18 +22,27 @@ function fcc_donation_shortcode( $atts ) {
         'fcc_donation'
     );
 
+    $assets_dir = plugin_dir_path( __FILE__ ) . 'assets/';
+    $css_path   = $assets_dir . 'fcc-donation.css';
+    $js_path    = $assets_dir . 'fcc-donation.iife.js';
+
+    // Use file mtime as the version so any change to the asset (via Plugin File
+    // Editor or otherwise) busts browser, CDN, and WordPress object caches.
+    $css_version = file_exists( $css_path ) ? filemtime( $css_path ) : '1.0.0';
+    $js_version  = file_exists( $js_path )  ? filemtime( $js_path )  : '1.0.0';
+
     wp_enqueue_style(
         'fcc-donation',
         plugins_url( 'assets/fcc-donation.css', __FILE__ ),
         [],
-        '1.0.0'
+        $css_version
     );
 
     wp_enqueue_script(
         'fcc-donation',
         plugins_url( 'assets/fcc-donation.iife.js', __FILE__ ),
         [],
-        '1.0.0',
+        $js_version,
         true // load in footer so the DOM is ready
     );
 

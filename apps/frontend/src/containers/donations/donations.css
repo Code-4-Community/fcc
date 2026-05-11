@@ -21,6 +21,22 @@
   min-width: 0 !important;
 }
 
+#fcc-donation-embed button[class*='#007b64']:hover,
+#fcc-donation-embed button[class*='#007b64']:focus,
+#fcc-donation-embed button[class*='#007B64']:hover,
+#fcc-donation-embed button[class*='#007B64']:focus {
+  background-color: #006b54;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+#fcc-donation-embed button[class*='bg-white']:hover,
+#fcc-donation-embed button[class*='bg-white']:focus {
+  background-color: #ffffff;
+  color: inherit;
+  text-decoration: none;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;

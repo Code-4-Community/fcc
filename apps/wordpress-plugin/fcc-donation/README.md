@@ -50,3 +50,7 @@ This outputs updated files to `apps/wordpress-plugin/fcc-donation/assets/`. Copy
 5. Click **fcc-donation.iife.js** and replace its contents with those of the newly-generated `fcc-donation.iife.js`.
 
 No changes to the PHP file or WordPress plugin settings are needed unless the shortcode interface itself changes.
+
+### Cache busting
+
+The PHP plugin enqueues each asset with its file modification time as the version query param (`?ver=<mtime>`). Saving a new version of either asset through the Plugin File Editor changes its mtime, which changes the URL, which forces browsers, CDNs, and the WordPress object cache to fetch the fresh file. No manual version bumps or cache purges needed.
