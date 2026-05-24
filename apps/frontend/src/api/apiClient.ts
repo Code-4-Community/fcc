@@ -216,6 +216,17 @@ export class ApiClient {
     }
   }
 
+  public async changePassword(body: {
+    previousPassword: string;
+    proposedPassword: string;
+  }): Promise<void> {
+    try {
+      await this.axiosInstance.post('/api/auth/changePassword', body);
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to change password');
+    }
+  }
+
   public async getActiveGoalSummary(): Promise<ActiveGoalResponse> {
     try {
       const res = await this.axiosInstance.get('/api/donations/goal/active');
@@ -325,6 +336,17 @@ export class ApiClient {
       await this.axiosInstance.patch(`/api/users/${id}/status`, { status });
     } catch (err: unknown) {
       this.handleAxiosError(err, 'Failed to update user status');
+    }
+  }
+
+  public async updateUser(
+    userId: number,
+    body: { firstName?: string; lastName?: string },
+  ): Promise<void> {
+    try {
+      await this.axiosInstance.patch(`/api/users/${userId}`, body);
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to update user profile');
     }
   }
 

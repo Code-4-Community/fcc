@@ -6,6 +6,7 @@ import {
   AttributeType,
   CognitoIdentityProviderClient,
   ConfirmForgotPasswordCommand,
+  ChangePasswordCommand,
   ConfirmSignUpCommand,
   ForgotPasswordCommand,
   ListUsersCommand,
@@ -260,6 +261,20 @@ export class AuthService {
     });
 
     await this.providerClient.send(confirmComamnd);
+  }
+
+  async changePassword(
+    accessToken: string,
+    previousPassword: string,
+    proposedPassword: string,
+  ): Promise<void> {
+    const command = new ChangePasswordCommand({
+      AccessToken: accessToken,
+      PreviousPassword: previousPassword,
+      ProposedPassword: proposedPassword,
+    });
+
+    await this.providerClient.send(command);
   }
 
   async deleteUser(email: string): Promise<void> {
