@@ -116,6 +116,7 @@ export const AdminGrowingGoal: React.FC = () => {
         total={0}
         goal={0}
         variant="admin"
+        fillHeight
         onEdit={() => setIsEditing(true)}
       />
     );
@@ -128,6 +129,7 @@ export const AdminGrowingGoal: React.FC = () => {
       total={data.amountRaised}
       goal={data.goal.targetAmount}
       variant="admin"
+      fillHeight
       onEdit={() => setIsEditing(true)}
     />
   );
