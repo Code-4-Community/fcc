@@ -86,6 +86,39 @@ export type UpdateGoalRequest = {
   endDate: string;
 };
 
+export type SaveTemplateRequest = {
+  type: 'donation_response' | 'relapsed_donor' | 'email_subscribers';
+  subject: string;
+  bodyHtml: string;
+};
+
+export type SaveTemplateResponse = {
+  message: string;
+  template: {
+    id: number;
+    type: string;
+    subject: string;
+    updatedAt: string;
+  };
+};
+
+export type BulkSendRequest = {
+  targetGroup: 'relapsed_donors' | 'email_subscribers';
+  subject: string;
+  bodyHtml: string;
+};
+
+export type BulkSendResponse = {
+  message: string;
+  sent: number;
+  targetGroup: string;
+};
+
+export type EmailSubscribersResponse = {
+  emails: string[];
+  count: number;
+};
+
 export type CreatePaymentIntentRequest = {
   amount: number; // in cents
   currency: string;
@@ -325,6 +358,35 @@ export class ApiClient {
       await this.axiosInstance.patch(`/api/users/${id}/status`, { status });
     } catch (err: unknown) {
       this.handleAxiosError(err, 'Failed to update user status');
+    }
+  }
+
+  public async saveEmailTemplate(
+    body: SaveTemplateRequest,
+  ): Promise<SaveTemplateResponse> {
+    try {
+      const res = await this.axiosInstance.post('/api/emails/template', body);
+      return res.data as SaveTemplateResponse;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to save email template');
+    }
+  }
+
+  public async bulkSendEmail(body: BulkSendRequest): Promise<BulkSendResponse> {
+    try {
+      const res = await this.axiosInstance.post('/api/emails/bulk-send', body);
+      return res.data as BulkSendResponse;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to send bulk email');
+    }
+  }
+
+  public async getEmailSubscribers(): Promise<EmailSubscribersResponse> {
+    try {
+      const res = await this.axiosInstance.get('/api/emails/subscribers');
+      return res.data as EmailSubscribersResponse;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to fetch email subscribers');
     }
   }
 
