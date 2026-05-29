@@ -171,7 +171,6 @@ export class EmailsService {
         return;
       }
 
-      // Replace placeholders in the template
       const bodyHTML = template.bodyHtml
         .replace(/\{\{donorName\}\}/g, donorName)
         .replace(/\{\{amount\}\}/g, amount.toString());
