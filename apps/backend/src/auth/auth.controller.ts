@@ -24,6 +24,7 @@ import { SignInResponseDto } from './dtos/sign-in-response.dto';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
 import { ConfirmPasswordDto } from './dtos/confirm-password.dto';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
+import { ChangePasswordDto } from './dtos/change-password.dto';
 import { ApiTags } from '@nestjs/swagger';
 
 interface AuthenticatedUser {
@@ -260,6 +261,41 @@ export class AuthController {
             throw new BadRequestException('User not found');
           case 'ExpiredCodeException':
             throw new BadRequestException('Confirmation code has expired');
+        }
+      }
+      throw new BadRequestException(this.getErrorMessage(error));
+    }
+  }
+
+  @Post('/changePassword')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(CurrentUserInterceptor)
+  async changePassword(
+    @Req() req: AuthenticatedRequest & { headers: { authorization?: string } },
+    @Body() body: ChangePasswordDto,
+  ): Promise<void> {
+    const authHeader = req.headers?.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new ForbiddenException('Missing or invalid authorization header');
+    }
+
+    const accessToken = authHeader.replace('Bearer ', '');
+
+    try {
+      await this.authService.changePassword(
+        accessToken,
+        body.previousPassword,
+        body.proposedPassword,
+      );
+    } catch (error: unknown) {
+      console.error('Change password error:', error);
+      if (error instanceof Error) {
+        const name = (error as any).name;
+        if (name === 'NotAuthorizedException') {
+          throw new BadRequestException('Invalid previous password');
+        }
+        if (name === 'InvalidPasswordException') {
+          throw new BadRequestException('Password does not meet requirements');
         }
       }
       throw new BadRequestException(this.getErrorMessage(error));

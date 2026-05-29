@@ -19,6 +19,7 @@ export type GrowingGoalProps = {
   variant?: 'default' | 'admin';
   subMessage?: string;
   onEdit?: () => void;
+  fillHeight?: boolean;
 };
 
 export const GrowingGoal = (props: GrowingGoalProps) => {
@@ -30,6 +31,7 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
     subMessage,
     onEdit,
     donorCycles,
+    fillHeight = false,
   } = props;
   const growthContainerRef = useRef<HTMLDivElement>(null);
   const [radius, setRadius] = useState(0);
@@ -140,7 +142,9 @@ export const GrowingGoal = (props: GrowingGoalProps) => {
       className={styles['goal-container']}
       style={{
         background: '#FCFCFC',
-        aspectRatio: variant === 'admin' ? '7 / 9' : '7 / 10',
+        ...(fillHeight
+          ? { height: '100%', aspectRatio: 'auto' }
+          : { aspectRatio: variant === 'admin' ? '7 / 9' : '7 / 10' }),
       }}
     >
       <div

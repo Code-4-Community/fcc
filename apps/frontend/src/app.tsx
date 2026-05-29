@@ -25,6 +25,7 @@ import { EmailEditor } from './components/EmailComms/EmailEditorOverviewPage';
 import { AdminGrowingGoalTester } from '@containers/dashboard/AdminGrowingGoalTester';
 import OverviewPage from '@containers/dashboard/OverviewPage';
 import { UserManagement } from '@containers/dashboard/UserManagement';
+import Settings from '@containers/dashboard/Settings';
 
 const router = createBrowserRouter([
   {
@@ -74,7 +75,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'settings',
-            element: <div>Settings (Placeholder)</div>,
+            element: <Settings />,
           },
         ],
       },
