@@ -3,6 +3,8 @@ import { Donation } from './donations/donation.entity';
 import { User } from './users/user.entity';
 import * as dotenv from 'dotenv';
 import { Goal } from './donations/goal.entity';
+import { EmailTemplate } from './emails/email-template.entity';
+import { EmailSubscriber } from './emails/email-subscriber.entity';
 
 dotenv.config();
 
@@ -13,7 +15,7 @@ const AppDataSource = new DataSource({
   username: process.env.NX_DB_USERNAME,
   password: process.env.NX_DB_PASSWORD,
   database: process.env.NX_DB_DATABASE,
-  entities: [User, Donation, Goal],
+  entities: [User, Donation, Goal, EmailTemplate, EmailSubscriber],
   migrations: [],
   // Setting synchronize: true shouldn't be used in production - otherwise you can lose production data
   synchronize: true,

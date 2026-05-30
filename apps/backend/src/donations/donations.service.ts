@@ -13,6 +13,7 @@ import { Readable } from 'stream';
 import { DonationsRepository } from './donations.repository';
 import { Goal } from './goal.entity';
 import { UpdateGoalDto } from './dtos';
+import { EmailsService } from '../emails/emails.service';
 
 interface PaymentIntentSyncPayload {
   donationId?: number;
@@ -39,6 +40,7 @@ export class DonationsService {
     private goalRepository: Repository<Goal>,
 
     private readonly donationsRepository: DonationsRepository,
+    private readonly emailsService: EmailsService,
   ) {}
 
   async create(
@@ -278,12 +280,37 @@ export class DonationsService {
       return;
     }
 
+    const previousStatus = donation.status;
     donation.status = status;
     if (transactionId) {
       donation.transactionId = transactionId;
     }
 
     await this.donationRepository.save(donation);
+
+    // Send donation response email if status changed to succeeded
+    if (
+      previousStatus !== DonationStatus.SUCCEEDED &&
+      status === DonationStatus.SUCCEEDED
+    ) {
+      try {
+        const donorName = `${donation.firstName} ${donation.lastName}`;
+        await this.emailsService.sendDonationResponseEmail(
+          donation.email,
+          donorName,
+          donation.amount,
+        );
+        this.logger.log(
+          `Donation Response email sent to ${donation.email} for donation ${donation.id}`,
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to send Donation Response email for donation ${donation.id}`,
+          error,
+        );
+        // caught error cause we dont want email failure to break the payment sync
+      }
+    }
   }
 
   async getLapsedDonors(numMonths = 6): Promise<{ emails: string[] }> {
