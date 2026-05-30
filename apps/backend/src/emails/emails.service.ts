@@ -147,6 +147,10 @@ export class EmailsService {
     return subscribers.map((sub) => sub.email);
   }
 
+  public async getAllTemplates(): Promise<EmailTemplate[]> {
+    return await this.emailTemplateRepository.find();
+  }
+
   /**
    * Sends the Donation Response email to a donor using the stored template.
    *

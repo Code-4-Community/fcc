@@ -98,6 +98,7 @@ export type SaveTemplateResponse = {
     id: number;
     type: string;
     subject: string;
+    bodyHtml: string;
     updatedAt: string;
   };
 };
@@ -391,6 +392,17 @@ export class ApiClient {
       return res.data as SaveTemplateResponse;
     } catch (err: unknown) {
       this.handleAxiosError(err, 'Failed to save email template');
+    }
+  }
+
+  public async getEmailTemplates(): Promise<
+    SaveTemplateResponse['template'][]
+  > {
+    try {
+      const res = await this.axiosInstance.get('/api/emails/template');
+      return res.data;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to fetch email templates');
     }
   }
 

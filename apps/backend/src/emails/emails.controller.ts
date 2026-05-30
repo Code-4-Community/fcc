@@ -32,6 +32,11 @@ export class EmailsController {
     return { message: 'email sent' };
   }
 
+  @Get('template')
+  async getTemplates() {
+    return this.emailService.getAllTemplates();
+  }
+
   @Get('subscribers')
   // TODO: re-enable auth guard temp disabled for local debugging
   // @UseGuards(AuthGuard('jwt'))

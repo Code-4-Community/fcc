@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import EmailEditorCard from './EmailEditorCard';
 import EmailPreviewPanel from './EmailPreviewPanel';
 import type { TabId, EmailData, EmailsState, Signature } from './types';
@@ -19,6 +19,36 @@ export function EmailEditor() {
   const [sent, setSent] = useState(false);
   const [ctaText, setCtaText] = useState('DONATE AT OUR SITE!');
   const [ctaLink, setCtaLink] = useState('https://fenwaycommunitycenter.org/');
+
+  useEffect(() => {
+    const loadTemplates = async () => {
+      try {
+        const templates = await apiClient.getEmailTemplates();
+        if (templates && templates.length > 0) {
+          setEmails((prev) => {
+            const next = { ...prev };
+            templates.forEach((t: any) => {
+              let tab: TabId | null = null;
+              if (t.type === 'donation_response') tab = 'donation';
+              else if (t.type === 'relapsed_donor') tab = 'relapsed';
+              else if (t.type === 'email_subscribers') tab = 'mass';
+
+              if (tab) {
+                next[tab] = {
+                  subject: t.subject,
+                  body: t.bodyHtml,
+                };
+              }
+            });
+            return next;
+          });
+        }
+      } catch (error) {
+        console.error('[EmailEditor] Failed to load templates:', error);
+      }
+    };
+    loadTemplates();
+  }, []);
 
   const handleEmailChange = (
     tab: TabId,
@@ -44,29 +74,29 @@ export function EmailEditor() {
       const email = emails[activeTab];
       const fullHTML = buildFullHTML();
 
+      let type: 'donation_response' | 'relapsed_donor' | 'email_subscribers';
       if (activeTab === 'donation') {
-        await apiClient.saveEmailTemplate({
-          type: 'donation_response',
-          subject: email.subject,
-          bodyHtml: fullHTML,
-        });
-        console.log(
-          '[EmailEditorOverviewPage] Donation Response template saved',
-        );
+        type = 'donation_response';
+      } else if (activeTab === 'relapsed') {
+        type = 'relapsed_donor';
       } else {
-        console.log('[EmailEditorOverviewPage] Save payload (local only):', {
-          tab: activeTab,
-          subject: email.subject,
-          body: email.body,
-        });
+        type = 'email_subscribers';
       }
+
+      await apiClient.saveEmailTemplate({
+        type,
+        subject: email.subject,
+        bodyHtml: fullHTML,
+      });
 
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (error) {
       console.error('[EmailEditorOverviewPage] Save failed:', error);
       alert(
-        `Failed to save: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to save: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
       );
     }
   };
