@@ -11,6 +11,7 @@ export type Signature = {
   linkedin: string;
   X: string;
   facebook: string;
+  imageUrl: string;
 };
 
 export type EmailData = {
@@ -61,12 +62,13 @@ export const defaultEmails: EmailsState = {
 export const DEFAULT_SIGNATURE: Signature = {
   name: 'Mallory Rohig',
   position: 'Executive Director',
-  email: 'filler-email@gmail.com',
+  email: 'mallory@fenwaycommunitycenter.org',
   pronouns: '(she/her)',
   website: 'https://fenwaycommunitycenter.org/',
-  linkedin: 'https://www.linkedin.com/company/fenwaycommunitycenter/',
-  X: 'https://fenwaycommunitycenter.org/?share=x&nb=1',
-  facebook: 'https://fenwaycommunitycenter.org/?share=facebook&nb=1',
+  linkedin: 'https://www.linkedin.com/company/fenwaycommunitycenter',
+  X: '',
+  facebook: 'https://www.facebook.com/fenwaycommunitycenter',
+  imageUrl: '',
 };
 
 export const TAB_CONFIG: { id: TabId; label: string }[] = [
@@ -94,12 +96,14 @@ export function buildSignatureHTML(sig: Signature): string {
       : '',
   ].join('');
 
+  const imageSrc = sig.imageUrl ? sig.imageUrl : FCCEmailMallory;
+
   return `
     <table cellpadding="0" cellspacing="0" border="0" style="width:100%;font-family:Arial,sans-serif;max-width:100%;table-layout:fixed;">
       <tr>
         <!-- Photo -->
         <td style="vertical-align:middle;width:clamp(45px, 6vw, 65px);padding-right:clamp(6px, 1vw, 12px);">
-          <img src="${FCCEmailMallory}" alt="${sig.name}"
+          <img src="${imageSrc}" alt="${sig.name}"
             style="width:clamp(40px, 5vw, 60px);height:clamp(40px, 5vw, 60px);border-radius:50%;object-fit:cover;object-position:top;border:2px solid white;display:block;" />
         </td>
 
@@ -112,6 +116,13 @@ export function buildSignatureHTML(sig: Signature): string {
 
         <!-- Website + Social -->
         <td style="vertical-align:middle;text-align:right;width:35%;min-width:100px;">
+          ${
+            sig.email
+              ? `<p style="margin:0 0 2px;font-size:clamp(9px, 1.2vw, 12px);font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            <a href="mailto:${sig.email}" target="_blank" rel="noreferrer" style="color:#1a1a1a;text-decoration:none;">${sig.email}</a>
+          </p>`
+              : ''
+          }
           ${
             sig.website
               ? `<p style="margin:0 0 6px;font-size:clamp(9px, 1.2vw, 12px);font-weight:700;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">

@@ -25,6 +25,7 @@ export function EmailEditor() {
       try {
         const templates = await apiClient.getEmailTemplates();
         if (templates && templates.length > 0) {
+          let loadedMeta = false;
           setEmails((prev) => {
             const next = { ...prev };
             templates.forEach((t: any) => {
@@ -34,10 +35,33 @@ export function EmailEditor() {
               else if (t.type === 'email_subscribers') tab = 'mass';
 
               if (tab) {
+                const bodyMatch = t.bodyHtml.match(
+                  /<!-- FCC_BODY_START -->([\s\S]*?)<!-- FCC_BODY_END -->/,
+                );
+                const body = bodyMatch ? bodyMatch[1].trim() : t.bodyHtml;
+
                 next[tab] = {
                   subject: t.subject,
-                  body: t.bodyHtml,
+                  body: body,
                 };
+              }
+
+              if (!loadedMeta) {
+                const metaMatch = t.bodyHtml.match(/<!-- FCC_META:(.*?) -->/);
+                if (metaMatch) {
+                  try {
+                    const meta = JSON.parse(metaMatch[1]);
+                    if (meta.sig) setSig(meta.sig);
+                    if (meta.ctaText) setCtaText(meta.ctaText);
+                    if (meta.ctaLink) setCtaLink(meta.ctaLink);
+                    loadedMeta = true; // Use the first found metadata
+                  } catch (e) {
+                    console.error(
+                      'Failed to parse metadata from email template',
+                      e,
+                    );
+                  }
+                }
               }
             });
             return next;
@@ -60,13 +84,15 @@ export function EmailEditor() {
 
   const buildFullHTML = () => {
     const email = emails[activeTab];
-    return `
-      <html><body>
-        ${email.body}
-        ${buildSignatureHTML(sig)}
-        ${ctaText ? `<div style="text-align:center;margin:28px 0"><a href="${ctaLink}" style="background:#059669;color:white;padding:14px 32px;border-radius:8px;font-weight:700;text-decoration:none;font-size:14px;letter-spacing:0.05em">${ctaText}</a></div>` : ''}
-      </body></html>
-    `;
+    const metadata = { sig, ctaText, ctaLink };
+    return `<!-- FCC_META:${JSON.stringify(metadata)} -->
+<html><body>
+  <!-- FCC_BODY_START -->
+  ${email.body}
+  <!-- FCC_BODY_END -->
+  ${buildSignatureHTML(sig)}
+  ${ctaText ? `<div style="text-align:center;margin:28px 0"><a href="${ctaLink}" style="background:#059669;color:white;padding:14px 32px;border-radius:8px;font-weight:700;text-decoration:none;font-size:14px;letter-spacing:0.05em">${ctaText}</a></div>` : ''}
+</body></html>`;
   };
 
   const handleSave = async () => {

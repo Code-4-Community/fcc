@@ -25,11 +25,27 @@ export default function SignatureEditor({
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3">
         {field('Full Name', 'name', 'Your name')}
-
         {field('Position', 'position', 'Your title')}
-
-        {field('Email', 'email', 'you@company.com')}
+        {field('Email', 'email', 'mallory@fenwaycommunitycenter.org')}
+        {field('Pronouns', 'pronouns', '(she/her)')}
+        {field('Website', 'website', 'https://fenwaycommunitycenter.org/')}
+        {field(
+          'LinkedIn',
+          'linkedin',
+          'https://www.linkedin.com/company/fenwaycommunitycenter',
+        )}
+        {field('X (Twitter)', 'X', 'https://twitter.com/...')}
+        {field(
+          'Facebook',
+          'facebook',
+          'https://www.facebook.com/fenwaycommunitycenter',
+        )}
       </div>
+      {field(
+        'Image Upload (CDN URL placeholder)',
+        'imageUrl',
+        'https://example.com/image.png',
+      )}
     </div>
   );
 }
