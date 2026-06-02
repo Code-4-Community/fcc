@@ -16,10 +16,8 @@ const AppDataSource = new DataSource({
   password: process.env.NX_DB_PASSWORD,
   database: process.env.NX_DB_DATABASE,
   entities: [User, Donation, Goal, EmailTemplate, EmailSubscriber],
-  migrations: [],
-  // Setting synchronize: true shouldn't be used in production - otherwise you can lose production data
-  synchronize: true,
-  // Removed PluralNamingStrategy - use explicit @Entity('table_name') instead
+  migrations: ['apps/backend/src/migrations/*.ts'],
+  synchronize: false,
 });
 
 export default AppDataSource;
