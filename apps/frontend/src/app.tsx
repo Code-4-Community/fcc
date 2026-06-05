@@ -6,7 +6,6 @@ import {
 } from 'react-router-dom';
 import './styles.css';
 import apiClient from '@api/apiClient';
-import Root from '@containers/root';
 import NotFound from '@containers/404';
 import TestimonialTester from '@containers/TestimonialTester';
 import { DonationForm } from '@containers/donations/DonationForm';
@@ -30,7 +29,7 @@ import Settings from '@containers/dashboard/Settings';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Root />,
+    element: <Navigate to="/dashboard" />,
     errorElement: <NotFound />,
   },
   {
