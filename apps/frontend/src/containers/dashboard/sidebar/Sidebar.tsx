@@ -1,6 +1,7 @@
 'use client';
 
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../../components/AuthProvider';
 import {
   Bookmark,
   ListFilter,
@@ -58,6 +59,16 @@ type SidebarProps = {
 
 export default function Sidebar({ className }: SidebarProps) {
   const { pathname } = useLocation();
+  const { user } = useAuth();
+
+  const isAdmin = user?.status === 'ADMIN';
+
+  const filteredNavItems = navItems.filter((item) => {
+    if (item.href === '/dashboard/approval') {
+      return isAdmin;
+    }
+    return true;
+  });
 
   return (
     <aside
@@ -76,7 +87,7 @@ export default function Sidebar({ className }: SidebarProps) {
       </div>
 
       <nav className="flex w-full flex-col gap-0.05 px-4 pt-8">
-        {navItems.map((item) => {
+        {filteredNavItems.map((item) => {
           const isActive = pathname === item.href;
 
           return (

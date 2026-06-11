@@ -13,7 +13,7 @@ export class Goal {
   })
   id!: number;
 
-  @Column({ type: 'int' })
+  @Column({ name: 'admin_target_amount', type: 'int' })
   targetAmount!: number;
 
   @Column({ type: 'text', nullable: true })
