@@ -53,11 +53,11 @@ export default function EditDonationGoal({
 
   return (
     <div
-      className="flex aspect-[7/10] w-full flex-col gap-3 rounded-[10px] border border-[#E5E5E5] bg-[#FCFCFC] p-4 font-['Source_Sans_Pro'] shadow-[0px_4px_12px_rgba(0,0,0,0.1)]"
+      className="flex h-full w-full flex-col gap-3 overflow-y-auto rounded-[10px] border border-[#E5E5E5] bg-[#FCFCFC] p-4 font-['Source_Sans_Pro'] shadow-[0px_4px_12px_rgba(0,0,0,0.1)]"
       onClick={(e) => e.stopPropagation()}
     >
       {/* Header */}
-      <div className="mb-1 flex w-full items-start justify-between border-b border-[#E5E5E5] pb-2">
+      <div className="mb-1 flex w-full shrink-0 items-start justify-between border-b border-[#E5E5E5] pb-2">
         <h4 className="text-[18px] font-semibold leading-tight tracking-[-0.2px] text-black">
           Edit Donation Goal
         </h4>
@@ -72,7 +72,7 @@ export default function EditDonationGoal({
       </div>
 
       {/* Title Field */}
-      <div className="flex w-full flex-col gap-1">
+      <div className="flex w-full shrink-0 flex-col gap-1">
         <label className="text-[13px] font-normal leading-tight text-[#171717]">
           Title displayed on{' '}
           <span className="font-bold">live donation site</span>
@@ -90,7 +90,7 @@ export default function EditDonationGoal({
       </div>
 
       {/* Goal Amount Field */}
-      <div className="flex w-full flex-col gap-1">
+      <div className="flex w-full shrink-0 flex-col gap-1">
         <div className="flex w-full items-center justify-between">
           <label className="text-[13px] font-normal leading-tight text-[#171717]">
             Goal Amount
@@ -115,7 +115,7 @@ export default function EditDonationGoal({
       </div>
 
       {/* Start Date Field */}
-      <div className="flex w-full flex-col gap-1">
+      <div className="flex w-full shrink-0 flex-col gap-1">
         <label className="text-[13px] font-normal leading-tight text-[#171717]">
           Start Date
         </label>
@@ -136,7 +136,7 @@ export default function EditDonationGoal({
       </div>
 
       {/* End Date Field */}
-      <div className="flex w-full flex-col gap-1">
+      <div className="flex w-full shrink-0 flex-col gap-1">
         <label className="text-[13px] font-normal leading-tight text-[#171717]">
           End Date
         </label>
@@ -159,7 +159,7 @@ export default function EditDonationGoal({
       <div className="flex-grow" />
 
       {/* Bottom Buttons */}
-      <div className="flex w-full gap-2">
+      <div className="mt-auto flex w-full shrink-0 gap-2 pt-2">
         <button
           type="button"
           onClick={onCancel}
