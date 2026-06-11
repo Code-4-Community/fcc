@@ -8,21 +8,42 @@ import {
 } from '@components/GrowingGoal/GrowingGoal';
 import { TestimonialCarousel } from '@components/testimonials/TestimonialCarousel';
 import { useActiveGoal } from './hooks/useActiveGoal';
+import apiClient from './api/apiClient';
 import './containers/root.css';
 import './styles.css';
 
-const SAMPLE_DONATION: SampleDonation = {
-  name: 'C4C',
-  amount: 500,
-  profile:
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAALElEQVR42mNgGAWjgLGB4T8DGjBgFiMDw38GphCjEopFY1GNRg0Y1GgAAAD9YB5WfVii1AAAAABJRU5ErkJggg==',
-};
-
 const EmbedApp: React.FC = () => {
-  const { data } = useActiveGoal();
+  const { data, refresh: refreshGoal } = useActiveGoal();
+  const [donorCycles, setDonorCycles] = React.useState<SampleDonation[]>([]);
+
+  const fetchDonors = React.useCallback(async () => {
+    try {
+      const response = await apiClient.getPublicDonations({ limit: 10 });
+      if (response && response.length > 0) {
+        const cycles = response.map((d) => ({
+          name: d.donorName || 'Anonymous',
+          amount: d.amount,
+          profile: '',
+        }));
+        setDonorCycles(cycles);
+      }
+    } catch (e) {
+      console.error('[FCC Donation] Failed to fetch donor cycles', e);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchDonors();
+  }, [fetchDonors]);
+
   const donationTotal = data?.amountRaised ?? 3000;
   const targetGoal = data?.goal?.targetAmount ?? 10000;
   const label = data?.goal?.title || 'Grow your community with FCC';
+
+  const handleDonationSuccess = async (donationId: string) => {
+    console.info('[FCC Donation] Submitted:', donationId);
+    await Promise.all([refreshGoal(), fetchDonors()]);
+  };
 
   return (
     <div className="root-page">
@@ -37,13 +58,13 @@ const EmbedApp: React.FC = () => {
               message={label}
               total={donationTotal}
               goal={targetGoal}
-              sampleDonation={SAMPLE_DONATION}
+              donorCycles={donorCycles}
             />
           </div>
 
           <div className="root-form-panel">
             <DonationForm
-              onSuccess={(id) => console.log('[FCC Donation] Submitted:', id)}
+              onSuccess={handleDonationSuccess}
               onError={(err) => console.error('[FCC Donation] Error:', err)}
             />
           </div>
