@@ -21,8 +21,7 @@ export class EmailsController {
   ) {}
 
   @Post('send-email')
-  // TODO: re-enable auth guard temp disabled for local debugging
-  // @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   async sendVerificationEmail(@Body() body: CreateEmailDto) {
     await this.emailService.sendEmail(
       body.email,
@@ -33,21 +32,20 @@ export class EmailsController {
   }
 
   @Get('template')
+  @UseGuards(AuthGuard('jwt'))
   async getTemplates() {
     return this.emailService.getAllTemplates();
   }
 
   @Get('subscribers')
-  // TODO: re-enable auth guard temp disabled for local debugging
-  // @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   async getSubscribers() {
     const emails = await this.emailService.getSubscribers();
     return { emails, count: emails.length };
   }
 
   @Post('template')
-  // TODO: re-enable auth guard temp disabled for local debugging
-  // @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   async saveTemplate(@Body() body: SaveTemplateDto) {
     const template = await this.emailService.saveTemplate(
       body.type,
@@ -66,8 +64,7 @@ export class EmailsController {
   }
 
   @Post('bulk-send')
-  // TODO: re-enable auth guard temp disabled for local debugging
-  // @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   async bulkSend(@Body() body: BulkSendDto) {
     let recipientEmails: string[] = [];
 
@@ -98,6 +95,7 @@ export class EmailsController {
     return {
       message: 'Bulk email campaign sent successfully',
       sent: result.sent,
+      failed: result.failed,
       targetGroup: body.targetGroup,
     };
   }

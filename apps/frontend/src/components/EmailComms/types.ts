@@ -1,4 +1,3 @@
-import FCCEmailMallory from './FCCEmailMallory.png';
 export type EmailTabId = 'donation' | 'relapsed' | 'mass';
 export type TabId = EmailTabId;
 
@@ -96,16 +95,23 @@ export function buildSignatureHTML(sig: Signature): string {
       : '',
   ].join('');
 
-  const imageSrc = sig.imageUrl ? sig.imageUrl : FCCEmailMallory;
+  // Only render the photo when an https-hosted image is provided. Local/bundled
+  // assets won't load in a recipient's inbox, so the signature must reference a
+  // remote URL (CDN/S3); otherwise the photo cell is omitted entirely.
+  const hasImage = /^https:\/\//i.test(sig.imageUrl);
 
   return `
     <table cellpadding="0" cellspacing="0" border="0" style="width:100%;font-family:Arial,sans-serif;max-width:100%;table-layout:fixed;">
       <tr>
-        <!-- Photo -->
+        ${
+          hasImage
+            ? `<!-- Photo -->
         <td style="vertical-align:middle;width:clamp(45px, 6vw, 65px);padding-right:clamp(6px, 1vw, 12px);">
-          <img src="${imageSrc}" alt="${sig.name}"
+          <img src="${sig.imageUrl}" alt="${sig.name}"
             style="width:clamp(40px, 5vw, 60px);height:clamp(40px, 5vw, 60px);border-radius:50%;object-fit:cover;object-position:top;border:2px solid white;display:block;" />
-        </td>
+        </td>`
+            : ''
+        }
 
         <!-- Name / Title / Pronouns -->
         <td style="vertical-align:middle;overflow:hidden;">

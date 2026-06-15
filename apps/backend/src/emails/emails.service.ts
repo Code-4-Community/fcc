@@ -49,38 +49,33 @@ export class EmailsService {
    * @param recipientEmails array of recipient email addresses
    * @param subject the subject of the email
    * @param bodyHTML the HTML body of the email
-   * @resolves with the number of emails sent
-   * @rejects if sending fails
+   * @resolves with the number of emails sent and failed
    */
   public async sendBulkEmail(
     recipientEmails: string[],
     subject: string,
     bodyHTML: string,
-  ): Promise<{ sent: number }> {
-    try {
-      // Send emails in batches to avoid rate limiting
-      const batchSize = 50; // AWS SES recommends batch sizes
-      const batches: string[][] = [];
+  ): Promise<{ sent: number; failed: number }> {
+    // Send one email per recipient so a single bad address doesn't abort the
+    // whole campaign, each failure is logged individually, and recipients
+    // aren't exposed to each other via a shared To header.
+    let sent = 0;
+    let failed = 0;
 
-      for (let i = 0; i < recipientEmails.length; i += batchSize) {
-        batches.push(recipientEmails.slice(i, i + batchSize));
+    for (const email of recipientEmails) {
+      try {
+        await this.amazonSESWrapper.sendEmail([email], subject, bodyHTML);
+        sent += 1;
+      } catch (error) {
+        failed += 1;
+        this.logger.error(`Failed to send bulk email to ${email}`, error);
       }
-
-      let sentCount = 0;
-      for (const batch of batches) {
-        await this.amazonSESWrapper.sendEmail(batch, subject, bodyHTML);
-        sentCount += batch.length;
-        this.logger.log(`Sent batch of ${batch.length} emails`);
-      }
-
-      this.logger.log(
-        `Successfully sent ${sentCount} emails with subject: ${subject}`,
-      );
-      return { sent: sentCount };
-    } catch (error) {
-      this.logger.error('Error sending bulk email', error);
-      throw error;
     }
+
+    this.logger.log(
+      `Bulk send complete: ${sent} sent, ${failed} failed (subject: ${subject})`,
+    );
+    return { sent, failed };
   }
 
   /**
@@ -175,9 +170,18 @@ export class EmailsService {
         return;
       }
 
-      const bodyHTML = template.bodyHtml
-        .replace(/\{\{donorName\}\}/g, donorName)
-        .replace(/\{\{amount\}\}/g, amount.toString());
+      let bodyHTML = template.bodyHtml;
+      try {
+        bodyHTML = template.bodyHtml
+          .replace(/\{\{donorName\}\}/g, donorName)
+          .replace(/\{\{amount\}\}/g, amount.toString());
+      } catch (error) {
+        // Fall back to the raw template so a bad value doesn't drop the email.
+        this.logger.error(
+          'Error replacing template variables, sending raw template',
+          error,
+        );
+      }
 
       await this.sendEmail(recipientEmail, template.subject, bodyHTML);
 
