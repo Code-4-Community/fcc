@@ -56,9 +56,6 @@ export class EmailsService {
     subject: string,
     bodyHTML: string,
   ): Promise<{ sent: number; failed: number }> {
-    // Send one email per recipient so a single bad address doesn't abort the
-    // whole campaign, each failure is logged individually, and recipients
-    // aren't exposed to each other via a shared To header.
     let sent = 0;
     let failed = 0;
 
