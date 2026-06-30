@@ -59,9 +59,24 @@ export class EmailsService {
     let sent = 0;
     let failed = 0;
 
+    const backendUrl = process.env.API_URL || 'http://localhost:3000/api';
+
     for (const email of recipientEmails) {
       try {
-        await this.amazonSESWrapper.sendEmail([email], subject, bodyHTML);
+        const unsubscribeUrl = `${backendUrl}/emails/unsubscribe?email=${encodeURIComponent(email)}`;
+        const unsubscribeHtml = `<br><br><hr><p style="font-size: 12px; color: #666; text-align: center;">If you no longer wish to receive these emails, you can <a href="${unsubscribeUrl}">unsubscribe here</a>.</p>`;
+
+        let finalBodyHTML = bodyHTML;
+        if (finalBodyHTML.includes('</body>')) {
+          finalBodyHTML = finalBodyHTML.replace(
+            '</body>',
+            `${unsubscribeHtml}\n</body>`,
+          );
+        } else {
+          finalBodyHTML += unsubscribeHtml;
+        }
+
+        await this.amazonSESWrapper.sendEmail([email], subject, finalBodyHTML);
         sent += 1;
       } catch (error) {
         failed += 1;
@@ -141,6 +156,55 @@ export class EmailsService {
 
   public async getAllTemplates(): Promise<EmailTemplate[]> {
     return await this.emailTemplateRepository.find();
+  }
+
+  /**
+   * Unsubscribes an email from receiving mass communications.
+   */
+  public async unsubscribe(email: string): Promise<void> {
+    try {
+      let subscriber = await this.emailSubscriberRepository.findOne({
+        where: { email },
+      });
+
+      if (!subscriber) {
+        subscriber = this.emailSubscriberRepository.create({
+          email,
+          isSubscribed: false,
+          unsubscribedAt: new Date(),
+        });
+      } else {
+        subscriber.isSubscribed = false;
+        subscriber.unsubscribedAt = new Date();
+      }
+
+      await this.emailSubscriberRepository.save(subscriber);
+      this.logger.log(`Unsubscribed email: ${email}`);
+    } catch (error) {
+      this.logger.error(`Failed to unsubscribe email: ${email}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Filters a list of emails, returning only those that are not explicitly unsubscribed.
+   */
+  public async filterSubscribedEmails(emails: string[]): Promise<string[]> {
+    if (!emails.length) return [];
+
+    const subscribers = await this.emailSubscriberRepository
+      .createQueryBuilder('sub')
+      .where('sub.email IN (:...emails)', { emails })
+      .select(['sub.email', 'sub.isSubscribed'])
+      .getMany();
+
+    const unsubscribedSet = new Set(
+      subscribers
+        .filter((sub) => sub.isSubscribed === false)
+        .map((sub) => sub.email),
+    );
+
+    return emails.filter((email) => !unsubscribedSet.has(email));
   }
 
   /**
