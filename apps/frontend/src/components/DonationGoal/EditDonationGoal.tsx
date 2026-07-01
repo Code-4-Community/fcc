@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Calendar } from 'lucide-react';
-import { Button } from '../ui/button';
 
 interface EditDonationGoalProps {
   initialData?: {
@@ -14,8 +13,19 @@ interface EditDonationGoalProps {
     targetAmount?: number;
   };
   onCancel?: () => void;
-  onSave?: (data: any) => void;
+  onSave?: (data: NormalizedGoal) => void;
 }
+
+// Cleaned, validated payload handed to onSave: numeric amount and ISO
+// (YYYY-MM-DD) dates so consumers don't have to re-parse display strings.
+interface NormalizedGoal {
+  title: string;
+  targetAmount: number;
+  startDate: string;
+  endDate: string;
+}
+
+const TITLE_MAX_LENGTH = 100;
 
 export default function EditDonationGoal({
   initialData,
@@ -31,6 +41,116 @@ export default function EditDonationGoal({
 
   const [form, setForm] = useState(initialForm);
 
+  // Parses an MM/DD/YYYY string into a Date, returning null if the string
+  // isn't a real calendar date (rejects things like 13/40/2026 or 02/30/2026).
+  const parseDate = (value: string): Date | null => {
+    const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
+    if (!match) return null;
+
+    const month = Number(match[1]);
+    const day = Number(match[2]);
+    const year = Number(match[3]);
+
+    const date = new Date(year, month - 1, day);
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      return null;
+    }
+
+    return date;
+  };
+
+  // Formats a Date as a local YYYY-MM-DD string (no timezone shift).
+  const toISODate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Validates the form and, if valid, returns a normalized payload.
+  // Returns null (after alerting the user) when anything fails to validate.
+  const buildPayload = (): NormalizedGoal | null => {
+    // Title: optional, but trim whitespace and cap the length. An empty
+    // title is allowed — the live site falls back to its generic heading.
+    const title = form.title.trim();
+    if (title.length > TITLE_MAX_LENGTH) {
+      window.alert(`Title must be ${TITLE_MAX_LENGTH} characters or fewer.`);
+      return null;
+    }
+
+    // Amount: required, finite, positive, whole dollars (the goal amount is
+    // stored as an integer, so cents aren't supported).
+    const amountValue = form.goalAmount.replace(/[$,]/g, '').trim();
+    if (!amountValue) {
+      window.alert('Goal amount is required.');
+      return null;
+    }
+    const amount = Number(amountValue);
+    if (!Number.isFinite(amount)) {
+      window.alert('Enter a valid goal amount.');
+      return null;
+    }
+    if (amount <= 0) {
+      window.alert('Goal amount must be greater than $0.');
+      return null;
+    }
+    if (!Number.isInteger(amount)) {
+      window.alert('Goal amount must be a whole dollar amount.');
+      return null;
+    }
+
+    // Dates: both required, must be real MM/DD/YYYY calendar dates, end not
+    // before start, and the goal can't end in the past.
+    const start = parseDate(form.startDate);
+    const end = parseDate(form.endDate);
+
+    if (!form.startDate.trim()) {
+      window.alert('Start date is required.');
+      return null;
+    }
+    if (!start) {
+      window.alert('Enter a valid start date in MM/DD/YYYY format.');
+      return null;
+    }
+
+    if (!form.endDate.trim()) {
+      window.alert('End date is required.');
+      return null;
+    }
+    if (!end) {
+      window.alert('Enter a valid end date in MM/DD/YYYY format.');
+      return null;
+    }
+
+    if (end < start) {
+      window.alert('End date cannot be before the start date.');
+      return null;
+    }
+
+    const startISO = toISODate(start);
+    const endISO = toISODate(end);
+
+    // Compare against "today" as a UTC date string, matching how the backend
+    // determines the active goal (`new Date().toISOString().split('T')[0]`).
+    // Dates are stored date-only, so a lexicographic YYYY-MM-DD compare is safe.
+    const todayUTC = new Date().toISOString().split('T')[0];
+    if (endISO < todayUTC) {
+      window.alert('End date cannot be in the past.');
+      return null;
+    }
+
+    return {
+      title,
+      targetAmount: amount,
+      startDate: startISO,
+      endDate: endISO,
+    };
+  };
+
   const handleResetGoal = () => {
     if (
       window.confirm(
@@ -42,12 +162,15 @@ export default function EditDonationGoal({
   };
 
   const handleSave = () => {
+    const payload = buildPayload();
+    if (!payload) return;
+
     if (
       window.confirm(
         'Are you sure you want to save these changes to the live donation goal?',
       )
     ) {
-      onSave?.(form);
+      onSave?.(payload);
     }
   };
 
@@ -81,6 +204,7 @@ export default function EditDonationGoal({
         <input
           type="text"
           value={form.title}
+          maxLength={TITLE_MAX_LENGTH}
           placeholder="Enter goal title..."
           onChange={(e) =>
             setForm((prev) => ({ ...prev, title: e.target.value }))

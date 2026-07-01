@@ -20,56 +20,28 @@ export const AdminGrowingGoal: React.FC = () => {
 
   const handleSave = async (formData: {
     title: string;
-    goalAmount: string;
+    targetAmount: number;
     startDate: string;
-    endDate?: string;
+    endDate: string;
   }) => {
-    console.log('HandleSave triggered with:', formData);
-
+    // formData is already validated and normalized by EditDonationGoal:
+    // a positive integer amount and ISO (YYYY-MM-DD) dates. The `goals`
+    // columns for title/startDate/endDate are nullable, but the editor
+    // requires the dates and treats an empty title as a valid cleared
+    // value (the backend reads it back as `title ?? ''`).
     try {
       const token = localStorage.getItem('accessToken');
       apiClient.setAuthToken(token);
 
-      // parse of "$10,000" string to number
-      const targetAmount = parseInt(formData.goalAmount.replace(/[^0-9]/g, ''));
-      if (isNaN(targetAmount)) {
-        throw new Error('Invalid goal amount. Please enter a number.');
-      }
-
-      const mmddyyyyRegex = /^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/;
-
-      const parseDate = (dateStr: string | null) => {
-        if (!dateStr) return null;
-
-        const match = dateStr.match(mmddyyyyRegex);
-        if (match) {
-          const [_, m, d, y] = match;
-          return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
-        }
-
-        throw new Error('Invalid date format. Please use MM/DD/YYYY.');
-      };
-
-      const startDate = parseDate(formData.startDate);
-      const endDate = parseDate(formData.endDate || null);
-
       const id = data?.goal?.id || null;
-      console.log('Sending update to API:', {
-        id,
-        targetAmount,
-        title: formData.title,
-        startDate,
-        endDate,
-      });
 
       await apiClient.updateGoal(id, {
-        targetAmount,
+        targetAmount: formData.targetAmount,
         title: formData.title,
-        startDate: startDate || '',
-        endDate: endDate || '',
+        startDate: formData.startDate,
+        endDate: formData.endDate,
       });
 
-      console.log('Update successful, refreshing...');
       await refresh();
       setIsEditing(false);
     } catch (err) {
