@@ -5,6 +5,7 @@ import {
   Body,
   UseGuards,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { EmailsService } from './emails.service';
@@ -21,8 +22,7 @@ export class EmailsController {
   ) {}
 
   @Post('send-email')
-  // TODO: re-enable auth guard temp disabled for local debugging
-  // @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   async sendVerificationEmail(@Body() body: CreateEmailDto) {
     await this.emailService.sendEmail(
       body.email,
@@ -33,21 +33,20 @@ export class EmailsController {
   }
 
   @Get('template')
+  @UseGuards(AuthGuard('jwt'))
   async getTemplates() {
     return this.emailService.getAllTemplates();
   }
 
   @Get('subscribers')
-  // TODO: re-enable auth guard temp disabled for local debugging
-  // @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   async getSubscribers() {
     const emails = await this.emailService.getSubscribers();
     return { emails, count: emails.length };
   }
 
   @Post('template')
-  // TODO: re-enable auth guard temp disabled for local debugging
-  // @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   async saveTemplate(@Body() body: SaveTemplateDto) {
     const template = await this.emailService.saveTemplate(
       body.type,
@@ -65,9 +64,38 @@ export class EmailsController {
     };
   }
 
+  @Get('unsubscribe')
+  async unsubscribe(@Query('email') email: string) {
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
+
+    await this.emailService.unsubscribe(email);
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Unsubscribed</title>
+        <style>
+          body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f9fafb; }
+          .container { text-align: center; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+          h1 { color: #1f2937; margin-bottom: 16px; }
+          p { color: #4b5563; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Successfully Unsubscribed</h1>
+          <p>You have been removed from our mass mailing list.</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
   @Post('bulk-send')
-  // TODO: re-enable auth guard temp disabled for local debugging
-  // @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   async bulkSend(@Body() body: BulkSendDto) {
     let recipientEmails: string[] = [];
 
@@ -88,6 +116,18 @@ export class EmailsController {
       };
     }
 
+    // Filter out anyone who has unsubscribed
+    recipientEmails =
+      await this.emailService.filterSubscribedEmails(recipientEmails);
+
+    if (recipientEmails.length === 0) {
+      return {
+        message: 'No subscribed recipients found after filtering unsubscribes',
+        sent: 0,
+        targetGroup: body.targetGroup,
+      };
+    }
+
     // Send bulk emails
     const result = await this.emailService.sendBulkEmail(
       recipientEmails,
@@ -98,6 +138,7 @@ export class EmailsController {
     return {
       message: 'Bulk email campaign sent successfully',
       sent: result.sent,
+      failed: result.failed,
       targetGroup: body.targetGroup,
     };
   }

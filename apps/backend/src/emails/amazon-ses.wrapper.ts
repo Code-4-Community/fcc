@@ -8,6 +8,7 @@ import { AMAZON_SES_CLIENT } from './amazon-ses-client.factory';
 import MailComposer = require('nodemailer/lib/mail-composer');
 import * as dotenv from 'dotenv';
 import Mail from 'nodemailer/lib/mailer';
+import { htmlToPlainText } from './html-to-text.util';
 dotenv.config();
 export const AMAZON_SES_WRAPPER = 'AMAZON_SES_WRAPPER';
 
@@ -41,6 +42,9 @@ export class AmazonSESWrapper {
       to: recipientEmails,
       subject: subject,
       html: emailContent,
+      // Attach a plain-text alternative so the message is multipart/alternative,
+      // which renders for non-HTML clients and improves spam-filter scoring.
+      text: htmlToPlainText(emailContent),
     };
 
     const messageData = await new MailComposer(mailOptions).compile().build();

@@ -2,6 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EmailsService } from './emails.service';
 import { AMAZON_SES_WRAPPER } from './amazon-ses.wrapper';
 
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { EmailTemplate } from './email-template.entity';
+import { EmailSubscriber } from './email-subscriber.entity';
+
 describe('EmailsService', () => {
   let service: EmailsService;
   let mockAmazonSESWrapper: any;
@@ -18,6 +22,25 @@ describe('EmailsService', () => {
         {
           provide: AMAZON_SES_WRAPPER,
           useValue: mockAmazonSESWrapper,
+        },
+        {
+          provide: getRepositoryToken(EmailTemplate),
+          useValue: {
+            findOne: jest.fn(),
+            find: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(EmailSubscriber),
+          useValue: {
+            findOne: jest.fn(),
+            find: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            createQueryBuilder: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -111,6 +134,79 @@ describe('EmailsService', () => {
         'Subject 3',
         '<p>Body 3</p>',
       );
+    });
+  });
+
+  describe('unsubscribe', () => {
+    it('should update an existing subscriber to unsubscribed', async () => {
+      const mockSubscriber = {
+        email: 'test@example.com',
+        isSubscribed: true,
+        unsubscribedAt: null,
+      };
+      const mockRepo = service['emailSubscriberRepository'];
+      (mockRepo.findOne as jest.Mock).mockResolvedValue(mockSubscriber);
+      (mockRepo.save as jest.Mock).mockResolvedValue({
+        ...mockSubscriber,
+        isSubscribed: false,
+      });
+
+      await service.unsubscribe('test@example.com');
+
+      expect(mockRepo.findOne).toHaveBeenCalledWith({
+        where: { email: 'test@example.com' },
+      });
+      expect(mockSubscriber.isSubscribed).toBe(false);
+      expect(mockSubscriber.unsubscribedAt).toBeInstanceOf(Date);
+      expect(mockRepo.save).toHaveBeenCalledWith(mockSubscriber);
+    });
+
+    it('should create a new unsubscribed record if subscriber does not exist', async () => {
+      const mockRepo = service['emailSubscriberRepository'];
+      (mockRepo.findOne as jest.Mock).mockResolvedValue(null);
+      (mockRepo.create as jest.Mock).mockImplementation((dto) => dto);
+      (mockRepo.save as jest.Mock).mockImplementation(async (entity) => entity);
+
+      await service.unsubscribe('new@example.com');
+
+      expect(mockRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'new@example.com',
+          isSubscribed: false,
+        }),
+      );
+      expect(mockRepo.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('filterSubscribedEmails', () => {
+    it('should return empty array if empty list provided', async () => {
+      const result = await service.filterSubscribedEmails([]);
+      expect(result).toEqual([]);
+    });
+
+    it('should filter out emails that have isSubscribed === false', async () => {
+      const mockRepo = service['emailSubscriberRepository'];
+      const mockQueryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([
+          { email: 'sub1@example.com', isSubscribed: true },
+          { email: 'unsub@example.com', isSubscribed: false },
+        ]),
+      };
+      (mockRepo.createQueryBuilder as jest.Mock).mockReturnValue(
+        mockQueryBuilder,
+      );
+
+      const input = [
+        'sub1@example.com',
+        'unsub@example.com',
+        'unknown@example.com',
+      ];
+      const result = await service.filterSubscribedEmails(input);
+
+      expect(result).toEqual(['sub1@example.com', 'unknown@example.com']);
     });
   });
 });

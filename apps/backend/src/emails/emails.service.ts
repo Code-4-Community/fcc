@@ -49,38 +49,45 @@ export class EmailsService {
    * @param recipientEmails array of recipient email addresses
    * @param subject the subject of the email
    * @param bodyHTML the HTML body of the email
-   * @resolves with the number of emails sent
-   * @rejects if sending fails
+   * @resolves with the number of emails sent and failed
    */
   public async sendBulkEmail(
     recipientEmails: string[],
     subject: string,
     bodyHTML: string,
-  ): Promise<{ sent: number }> {
-    try {
-      // Send emails in batches to avoid rate limiting
-      const batchSize = 50; // AWS SES recommends batch sizes
-      const batches: string[][] = [];
+  ): Promise<{ sent: number; failed: number }> {
+    let sent = 0;
+    let failed = 0;
 
-      for (let i = 0; i < recipientEmails.length; i += batchSize) {
-        batches.push(recipientEmails.slice(i, i + batchSize));
+    const backendUrl = process.env.API_URL || 'http://localhost:3000/api';
+
+    for (const email of recipientEmails) {
+      try {
+        const unsubscribeUrl = `${backendUrl}/emails/unsubscribe?email=${encodeURIComponent(email)}`;
+        const unsubscribeHtml = `<br><br><hr><p style="font-size: 12px; color: #666; text-align: center;">If you no longer wish to receive these emails, you can <a href="${unsubscribeUrl}">unsubscribe here</a>.</p>`;
+
+        let finalBodyHTML = bodyHTML;
+        if (finalBodyHTML.includes('</body>')) {
+          finalBodyHTML = finalBodyHTML.replace(
+            '</body>',
+            `${unsubscribeHtml}\n</body>`,
+          );
+        } else {
+          finalBodyHTML += unsubscribeHtml;
+        }
+
+        await this.amazonSESWrapper.sendEmail([email], subject, finalBodyHTML);
+        sent += 1;
+      } catch (error) {
+        failed += 1;
+        this.logger.error(`Failed to send bulk email to ${email}`, error);
       }
-
-      let sentCount = 0;
-      for (const batch of batches) {
-        await this.amazonSESWrapper.sendEmail(batch, subject, bodyHTML);
-        sentCount += batch.length;
-        this.logger.log(`Sent batch of ${batch.length} emails`);
-      }
-
-      this.logger.log(
-        `Successfully sent ${sentCount} emails with subject: ${subject}`,
-      );
-      return { sent: sentCount };
-    } catch (error) {
-      this.logger.error('Error sending bulk email', error);
-      throw error;
     }
+
+    this.logger.log(
+      `Bulk send complete: ${sent} sent, ${failed} failed (subject: ${subject})`,
+    );
+    return { sent, failed };
   }
 
   /**
@@ -152,6 +159,55 @@ export class EmailsService {
   }
 
   /**
+   * Unsubscribes an email from receiving mass communications.
+   */
+  public async unsubscribe(email: string): Promise<void> {
+    try {
+      let subscriber = await this.emailSubscriberRepository.findOne({
+        where: { email },
+      });
+
+      if (!subscriber) {
+        subscriber = this.emailSubscriberRepository.create({
+          email,
+          isSubscribed: false,
+          unsubscribedAt: new Date(),
+        });
+      } else {
+        subscriber.isSubscribed = false;
+        subscriber.unsubscribedAt = new Date();
+      }
+
+      await this.emailSubscriberRepository.save(subscriber);
+      this.logger.log(`Unsubscribed email: ${email}`);
+    } catch (error) {
+      this.logger.error(`Failed to unsubscribe email: ${email}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Filters a list of emails, returning only those that are not explicitly unsubscribed.
+   */
+  public async filterSubscribedEmails(emails: string[]): Promise<string[]> {
+    if (!emails.length) return [];
+
+    const subscribers = await this.emailSubscriberRepository
+      .createQueryBuilder('sub')
+      .where('sub.email IN (:...emails)', { emails })
+      .select(['sub.email', 'sub.isSubscribed'])
+      .getMany();
+
+    const unsubscribedSet = new Set(
+      subscribers
+        .filter((sub) => sub.isSubscribed === false)
+        .map((sub) => sub.email),
+    );
+
+    return emails.filter((email) => !unsubscribedSet.has(email));
+  }
+
+  /**
    * Sends the Donation Response email to a donor using the stored template.
    *
    * @param recipientEmail the donor's email address
@@ -175,9 +231,18 @@ export class EmailsService {
         return;
       }
 
-      const bodyHTML = template.bodyHtml
-        .replace(/\{\{donorName\}\}/g, donorName)
-        .replace(/\{\{amount\}\}/g, amount.toString());
+      let bodyHTML = template.bodyHtml;
+      try {
+        bodyHTML = template.bodyHtml
+          .replace(/\{\{donorName\}\}/g, donorName)
+          .replace(/\{\{amount\}\}/g, amount.toString());
+      } catch (error) {
+        // Fall back to the raw template so a bad value doesn't drop the email.
+        this.logger.error(
+          'Error replacing template variables, sending raw template',
+          error,
+        );
+      }
 
       await this.sendEmail(recipientEmail, template.subject, bodyHTML);
 
