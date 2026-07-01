@@ -14,18 +14,33 @@ import apiClient from '../../api/apiClient';
 export function EmailEditor() {
   const [activeTab, setActiveTab] = useState<TabId>('donation');
   const [emails, setEmails] = useState<EmailsState>(defaultEmails);
-  const [sig, setSig] = useState<Signature>(DEFAULT_SIGNATURE);
+  const [meta, setMeta] = useState<
+    Record<TabId, { sig: Signature; ctaText: string; ctaLink: string }>
+  >({
+    donation: {
+      sig: DEFAULT_SIGNATURE,
+      ctaText: 'DONATE AT OUR SITE!',
+      ctaLink: 'https://fenwaycommunitycenter.org/',
+    },
+    relapsed: {
+      sig: DEFAULT_SIGNATURE,
+      ctaText: 'DONATE AT OUR SITE!',
+      ctaLink: 'https://fenwaycommunitycenter.org/',
+    },
+    mass: {
+      sig: DEFAULT_SIGNATURE,
+      ctaText: 'DONATE AT OUR SITE!',
+      ctaLink: 'https://fenwaycommunitycenter.org/',
+    },
+  });
   const [saved, setSaved] = useState(false);
   const [sent, setSent] = useState(false);
-  const [ctaText, setCtaText] = useState('DONATE AT OUR SITE!');
-  const [ctaLink, setCtaLink] = useState('https://fenwaycommunitycenter.org/');
 
   useEffect(() => {
     const loadTemplates = async () => {
       try {
         const templates = await apiClient.getEmailTemplates();
         if (templates && templates.length > 0) {
-          let loadedMeta = false;
           setEmails((prev) => {
             const next = { ...prev };
             templates.forEach((t: any) => {
@@ -45,21 +60,30 @@ export function EmailEditor() {
                   body: body,
                 };
               }
+            });
+            return next;
+          });
 
-              if (!loadedMeta) {
+          setMeta((prev) => {
+            const next = { ...prev };
+            templates.forEach((t: any) => {
+              let tab: TabId | null = null;
+              if (t.type === 'donation_response') tab = 'donation';
+              else if (t.type === 'relapsed_donor') tab = 'relapsed';
+              else if (t.type === 'email_subscribers') tab = 'mass';
+
+              if (tab) {
                 const metaMatch = t.bodyHtml.match(/<!-- FCC_META:(.*?) -->/);
                 if (metaMatch) {
                   try {
                     const meta = JSON.parse(metaMatch[1]);
-                    if (meta.sig) setSig(meta.sig);
-                    if (meta.ctaText) setCtaText(meta.ctaText);
-                    if (meta.ctaLink) setCtaLink(meta.ctaLink);
-                    loadedMeta = true; // Use the first found metadata
+                    next[tab] = {
+                      sig: meta.sig || next[tab].sig,
+                      ctaText: meta.ctaText || next[tab].ctaText,
+                      ctaLink: meta.ctaLink || next[tab].ctaLink,
+                    };
                   } catch (e) {
-                    console.error(
-                      'Failed to parse metadata from email template',
-                      e,
-                    );
+                    console.error('Failed to parse metadata from template', e);
                   }
                 }
               }
@@ -84,14 +108,15 @@ export function EmailEditor() {
 
   const buildFullHTML = () => {
     const email = emails[activeTab];
-    const metadata = { sig, ctaText, ctaLink };
+    const m = meta[activeTab];
+    const metadata = { sig: m.sig, ctaText: m.ctaText, ctaLink: m.ctaLink };
     return `<!-- FCC_META:${JSON.stringify(metadata)} -->
 <html><body>
   <!-- FCC_BODY_START -->
   ${email.body}
   <!-- FCC_BODY_END -->
-  ${buildSignatureHTML(sig)}
-  ${ctaText ? `<div style="text-align:center;margin:28px 0"><a href="${ctaLink}" style="background:#059669;color:white;padding:14px 32px;border-radius:8px;font-weight:700;text-decoration:none;font-size:14px;letter-spacing:0.05em">${ctaText}</a></div>` : ''}
+  ${buildSignatureHTML(m.sig)}
+  ${m.ctaText ? `<div style="text-align:center;margin:28px 0"><a href="${m.ctaLink}" style="background:#059669;color:white;padding:14px 32px;border-radius:8px;font-weight:700;text-decoration:none;font-size:14px;letter-spacing:0.05em">${m.ctaText}</a></div>` : ''}
 </body></html>`;
   };
 
@@ -185,12 +210,27 @@ export function EmailEditor() {
             activeTab={activeTab}
             emails={emails}
             onEmailChange={handleEmailChange}
-            sig={sig}
-            onSigChange={setSig}
-            ctaText={ctaText}
-            onCtaTextChange={setCtaText}
-            ctaLink={ctaLink}
-            onLinkChange={setCtaLink}
+            sig={meta[activeTab].sig}
+            onSigChange={(s) =>
+              setMeta((prev) => ({
+                ...prev,
+                [activeTab]: { ...prev[activeTab], sig: s },
+              }))
+            }
+            ctaText={meta[activeTab].ctaText}
+            onCtaTextChange={(v) =>
+              setMeta((prev) => ({
+                ...prev,
+                [activeTab]: { ...prev[activeTab], ctaText: v },
+              }))
+            }
+            ctaLink={meta[activeTab].ctaLink}
+            onLinkChange={(v) =>
+              setMeta((prev) => ({
+                ...prev,
+                [activeTab]: { ...prev[activeTab], ctaLink: v },
+              }))
+            }
             saved={saved}
             sent={sent}
             onSave={handleSave}
@@ -202,9 +242,9 @@ export function EmailEditor() {
           <EmailPreviewPanel
             activeTab={activeTab}
             emails={emails}
-            sig={sig}
-            ctaText={ctaText}
-            ctaLink={ctaLink}
+            sig={meta[activeTab].sig}
+            ctaText={meta[activeTab].ctaText}
+            ctaLink={meta[activeTab].ctaLink}
           />
         </div>
       </div>

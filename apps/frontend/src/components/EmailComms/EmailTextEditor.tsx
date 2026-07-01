@@ -167,6 +167,12 @@ export default function RichTextEditor({
     },
   });
 
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content, { emitUpdate: false });
+    }
+  }, [content, editor]);
+
   const setLink = useCallback(() => {
     if (!editor) return;
 
