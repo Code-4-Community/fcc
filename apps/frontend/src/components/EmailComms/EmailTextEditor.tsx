@@ -153,7 +153,12 @@ export default function RichTextEditor({
       }),
       Underline,
       Highlight,
-      Link.configure({ openOnClick: false }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-600 underline underline-offset-2',
+        },
+      }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Placeholder.configure({ placeholder: 'Type your message here…' }),
     ],
