@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import SignatureEditorCard from './SignatureEditorCard';
 import { Label } from '../ui/label';
+import MailingListManager from './MailingListManager';
 
 type EmailEditorCardProps = {
   activeTab: TabId;
@@ -98,6 +99,8 @@ export default function EmailEditorCard({
           {sent ? 'Sent!' : 'Send Email'}
         </Button>
       </div>
+
+      <MailingListManager activeTab={activeTab} />
     </div>
   );
 }

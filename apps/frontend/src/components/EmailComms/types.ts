@@ -10,7 +10,6 @@ export type Signature = {
   linkedin: string;
   X: string;
   facebook: string;
-  imageUrl: string;
 };
 
 export type EmailData = {
@@ -67,7 +66,6 @@ export const DEFAULT_SIGNATURE: Signature = {
   linkedin: 'https://www.linkedin.com/company/fenwaycommunitycenter',
   X: '',
   facebook: 'https://www.facebook.com/fenwaycommunitycenter',
-  imageUrl: '',
 };
 
 export const TAB_CONFIG: { id: TabId; label: string }[] = [
@@ -95,24 +93,9 @@ export function buildSignatureHTML(sig: Signature): string {
       : '',
   ].join('');
 
-  // Only render the photo when an https-hosted image is provided. Local/bundled
-  // assets won't load in a recipient's inbox, so the signature must reference a
-  // remote URL (CDN/S3); otherwise the photo cell is omitted entirely.
-  const hasImage = /^https:\/\//i.test(sig.imageUrl);
-
   return `
     <table cellpadding="0" cellspacing="0" border="0" style="width:100%;font-family:Arial,sans-serif;max-width:100%;table-layout:fixed;">
       <tr>
-        ${
-          hasImage
-            ? `<!-- Photo -->
-        <td style="vertical-align:middle;width:clamp(45px, 6vw, 65px);padding-right:clamp(6px, 1vw, 12px);">
-          <img src="${sig.imageUrl}" alt="${sig.name}"
-            style="width:clamp(40px, 5vw, 60px);height:clamp(40px, 5vw, 60px);border-radius:50%;object-fit:cover;object-position:top;border:2px solid white;display:block;" />
-        </td>`
-            : ''
-        }
-
         <!-- Name / Title / Pronouns -->
         <td style="vertical-align:middle;overflow:hidden;">
           <p style="margin:0 0 1px;font-size:clamp(12px, 2vw, 16px);font-weight:800;color:#1a1a1a;letter-spacing:-0.2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sig.name}</p>

@@ -43,6 +43,7 @@ export type DonationListRow = {
   createdAt: string;
   updatedAt: string;
   transactionId?: string;
+  feeAmount?: number;
   isAnonymous: boolean;
 };
 
@@ -421,6 +422,35 @@ export class ApiClient {
       return res.data as EmailSubscribersResponse;
     } catch (err: unknown) {
       this.handleAxiosError(err, 'Failed to fetch email subscribers');
+    }
+  }
+
+  public async syncEmailSubscribers(emails: string[]): Promise<void> {
+    try {
+      await this.axiosInstance.post('/api/emails/subscribers/sync', { emails });
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to sync email subscribers');
+    }
+  }
+
+  public async deleteEmailSubscriber(email: string): Promise<void> {
+    try {
+      await this.axiosInstance.delete(
+        `/api/emails/subscribers/${encodeURIComponent(email)}`,
+      );
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to delete email subscriber');
+    }
+  }
+
+  public async getLapsedDonors(numMonths = 6): Promise<{ emails: string[] }> {
+    try {
+      const res = await this.axiosInstance.get(
+        `/api/donations/lapsed?numMonths=${numMonths}`,
+      );
+      return res.data;
+    } catch (err: unknown) {
+      this.handleAxiosError(err, 'Failed to fetch lapsed donors');
     }
   }
 

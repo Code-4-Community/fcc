@@ -10,6 +10,7 @@ import {
   buildSignatureHTML,
 } from './types';
 import apiClient from '../../api/apiClient';
+import { ConfirmationModal } from '../ConfirmationModal';
 
 export function EmailEditor() {
   const [activeTab, setActiveTab] = useState<TabId>('donation');
@@ -35,6 +36,8 @@ export function EmailEditor() {
   });
   const [saved, setSaved] = useState(false);
   const [sent, setSent] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     const loadTemplates = async () => {
@@ -152,7 +155,16 @@ export function EmailEditor() {
     }
   };
 
-  const handleSend = async () => {
+  const handleSendClick = () => {
+    if (activeTab === 'donation') {
+      alert('Use "Save Changes" for Donation Response emails');
+      return;
+    }
+    setShowConfirmModal(true);
+  };
+
+  const executeSend = async () => {
+    setIsSending(true);
     try {
       const email = emails[activeTab];
       const fullHTML = buildFullHTML();
@@ -163,7 +175,7 @@ export function EmailEditor() {
       } else if (activeTab === 'mass') {
         targetGroup = 'email_subscribers';
       } else {
-        alert('Use "Save Changes" for Donation Response emails');
+        setIsSending(false);
         return;
       }
 
@@ -174,6 +186,7 @@ export function EmailEditor() {
       });
 
       console.log('[EmailEditorOverviewPage] Bulk email sent:', result);
+      setShowConfirmModal(false);
       alert(`Successfully sent ${result.sent} emails to ${result.targetGroup}`);
 
       setSent(true);
@@ -183,6 +196,8 @@ export function EmailEditor() {
       alert(
         `Failed to send: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -234,7 +249,7 @@ export function EmailEditor() {
             saved={saved}
             sent={sent}
             onSave={handleSave}
-            onSend={handleSend}
+            onSend={handleSendClick}
           />
         </div>
 
@@ -248,6 +263,19 @@ export function EmailEditor() {
           />
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={executeSend}
+        title="Confirm Send"
+        heading={`Send ${activeTab === 'relapsed' ? 'Relapsed Donor' : 'Mass'} Email?`}
+        description={`Are you sure you want to send this email to the ${activeTab === 'relapsed' ? 'Relapsed Donors' : 'Mass Email Subscribers'} list? This action cannot be undone.`}
+        confirmText="Send Email"
+        cancelText="Cancel"
+        confirmVariant="success"
+        isConfirming={isSending}
+      />
     </div>
   );
 }
