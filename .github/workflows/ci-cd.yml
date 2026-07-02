@@ -78,7 +78,7 @@ jobs:
 
   deploy-frontend:
     needs: pre-deploy
-    if: (contains(github.event.inputs.manual-deploy, 'c4c-ops-frontend') || contains(needs.pre-deploy.outputs.affected, 'scaffolding-frontend')) && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    if: (contains(github.event.inputs.manual-deploy, 'frontend') || contains(needs.pre-deploy.outputs.affected, 'frontend')) && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     # For "simplicity", deployment settings are configured in the AWS Amplify Console
     # This just posts to a webhook telling Amplify to redeploy the main branch
@@ -90,7 +90,7 @@ jobs:
 
   deploy-backend:
     needs: pre-deploy
-    if: (contains(github.event.inputs.manual-deploy, 'c4c-ops-backend') || contains(needs.pre-deploy.outputs.affected, 'scaffolding-backend')) && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    if: (contains(github.event.inputs.manual-deploy, 'backend') || contains(needs.pre-deploy.outputs.affected, 'backend')) && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -103,7 +103,7 @@ jobs:
       - name: Install Dependencies
         run: yarn install
 
-      - run: npx nx build c4c-ops-backend --configuration production
+      - run: npx nx build backend --configuration production
       - name: default deploy
         uses: appleboy/lambda-action@master
         with:
@@ -111,4 +111,4 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ secrets.AWS_REGION }}
           function_name: c4c-ops-monolith-lambda
-          source: dist/apps/c4c-ops/c4c-ops-backend/main.js
+          source: dist/apps/backend/main.js
