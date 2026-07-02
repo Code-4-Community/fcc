@@ -25,11 +25,12 @@ import { AdminGrowingGoalTester } from '@containers/dashboard/AdminGrowingGoalTe
 import OverviewPage from '@containers/dashboard/OverviewPage';
 import { UserManagement } from '@containers/dashboard/UserManagement';
 import Settings from '@containers/dashboard/Settings';
+import Root from './containers/root';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/dashboard" />,
+    element: <Root />,
     errorElement: <NotFound />,
   },
   {

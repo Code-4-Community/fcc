@@ -58,7 +58,7 @@ export class DonationMappers {
       firstName: dto.firstName,
       lastName: dto.lastName,
       email: dto.email,
-      amount: dto.amount,
+      amount: Math.round(dto.amount * 100),
       isAnonymous: dto.isAnonymous ?? false,
       donationType: dto.donationType as 'one_time' | 'recurring',
       recurringInterval: dto.recurringInterval as
@@ -82,7 +82,7 @@ export class DonationMappers {
       firstName: donation.firstName,
       lastName: donation.lastName,
       email: donation.email,
-      amount: donation.amount,
+      amount: donation.amount / 100,
       isAnonymous: donation.isAnonymous,
       donationType: donation.donationType as DonationType,
       recurringInterval: donation.recurringInterval as RecurringInterval,
@@ -99,7 +99,7 @@ export class DonationMappers {
   static toPublicDonationDto(donation: Donation): PublicDonationDto {
     const publicDto: PublicDonationDto = {
       id: donation.id,
-      amount: donation.amount,
+      amount: donation.amount / 100,
       isAnonymous: donation.isAnonymous,
       donationType: donation.donationType as DonationType,
       recurringInterval: donation.recurringInterval as RecurringInterval,

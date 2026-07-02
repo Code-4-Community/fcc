@@ -5,7 +5,7 @@ export class AddGoals1780531200000 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "goals" ("id" integer GENERATED ALWAYS AS IDENTITY NOT NULL, "targetAmount" integer NOT NULL, "title" text, "startDate" date, "endDate" date, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_goals" PRIMARY KEY ("id"))`,
+      `CREATE TABLE IF NOT EXISTS "goals" ("id" integer GENERATED ALWAYS AS IDENTITY NOT NULL, "targetAmount" integer NOT NULL, "title" text, "startDate" date, "endDate" date, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_goals" PRIMARY KEY ("id"))`,
     );
   }
 

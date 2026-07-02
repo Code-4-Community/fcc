@@ -256,10 +256,10 @@ export class DonationsService {
     );
 
     return {
-      total: Number(donations?.total ?? 0),
+      total: Number(donations?.total ?? 0) / 100,
       count: Number(donations?.count ?? 0),
-      yearToDate: Number(donations?.yearToDate ?? 0),
-      monthToDate: Number(donations?.monthToDate ?? 0),
+      yearToDate: Number(donations?.yearToDate ?? 0) / 100,
+      monthToDate: Number(donations?.monthToDate ?? 0) / 100,
     };
   }
 
@@ -520,7 +520,7 @@ export class DonationsService {
       })
       .getRawOne<{ amount: string }>();
 
-    const amountRaised = Number(result?.amount ?? 0);
+    const amountRaised = Number(result?.amount ?? 0) / 100;
 
     const progressPercent =
       goal.targetAmount > 0
