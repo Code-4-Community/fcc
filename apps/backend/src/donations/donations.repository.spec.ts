@@ -28,6 +28,8 @@ describe('DonationsRepository', () => {
     status: DonationStatus.SUCCEEDED,
     transactionId: 'txn_123456',
     feeAmount: null,
+    stripeSubscriptionId: null,
+    stripeCustomerId: null,
     createdAt: new Date('2024-01-15T10:00:00Z'),
     updatedAt: new Date('2024-01-15T10:00:00Z'),
   };
