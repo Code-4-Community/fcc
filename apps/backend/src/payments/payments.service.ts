@@ -1,4 +1,5 @@
 import { Injectable, Inject, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import {
   DonationStatus,
@@ -10,6 +11,33 @@ import { CreatePaymentIntentRequest } from './mappers';
  * Flexible definition for metadata, may want to change to be stricter later
  */
 export type PaymentIntentMetadata = Record<string, string>;
+
+/**
+ * Parameters accepted by {@link PaymentsService.createSubscription}.
+ */
+export type CreateSubscriptionParams = {
+  email: string;
+  name: string;
+  amount: number; // smallest currency unit (e.g. cents)
+  currency: string;
+  interval: RecurringInterval | string;
+  metadata?: Stripe.MetadataParam;
+};
+
+/**
+ * Shape returned by {@link PaymentsService.createSubscription}. `paymentIntentId`/
+ * `clientSecret` intentionally mirror {@link PaymentIntentResponse} so the frontend
+ * card-confirmation flow is identical to one-time payments.
+ */
+export type SubscriptionResponse = {
+  subscriptionId: string;
+  customerId: string;
+  paymentIntentId: string;
+  clientSecret: string;
+  status: string;
+  amount: number;
+  currency: string;
+};
 
 /**
  * Interface for object shape returned by service methods that output detailed payment intent info
@@ -55,7 +83,13 @@ export type PaymentIntentResponse = {
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
 
-  constructor(@Inject('STRIPE_CLIENT') private stripe: Stripe) {}
+  /** Cached Stripe Product id for donation subscriptions (see resolveDonationProductId). */
+  private cachedDonationProductId?: string;
+
+  constructor(
+    @Inject('STRIPE_CLIENT') private stripe: Stripe,
+    private readonly configService: ConfigService,
+  ) {}
 
   /**
    * Validates the parameters for createPaymentIntent
@@ -192,89 +226,202 @@ export class PaymentsService {
   }
 
   /**
-   * Validates the parameters for a subscription.
+   * Maps our RecurringInterval enum to Stripe's price `recurring` shape.
+   * Stripe only supports day/week/month/year, so bimonthly/quarterly are
+   * expressed via `interval_count`.
    *
-   * @param customerId string - ID of the customer in the payment provider
-   * @param priceId string - ID of the price/product to subscribe the customer to
-   * @param interval enum RecurringInterval - billing interval
-   *                ( 'weekly' | 'monthly' | 'bimonthly' | 'quarterly' | 'annually')
-   * @returns string - either an empty string to signify good paramters, or an error message
+   * @returns the Stripe recurring config, or null if the interval is unknown
    */
-  private validateCreateSubscriptionParams(
-    customerId: string,
-    priceId: string,
-  ): string {
-    const customerIdPattern = /^cus_[a-zA-Z0-9]{14,}$/;
-    const priceIdPattern = /^price_[a-zA-Z0-9]{14,}$/;
-
-    if (!customerId || typeof customerId !== 'string') {
-      this.logger.warn('createSubscription called with invalid customerId');
-      return 'Invalid customerId';
+  private mapIntervalToStripeRecurring(
+    interval: RecurringInterval | string,
+  ): { interval: 'week' | 'month' | 'year'; interval_count: number } | null {
+    switch (interval) {
+      case RecurringInterval.WEEKLY:
+        return { interval: 'week', interval_count: 1 };
+      case RecurringInterval.MONTHLY:
+        return { interval: 'month', interval_count: 1 };
+      case RecurringInterval.BIMONTHLY:
+        return { interval: 'month', interval_count: 2 };
+      case RecurringInterval.QUARTERLY:
+        return { interval: 'month', interval_count: 3 };
+      case RecurringInterval.ANNUALLY:
+        return { interval: 'year', interval_count: 1 };
+      default:
+        return null;
     }
-
-    if (!priceId || typeof priceId !== 'string') {
-      this.logger.warn('createSubscription called with invalid priceId');
-      return 'Invalid priceId';
-    }
-
-    if (!customerIdPattern.test(customerId)) {
-      return 'Invalid customerId format';
-    }
-
-    if (!priceIdPattern.test(priceId)) {
-      return 'Invalid priceId format';
-    }
-
-    return '';
   }
 
   /**
-   * Creates a subscription for a customer.
+   * Resolves the Stripe Product id used for donation subscriptions. Prefers the
+   * configured STRIPE_DONATION_PRODUCT_ID; if unset, creates a product once and
+   * caches it for the lifetime of the process (logging the id so it can be added
+   * to the environment to avoid creating duplicates on restart).
+   */
+  private async resolveDonationProductId(): Promise<string> {
+    if (this.cachedDonationProductId) {
+      return this.cachedDonationProductId;
+    }
+
+    const configured = this.configService.get<string>(
+      'STRIPE_DONATION_PRODUCT_ID',
+    );
+    if (configured) {
+      this.cachedDonationProductId = configured;
+      return configured;
+    }
+
+    const product = await this.stripe.products.create({ name: 'FCC Donation' });
+    this.logger.warn(
+      `STRIPE_DONATION_PRODUCT_ID not configured; created Stripe product ${product.id}. ` +
+        `Set STRIPE_DONATION_PRODUCT_ID=${product.id} to reuse it and avoid duplicates.`,
+    );
+    this.cachedDonationProductId = product.id;
+    return product.id;
+  }
+
+  /**
+   * Finds an existing Stripe customer by email, or creates a new one.
+   */
+  private async resolveCustomerId(
+    email: string,
+    name: string,
+  ): Promise<string> {
+    const existing = await this.stripe.customers.list({ email, limit: 1 });
+    if (existing.data.length > 0) {
+      return existing.data[0].id;
+    }
+    const created = await this.stripe.customers.create({ email, name });
+    return created.id;
+  }
+
+  /**
+   * Creates a recurring donation as a Stripe Subscription.
    *
-   * @param customerId string - ID of the customer in the payment provider
-   * @param priceId string - ID of the price/product to subscribe the customer to
-   * @returns Promise resolving to a Subscription-like object
+   * Uses `payment_behavior: 'default_incomplete'` so the subscription's first
+   * invoice yields a PaymentIntent the frontend confirms with the exact same code
+   * as a one-time payment. The returned `paymentIntentId` matches the id Stripe
+   * later sends in the `payment_intent.succeeded` webhook, so the existing sync
+   * path marks the donation succeeded with no changes.
+   *
+   * @param params email/name/amount/currency/interval/metadata for the donation
+   * @returns subscription id, customer id, and the first PaymentIntent id + client secret
    */
   async createSubscription(
-    customerId: string,
-    priceId: string,
-  ): Promise<{
-    id: string;
-    customerId: string;
-    priceId: string;
-    interval: RecurringInterval;
-    status: string;
-  }> {
-    try {
-      const errorMsg = this.validateCreateSubscriptionParams(
-        customerId,
-        priceId,
-      );
-      if (errorMsg !== '') {
-        throw new Error(errorMsg);
-      }
-      const subscription: Stripe.Subscription =
-        await this.stripe.subscriptions.create({
-          customer: customerId,
-          items: [
-            {
-              price: priceId,
-            },
-          ],
-        });
+    params: CreateSubscriptionParams,
+  ): Promise<SubscriptionResponse> {
+    const currency = params.currency
+      ? params.currency.toLowerCase()
+      : params.currency;
 
-      this.logger.debug(`createSubscription (stub) -> ${subscription.id}`);
+    const errorMsg = this.validateCreatePaymentIntentParams(
+      params.amount,
+      currency,
+      params.metadata,
+    );
+    if (errorMsg !== '') {
+      throw new Error(errorMsg);
+    }
+
+    const recurring = this.mapIntervalToStripeRecurring(params.interval);
+    if (!recurring) {
+      this.logger.warn(
+        `createSubscription called with invalid interval: ${params.interval}`,
+      );
+      throw new Error('Invalid interval');
+    }
+
+    if (!params.email || typeof params.email !== 'string') {
+      throw new Error('Invalid email');
+    }
+
+    try {
+      const customerId = await this.resolveCustomerId(
+        params.email,
+        params.name,
+      );
+      const product = await this.resolveDonationProductId();
+
+      const subscription = await this.stripe.subscriptions.create({
+        customer: customerId,
+        items: [
+          {
+            price_data: {
+              currency,
+              unit_amount: params.amount,
+              recurring,
+              product,
+            },
+          },
+        ],
+        payment_behavior: 'default_incomplete',
+        payment_settings: { save_default_payment_method: 'on_subscription' },
+        expand: ['latest_invoice.confirmation_secret'],
+        metadata: params.metadata,
+      });
+
+      const invoice = subscription.latest_invoice as Stripe.Invoice | null;
+      const clientSecret = invoice?.confirmation_secret?.client_secret;
+      if (!clientSecret) {
+        throw new Error(
+          'Subscription created but no confirmation secret was returned',
+        );
+      }
+
+      // confirmation_secret holds a PaymentIntent client secret ("pi_x_secret_y");
+      // the PaymentIntent id is the portion before "_secret_".
+      const paymentIntentId = clientSecret.split('_secret_')[0];
+      if (!paymentIntentId.startsWith('pi_')) {
+        throw new Error(
+          'Unexpected client secret format from subscription invoice',
+        );
+      }
+
+      this.logger.debug(
+        `createSubscription -> ${subscription.id} (pi ${paymentIntentId})`,
+      );
+
       return {
-        id: subscription.id,
-        customerId: subscription.customer as string,
-        priceId: subscription.items.data[0].price.id,
-        interval: subscription.items.data[0].price.recurring
-          .interval as RecurringInterval,
+        subscriptionId: subscription.id,
+        customerId,
+        paymentIntentId,
+        clientSecret,
         status: subscription.status,
+        amount: params.amount,
+        currency,
       };
     } catch (error) {
       this.logger.error(`Error creating subscription: ${error.message}`);
       throw error;
+    }
+  }
+
+  /**
+   * Resolves the PaymentIntent id that paid a given invoice. On this Stripe API
+   * version invoices no longer expose `payment_intent` directly, so we read the
+   * expanded `payments` list. Returns undefined if none is found.
+   */
+  async getPaymentIntentIdForInvoice(
+    invoiceId: string,
+  ): Promise<string | undefined> {
+    try {
+      const invoice = await this.stripe.invoices.retrieve(invoiceId, {
+        expand: ['payments'],
+      });
+      const payments = invoice.payments?.data ?? [];
+      for (const invoicePayment of payments) {
+        const payment = invoicePayment.payment;
+        if (payment?.type === 'payment_intent' && payment.payment_intent) {
+          return typeof payment.payment_intent === 'string'
+            ? payment.payment_intent
+            : payment.payment_intent.id;
+        }
+      }
+      return undefined;
+    } catch (err) {
+      this.logger.error(
+        `Error resolving payment intent for invoice ${invoiceId}: ${err.message}`,
+      );
+      return undefined;
     }
   }
 

@@ -1,7 +1,13 @@
 import Stripe from 'stripe';
 import { PaymentIntentResponseDto } from './dtos/payment-intent-response-dto';
-import { PaymentIntentResponse } from './payments.service';
+import {
+  CreateSubscriptionParams,
+  PaymentIntentResponse,
+  SubscriptionResponse,
+} from './payments.service';
 import { CreatePaymentIntentDto } from './dtos/create-payment-intent-dto';
+import { CreateSubscriptionDto } from './dtos/create-subscription-dto';
+import { SubscriptionResponseDto } from './dtos/subscription-response-dto';
 
 export interface CreatePaymentIntentRequest {
   amount: number;
@@ -61,6 +67,36 @@ export class PaymentMappers {
       nextAction: paymentIntentResponse.nextAction,
       lastPaymentError: paymentIntentResponse.lastPaymentError,
       canceledAt: paymentIntentResponse.canceledAt,
+    };
+  }
+
+  static toCreateSubscriptionParams(
+    dto: CreateSubscriptionDto,
+  ): CreateSubscriptionParams {
+    return {
+      email: dto.email,
+      name: dto.name,
+      amount: dto.amount,
+      currency: dto.currency,
+      interval: dto.interval,
+      metadata:
+        dto.metadata == undefined
+          ? undefined
+          : PaymentMappers.normalizeMetadata(dto.metadata),
+    };
+  }
+
+  static toSubscriptionResponseDto(
+    subscriptionResponse: SubscriptionResponse,
+  ): SubscriptionResponseDto {
+    return {
+      id: subscriptionResponse.paymentIntentId,
+      clientSecret: subscriptionResponse.clientSecret,
+      subscriptionId: subscriptionResponse.subscriptionId,
+      customerId: subscriptionResponse.customerId,
+      status: subscriptionResponse.status,
+      amount: subscriptionResponse.amount,
+      currency: subscriptionResponse.currency,
     };
   }
 }
