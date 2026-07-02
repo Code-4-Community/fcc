@@ -110,10 +110,12 @@ const router = createBrowserRouter([
   {
     path: '/donate',
     element: (
-      <DonationForm
-        onSuccess={(id) => console.log('Donation successful:', id)}
-        onError={(err) => console.error('Donation failed:', err)}
-      />
+      <div style={{ maxWidth: 480, margin: '2rem auto' }}>
+        <DonationForm
+          onSuccess={(id) => console.log('Donation successful:', id)}
+          onError={(err) => console.error('Donation failed:', err)}
+        />
+      </div>
     ),
   },
 ]);

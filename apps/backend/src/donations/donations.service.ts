@@ -22,6 +22,14 @@ interface PaymentIntentSyncPayload {
   feeAmount?: number;
 }
 
+interface RenewalChargePayload {
+  stripeSubscriptionId: string;
+  transactionId: string;
+  amount: number;
+  status: DonationStatus;
+  feeAmount?: number;
+}
+
 interface DonationStats {
   total: number;
   count: number;
@@ -93,6 +101,8 @@ export class DonationsService {
       dedicationMessage: createDonationRequest.dedicationMessage || null,
       showDedicationPublicly: createDonationRequest.showDedicationPublicly,
       transactionId: createDonationRequest.paymentIntentId || null,
+      stripeSubscriptionId: createDonationRequest.stripeSubscriptionId || null,
+      stripeCustomerId: createDonationRequest.stripeCustomerId || null,
     });
 
     // Reload from database so any DB-side defaults are reflected
@@ -246,10 +256,10 @@ export class DonationsService {
     );
 
     return {
-      total: Number(donations?.total ?? 0),
+      total: Number(donations?.total ?? 0) / 100,
       count: Number(donations?.count ?? 0),
-      yearToDate: Number(donations?.yearToDate ?? 0),
-      monthToDate: Number(donations?.monthToDate ?? 0),
+      yearToDate: Number(donations?.yearToDate ?? 0) / 100,
+      monthToDate: Number(donations?.monthToDate ?? 0) / 100,
     };
   }
 
@@ -316,6 +326,88 @@ export class DonationsService {
           error,
         );
         // caught error cause we dont want email failure to break the payment sync
+      }
+    }
+  }
+
+  /**
+   * Records a recurring-subscription renewal charge (month 2+) as its own donation
+   * row so it counts toward the goal (goal progress = SUM of succeeded rows).
+   *
+   * Donor details are cloned from the original ("template") donation created when the
+   * subscription started, located via {@link stripeSubscriptionId}. Idempotent on
+   * {@link transactionId} so redelivered Stripe webhooks don't double-count.
+   */
+  async recordRenewalCharge(payload: RenewalChargePayload): Promise<void> {
+    const { stripeSubscriptionId, transactionId, amount, status, feeAmount } =
+      payload;
+
+    if (!stripeSubscriptionId || !transactionId) {
+      this.logger.warn(
+        'Unable to record renewal charge without subscription and transaction ids',
+      );
+      return;
+    }
+
+    // Idempotency: skip if we've already recorded this charge.
+    const existing = await this.donationRepository.findOne({
+      where: { transactionId },
+    });
+    if (existing) {
+      this.logger.debug(
+        `Renewal charge ${transactionId} already recorded (donation ${existing.id}); skipping`,
+      );
+      return;
+    }
+
+    // Find the original donation for this subscription to clone donor details.
+    const template = await this.donationRepository.findOne({
+      where: { stripeSubscriptionId },
+      order: { createdAt: 'ASC' },
+    });
+    if (!template) {
+      this.logger.warn(
+        `No template donation found for subscription ${stripeSubscriptionId}; cannot record renewal ${transactionId}`,
+      );
+      return;
+    }
+
+    const renewal = this.donationRepository.create({
+      firstName: template.firstName,
+      lastName: template.lastName,
+      email: template.email,
+      amount,
+      isAnonymous: template.isAnonymous,
+      donationType: DonationType.RECURRING,
+      recurringInterval: template.recurringInterval,
+      dedicationMessage: template.dedicationMessage,
+      showDedicationPublicly: template.showDedicationPublicly,
+      status,
+      transactionId,
+      feeAmount: feeAmount ?? null,
+      stripeSubscriptionId,
+      stripeCustomerId: template.stripeCustomerId,
+    });
+
+    const saved = await this.donationRepository.save(renewal);
+    this.logger.log(
+      `Recorded renewal charge ${transactionId} for subscription ${stripeSubscriptionId} as donation ${saved.id} (${status})`,
+    );
+
+    if (status === DonationStatus.SUCCEEDED) {
+      try {
+        const donorName = `${saved.firstName} ${saved.lastName}`;
+        await this.emailsService.sendDonationResponseEmail(
+          saved.email,
+          donorName,
+          saved.amount,
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to send Donation Response email for renewal donation ${saved.id}`,
+          error,
+        );
+        // don't let email failure break the renewal sync
       }
     }
   }
@@ -428,7 +520,7 @@ export class DonationsService {
       })
       .getRawOne<{ amount: string }>();
 
-    const amountRaised = Number(result?.amount ?? 0);
+    const amountRaised = Number(result?.amount ?? 0) / 100;
 
     const progressPercent =
       goal.targetAmount > 0

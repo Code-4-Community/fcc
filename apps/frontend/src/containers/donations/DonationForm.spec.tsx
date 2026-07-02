@@ -8,6 +8,7 @@ import {
   waitFor,
   cleanup,
 } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import apiClient from '../../api/apiClient';
 import { DonationForm } from './DonationForm';
 import type { CreateDonationResponse } from '../../api/apiClient';
@@ -25,7 +26,11 @@ describe('DonationForm Component', () => {
   });
 
   it('prevents advancing past Step 1 when amount is missing', async () => {
-    render(<DonationForm onSuccess={onSuccess} onError={onError} />);
+    render(
+      <MemoryRouter>
+        <DonationForm onSuccess={onSuccess} onError={onError} />
+      </MemoryRouter>,
+    );
 
     fireEvent.click(screen.getByRole('button', { name: /next/i }));
 
@@ -35,7 +40,11 @@ describe('DonationForm Component', () => {
   });
 
   it('shows payment details on Step 2 after entering amount', async () => {
-    render(<DonationForm onSuccess={onSuccess} onError={onError} />);
+    render(
+      <MemoryRouter>
+        <DonationForm onSuccess={onSuccess} onError={onError} />
+      </MemoryRouter>,
+    );
 
     fireEvent.change(screen.getByLabelText(/donation amount/i), {
       target: { value: '45' },
@@ -56,7 +65,11 @@ describe('DonationForm Component', () => {
       .spyOn(apiClient, 'createDonation')
       .mockResolvedValueOnce({ id: '123' });
 
-    render(<DonationForm onSuccess={onSuccess} onError={onError} />);
+    render(
+      <MemoryRouter>
+        <DonationForm onSuccess={onSuccess} onError={onError} />
+      </MemoryRouter>,
+    );
 
     fireEvent.change(screen.getByLabelText(/donation amount/i), {
       target: { value: '50' },
@@ -93,7 +106,11 @@ describe('DonationForm Component', () => {
       .spyOn(apiClient, 'createDonation')
       .mockReturnValueOnce(pending as Promise<CreateDonationResponse>);
 
-    render(<DonationForm onSuccess={onSuccess} onError={onError} />);
+    render(
+      <MemoryRouter>
+        <DonationForm onSuccess={onSuccess} onError={onError} />
+      </MemoryRouter>,
+    );
 
     fireEvent.change(screen.getByLabelText(/donation amount/i), {
       target: { value: '75' },

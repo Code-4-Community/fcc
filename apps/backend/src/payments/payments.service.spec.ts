@@ -1,4 +1,5 @@
 import { PaymentsService } from './payments.service';
+import { ConfigService } from '@nestjs/config';
 import { DonationStatus } from '../donations/donation.entity';
 import Stripe from 'stripe';
 import { CreatePaymentIntentRequest } from './mappers';
@@ -16,6 +17,20 @@ const stripeMock = {
     update: jest.fn(),
     cancel: jest.fn(),
   },
+  customers: {
+    list: jest.fn(),
+    create: jest.fn(),
+  },
+  products: {
+    create: jest.fn(),
+  },
+  invoices: {
+    retrieve: jest.fn(),
+  },
+};
+
+const configServiceMock = {
+  get: jest.fn(),
 };
 
 // Mock the Stripe constructor to return our mock
@@ -222,7 +237,14 @@ const subscriptionMock1 = {
     total_count: 1,
     url: '/v1/subscription_items?subscription=sub_1234567890abcdef',
   },
-  latest_invoice: 'in_1234567890abcdef',
+  latest_invoice: {
+    id: 'in_1234567890abcdef',
+    object: 'invoice',
+    confirmation_secret: {
+      client_secret: 'pi_sub1234567890_secret_abcdefghij',
+      type: 'payment_intent',
+    },
+  },
   livemode: false,
   metadata: { orderId: '123' },
   next_pending_invoice_item_invoice: null,
@@ -250,8 +272,11 @@ describe('PaymentsService', () => {
     // Clear all mocks before each test
     jest.clearAllMocks();
 
-    // Create a new instance with our mock
-    svc = new PaymentsService(stripeMock as unknown as Stripe);
+    // Create a new instance with our mocks
+    svc = new PaymentsService(
+      stripeMock as unknown as Stripe,
+      configServiceMock as unknown as ConfigService,
+    );
 
     // Set up default mock implementations with more realistic Stripe responses
     stripeMock.paymentIntents.create.mockResolvedValue(paymentIntentMock1);
@@ -259,6 +284,14 @@ describe('PaymentsService', () => {
     stripeMock.paymentIntents.retrieve.mockResolvedValue(paymentIntentMock2);
 
     stripeMock.subscriptions.create.mockResolvedValue(subscriptionMock1);
+
+    // Subscription-flow defaults: no existing customer, product created on the fly
+    configServiceMock.get.mockReturnValue(undefined);
+    stripeMock.customers.list.mockResolvedValue({ data: [] });
+    stripeMock.customers.create.mockResolvedValue({
+      id: 'cus_new1234567890',
+    });
+    stripeMock.products.create.mockResolvedValue({ id: 'prod_created123' });
   });
 
   describe('createPaymentIntent', () => {
@@ -463,28 +496,122 @@ describe('PaymentsService', () => {
   });
 
   describe('createSubscription', () => {
-    it('throws for undefined customerId', async () => {
+    const validParams = {
+      email: 'donor@example.com',
+      name: 'Jane Donor',
+      amount: 1000,
+      currency: 'usd',
+      interval: 'monthly',
+    };
+
+    it('throws for an amount below the USD minimum', async () => {
       await expect(
-        svc.createSubscription(undefined, 'price_1234abcdefgh5678'),
-      ).rejects.toThrow('Invalid customerId');
+        svc.createSubscription({ ...validParams, amount: 10 }),
+      ).rejects.toThrow(
+        'Invalid amount, US currency donations must be at least 50 cents',
+      );
     });
 
-    it('throws for null customerId', async () => {
+    it('throws for an invalid interval', async () => {
       await expect(
-        svc.createSubscription(null, 'price_1234abcdefgh5678'),
-      ).rejects.toThrow('Invalid customerId');
+        svc.createSubscription({ ...validParams, interval: 'fortnightly' }),
+      ).rejects.toThrow('Invalid interval');
     });
 
-    it('throws for undefined priceId', async () => {
+    it('throws for a missing email', async () => {
       await expect(
-        svc.createSubscription('cus_1234abcdefgh5678', undefined),
-      ).rejects.toThrow('Invalid priceId');
+        svc.createSubscription({
+          ...validParams,
+          email: undefined as unknown as string,
+        }),
+      ).rejects.toThrow('Invalid email');
     });
 
-    it('throws for null priceId', async () => {
-      await expect(
-        svc.createSubscription('cus_1234abcdefgh5678', null),
-      ).rejects.toThrow('Invalid priceId');
+    it('reuses an existing Stripe customer when one is found by email', async () => {
+      stripeMock.customers.list.mockResolvedValue({
+        data: [{ id: 'cus_existing123' }],
+      });
+
+      const result = await svc.createSubscription(validParams);
+
+      expect(stripeMock.customers.create).not.toHaveBeenCalled();
+      expect(result.customerId).toBe('cus_existing123');
+    });
+
+    it('creates a new customer when none exists', async () => {
+      const result = await svc.createSubscription(validParams);
+
+      expect(stripeMock.customers.create).toHaveBeenCalledWith({
+        email: validParams.email,
+        name: validParams.name,
+      });
+      expect(result.customerId).toBe('cus_new1234567890');
+    });
+
+    it('creates a product when STRIPE_DONATION_PRODUCT_ID is unset', async () => {
+      await svc.createSubscription(validParams);
+      expect(stripeMock.products.create).toHaveBeenCalledWith({
+        name: 'FCC Donation',
+      });
+    });
+
+    it('uses the configured product id without creating one', async () => {
+      configServiceMock.get.mockReturnValue('prod_configured999');
+
+      await svc.createSubscription(validParams);
+
+      expect(stripeMock.products.create).not.toHaveBeenCalled();
+      const createArgs = stripeMock.subscriptions.create.mock.calls[0][0];
+      expect(createArgs.items[0].price_data.product).toBe('prod_configured999');
+    });
+
+    it('derives the PaymentIntent id and client secret from confirmation_secret', async () => {
+      const result = await svc.createSubscription(validParams);
+
+      expect(result.subscriptionId).toBe('sub_1234567890abcdef');
+      expect(result.clientSecret).toBe('pi_sub1234567890_secret_abcdefghij');
+      expect(result.paymentIntentId).toBe('pi_sub1234567890');
+      expect(result.amount).toBe(1000);
+      expect(result.currency).toBe('usd');
+    });
+
+    it('creates the subscription with default_incomplete and expands confirmation_secret', async () => {
+      await svc.createSubscription(validParams);
+      const createArgs = stripeMock.subscriptions.create.mock.calls[0][0];
+      expect(createArgs.payment_behavior).toBe('default_incomplete');
+      expect(createArgs.expand).toContain('latest_invoice.confirmation_secret');
+      expect(createArgs.payment_settings.save_default_payment_method).toBe(
+        'on_subscription',
+      );
+    });
+
+    it.each([
+      ['weekly', 'week', 1],
+      ['monthly', 'month', 1],
+      ['bimonthly', 'month', 2],
+      ['quarterly', 'month', 3],
+      ['annually', 'year', 1],
+    ])(
+      'maps interval %s to { %s, count %d }',
+      async (interval, expectedInterval, expectedCount) => {
+        await svc.createSubscription({ ...validParams, interval });
+        const createArgs = stripeMock.subscriptions.create.mock.calls[0][0];
+        expect(createArgs.items[0].price_data.recurring).toEqual({
+          interval: expectedInterval,
+          interval_count: expectedCount,
+        });
+      },
+    );
+
+    it('throws when the invoice has no confirmation secret', async () => {
+      stripeMock.subscriptions.create.mockResolvedValueOnce({
+        ...subscriptionMock1,
+        latest_invoice: { id: 'in_x', object: 'invoice' },
+      });
+
+      await expect(svc.createSubscription(validParams)).rejects.toThrow(
+        'no confirmation secret',
+      );
     });
 
     it('handles Stripe API errors correctly', async () => {
@@ -499,23 +626,9 @@ describe('PaymentsService', () => {
         paymentMethodNotSupportedError,
       );
 
-      await expect(
-        svc.createSubscription(
-          'cus_1234abcdefgh5678',
-          'price_1234abcdefgh5678',
-        ),
-      ).rejects.toMatchObject(paymentMethodNotSupportedError);
-    });
-
-    it('creates a mock subscription for valid inputs', async () => {
-      const sub = await svc.createSubscription(
-        'cus_1234abcdefgh5678',
-        'price_1234abcdefgh5678',
+      await expect(svc.createSubscription(validParams)).rejects.toMatchObject(
+        paymentMethodNotSupportedError,
       );
-      expect(sub).toHaveProperty('id');
-      expect(sub.customerId).toBe('cus_1234abcdefgh5678');
-      expect(sub.priceId).toBe('price_1234abcdefgh5678');
-      expect(sub.status).toBe('active');
     });
   });
 

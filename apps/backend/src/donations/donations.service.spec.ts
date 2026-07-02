@@ -8,6 +8,7 @@ import { CreateDonationRequest } from './mappers';
 import { DonationResponseDto } from './dtos/donation-response-dto';
 import { DonationsRepository } from './donations.repository';
 import { Goal } from './goal.entity';
+import { EmailsService } from '../emails/emails.service';
 // mock donations
 
 // invalid donation: non positive donation amount
@@ -125,6 +126,8 @@ const validDonation1: Donation = {
   updatedAt: new Date(2026, 7, 1),
   recurringInterval: null,
   feeAmount: null,
+  stripeSubscriptionId: null,
+  stripeCustomerId: null,
 };
 
 const validDonation2: Donation = {
@@ -155,6 +158,8 @@ const validDonation2: Donation = {
 
   dedicationMessage: 'I love fcc!',
   feeAmount: null,
+  stripeSubscriptionId: null,
+  stripeCustomerId: null,
 };
 
 const validDonation3: Donation = {
@@ -185,6 +190,8 @@ const validDonation3: Donation = {
 
   dedicationMessage: 'I love fcc!',
   feeAmount: null,
+  stripeSubscriptionId: null,
+  stripeCustomerId: null,
 };
 
 const allDonations: Donation[] = [
@@ -242,12 +249,17 @@ describe('DonationsService', () => {
       findLapsedDonors: jest.fn(),
     };
 
+    const mockEmailsService = {
+      sendDonationResponseEmail: jest.fn(),
+    };
+
     const app = await Test.createTestingModule({
       providers: [
         DonationsService,
         { provide: getRepositoryToken(Donation), useValue: repoMock },
         { provide: getRepositoryToken(Goal), useValue: {} },
         { provide: DonationsRepository, useValue: mockDonationsRepository },
+        { provide: EmailsService, useValue: mockEmailsService },
       ],
     }).compile();
 
@@ -322,6 +334,24 @@ describe('DonationsService', () => {
         createdAt: validDonation1.createdAt,
         updatedAt: validDonation1.updatedAt,
       });
+    });
+
+    it('persists Stripe subscription and customer ids when provided', async () => {
+      repo.create.mockReturnValue(validDonation1);
+      repo.save.mockResolvedValue(validDonation1);
+
+      await service.create({
+        ...validCreateDonation1,
+        stripeSubscriptionId: 'sub_persist',
+        stripeCustomerId: 'cus_persist',
+      });
+
+      expect(repo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          stripeSubscriptionId: 'sub_persist',
+          stripeCustomerId: 'cus_persist',
+        }),
+      );
     });
   });
 
@@ -440,6 +470,110 @@ describe('DonationsService', () => {
           status: DonationStatus.FAILED,
         }),
       );
+    });
+  });
+
+  describe('recordRenewalCharge', () => {
+    const template = {
+      ...validDonation1,
+      id: 42,
+      stripeSubscriptionId: 'sub_renew',
+      stripeCustomerId: 'cus_renew',
+    };
+
+    beforeEach(() => {
+      // shared repo mocks persist across the beforeAll-scoped suite; reset call
+      // history (not implementations) so per-test assertions are isolated
+      repo.create.mockClear();
+      repo.save.mockClear();
+      repo.findOne.mockClear();
+    });
+
+    afterEach(() => {
+      // restore the shared findOne implementation for other suites
+      repo.findOne.mockImplementation(
+        async (options?: FindOneOptions<Donation>) => {
+          const where = options?.where as
+            | FindOptionsWhere<Donation>
+            | undefined;
+          if (!where) return null;
+          if (where.id !== undefined && where.id !== null) {
+            return allDonations.find((d) => d.id === where.id) ?? null;
+          }
+          if (where.transactionId) {
+            return (
+              allDonations.find(
+                (d) => d.transactionId === where.transactionId,
+              ) ?? null
+            );
+          }
+          return null;
+        },
+      );
+    });
+
+    it('is idempotent: skips when a donation with the transactionId already exists', async () => {
+      repo.findOne.mockResolvedValueOnce(template); // existing by transactionId
+      const createSpy = jest.spyOn(repo, 'create');
+
+      await service.recordRenewalCharge({
+        stripeSubscriptionId: 'sub_renew',
+        transactionId: 'pi_dup',
+        amount: 1000,
+        status: DonationStatus.SUCCEEDED,
+      });
+
+      expect(createSpy).not.toHaveBeenCalled();
+    });
+
+    it('warns and does nothing when no template donation exists for the subscription', async () => {
+      repo.findOne
+        .mockResolvedValueOnce(null) // no existing by transactionId
+        .mockResolvedValueOnce(null); // no template by subscription id
+      const createSpy = jest.spyOn(repo, 'create');
+
+      await service.recordRenewalCharge({
+        stripeSubscriptionId: 'sub_missing',
+        transactionId: 'pi_new',
+        amount: 1000,
+        status: DonationStatus.SUCCEEDED,
+      });
+
+      expect(createSpy).not.toHaveBeenCalled();
+    });
+
+    it('clones the template into a new succeeded row counting toward the goal', async () => {
+      repo.findOne
+        .mockResolvedValueOnce(null) // no existing by transactionId
+        .mockResolvedValueOnce(template); // template by subscription id
+      const createSpy = jest
+        .spyOn(repo, 'create')
+        .mockImplementation((d) => d as Donation);
+      const saveSpy = jest
+        .spyOn(repo, 'save')
+        .mockResolvedValue({ ...template, id: 99 } as Donation);
+
+      await service.recordRenewalCharge({
+        stripeSubscriptionId: 'sub_renew',
+        transactionId: 'pi_renew_new',
+        amount: 2500,
+        status: DonationStatus.SUCCEEDED,
+        feeAmount: 100,
+      });
+
+      expect(createSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: template.email,
+          amount: 2500,
+          status: DonationStatus.SUCCEEDED,
+          transactionId: 'pi_renew_new',
+          feeAmount: 100,
+          stripeSubscriptionId: 'sub_renew',
+          stripeCustomerId: 'cus_renew',
+          donationType: DonationType.RECURRING,
+        }),
+      );
+      expect(saveSpy).toHaveBeenCalled();
     });
   });
 

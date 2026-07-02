@@ -69,6 +69,12 @@ export class Donation {
   @Column({ type: 'int', nullable: true })
   feeAmount: number | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  stripeSubscriptionId: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  stripeCustomerId: string | null;
+
   @CreateDateColumn({ type: 'timestamp', default: () => 'now()' })
   createdAt: Date;
 

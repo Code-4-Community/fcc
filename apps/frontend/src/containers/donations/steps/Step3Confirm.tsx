@@ -2,12 +2,21 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useStripe } from '@stripe/react-stripe-js';
 import type { DonationFormData } from '../donation-form.types';
 import apiClient from '../../../api/apiClient';
+import { calculateChargeAmount } from '../DonationSummary';
 import { Card } from '@components/ui/card';
+
+export interface SubscriptionInfo {
+  stripeSubscriptionId: string;
+  stripeCustomerId: string;
+}
 
 interface Step3ConfirmProps {
   formData: DonationFormData;
   paymentMethodId: string | null;
-  onBeforePayment: (paymentIntentId: string) => Promise<string>;
+  onBeforePayment: (
+    paymentIntentId: string,
+    subscriptionInfo?: SubscriptionInfo,
+  ) => Promise<string>;
   onPaymentSuccess: (donationId: string) => void;
   onPaymentError: (error: string) => void;
   isSubmitting: boolean;
@@ -28,7 +37,10 @@ export const Step3Confirm: React.FC<Step3ConfirmProps> = ({
   const stripe = useStripe();
   const [error, setError] = useState<string | null>(null);
 
-  const amount = parseFloat(formData.amount) || 0;
+  const amount = calculateChargeAmount(
+    parseFloat(formData.amount) || 0,
+    formData.coverFees,
+  );
 
   const handleConfirmPayment = useCallback(async () => {
     if (!stripe) {
@@ -47,21 +59,55 @@ export const Step3Confirm: React.FC<Step3ConfirmProps> = ({
     setError(null);
 
     try {
-      // Step 1: Create PaymentIntent
+      // Step 1: Create the payment. Recurring donations create a Stripe
+      // Subscription whose first invoice yields a PaymentIntent we confirm with
+      // the exact same code as a one-time payment; one-time donations create a
+      // plain PaymentIntent.
       const amountInCents = Math.round(amount * 100);
-      const paymentIntentResponse = await apiClient.createPaymentIntent({
-        amount: amountInCents,
-        currency: 'usd',
-        metadata: {
-          email: formData.email,
-          donationType: formData.donationType,
-        },
-      });
 
-      const donationId = await onBeforePayment(paymentIntentResponse.id);
+      let clientSecret: string;
+      let paymentIntentId: string;
+      let subscriptionInfo: SubscriptionInfo | undefined;
+
+      if (formData.donationType === 'recurring') {
+        const subscriptionResponse = await apiClient.createSubscription({
+          amount: amountInCents,
+          currency: 'usd',
+          interval: formData.recurringInterval,
+          email: formData.email,
+          name: `${formData.firstName} ${formData.lastName}`.trim(),
+          metadata: {
+            email: formData.email,
+            donationType: formData.donationType,
+            recurringInterval: formData.recurringInterval,
+          },
+        });
+        clientSecret = subscriptionResponse.clientSecret;
+        paymentIntentId = subscriptionResponse.id;
+        subscriptionInfo = {
+          stripeSubscriptionId: subscriptionResponse.subscriptionId,
+          stripeCustomerId: subscriptionResponse.customerId,
+        };
+      } else {
+        const paymentIntentResponse = await apiClient.createPaymentIntent({
+          amount: amountInCents,
+          currency: 'usd',
+          metadata: {
+            email: formData.email,
+            donationType: formData.donationType,
+          },
+        });
+        clientSecret = paymentIntentResponse.clientSecret;
+        paymentIntentId = paymentIntentResponse.id;
+      }
+
+      const donationId = await onBeforePayment(
+        paymentIntentId,
+        subscriptionInfo,
+      );
 
       const { error: stripeError, paymentIntent } =
-        await stripe.confirmCardPayment(paymentIntentResponse.clientSecret, {
+        await stripe.confirmCardPayment(clientSecret, {
           payment_method: paymentMethodId,
         });
 
@@ -74,7 +120,7 @@ export const Step3Confirm: React.FC<Step3ConfirmProps> = ({
       if (paymentIntent && paymentIntent.status === 'succeeded') {
         // Explicitly trigger a backend sync for localhost environments without webhooks listening
         try {
-          await apiClient.syncPaymentIntent(paymentIntentResponse.id);
+          await apiClient.syncPaymentIntent(paymentIntentId);
         } catch (e) {
           console.warn('Failed to explicitly sync payment intent', e);
         }
@@ -97,6 +143,10 @@ export const Step3Confirm: React.FC<Step3ConfirmProps> = ({
     amount,
     formData.email,
     formData.donationType,
+    formData.recurringInterval,
+    formData.firstName,
+    formData.lastName,
+    onBeforePayment,
     setIsSubmitting,
     onPaymentSuccess,
     onPaymentError,
