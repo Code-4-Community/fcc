@@ -45,6 +45,7 @@ export interface Donation {
   createdAt: Date;
   updatedAt: Date;
   transactionId?: string;
+  feeAmount?: number;
 }
 
 export class DonationMappers {
@@ -86,7 +87,8 @@ export class DonationMappers {
       status: donation.status as DonationStatus,
       createdAt: donation.createdAt,
       updatedAt: donation.updatedAt,
-      transactionId: donation.transactionId,
+      transactionId: donation.transactionId ?? undefined,
+      feeAmount: donation.feeAmount ?? undefined,
     };
   }
 

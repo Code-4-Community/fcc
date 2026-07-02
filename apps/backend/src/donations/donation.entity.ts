@@ -66,6 +66,9 @@ export class Donation {
   @Column({ nullable: true })
   transactionId: string | null;
 
+  @Column({ type: 'int', nullable: true })
+  feeAmount: number | null;
+
   @CreateDateColumn({ type: 'timestamp', default: () => 'now()' })
   createdAt: Date;
 

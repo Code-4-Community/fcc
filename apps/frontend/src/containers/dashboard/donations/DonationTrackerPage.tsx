@@ -106,16 +106,6 @@ function getReasonLabel(donation: DonationListRow): string {
   return 'Standard';
 }
 
-function getFeeIndicator(status: DonationListRow['status']): {
-  label: string;
-  className: string;
-} {
-  return {
-    label: status.charAt(0).toUpperCase() + status.slice(1),
-    className: 'bg-emerald-500',
-  };
-}
-
 function buildPageWindow(
   page: number,
   totalPages: number,
@@ -550,8 +540,6 @@ function DonationTable({ rows }: { rows: DonationListRow[] }) {
           </thead>
           <tbody>
             {rows.map((donation) => {
-              const feeIndicator = getFeeIndicator(donation.status);
-
               return (
                 <tr key={donation.id} className="hover:bg-neutral-50/70">
                   <td className="border-t border-neutral-100 px-4 py-4 text-neutral-700">
@@ -574,16 +562,13 @@ function DonationTable({ rows }: { rows: DonationListRow[] }) {
                   <td className="border-t border-neutral-100 px-4 py-4 text-neutral-700">
                     {formatDate(donation.createdAt)}
                   </td>
-                  <td className="border-t border-neutral-100 px-4 py-4">
-                    <span
-                      className={cn(
-                        'inline-flex h-6 w-6 items-center justify-center rounded-full text-[13px] font-semibold text-white',
-                        feeIndicator.className,
-                      )}
-                      title={feeIndicator.label}
-                    >
-                      ✓
-                    </span>
+                  <td className="border-t border-neutral-100 px-4 py-4 text-neutral-700">
+                    {donation.feeAmount !== undefined &&
+                    donation.feeAmount !== null ? (
+                      formatCurrency(donation.feeAmount / 100)
+                    ) : (
+                      <span className="text-neutral-400">-</span>
+                    )}
                   </td>
                   <td className="border-t border-neutral-100 px-4 py-4">
                     <span className="text-base text-neutral-700">

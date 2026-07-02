@@ -115,7 +115,15 @@ export class PaymentsController {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
       const response =
         this.paymentsService.mapPaymentIntentToResponse(paymentIntent);
-      await this.syncDonationFromPaymentIntent(response);
+
+      let feeAmount: number | undefined;
+      if (event.type === 'payment_intent.succeeded') {
+        feeAmount = await this.paymentsService.getExactFeeForPaymentIntent(
+          paymentIntent.id,
+        );
+      }
+
+      await this.syncDonationFromPaymentIntent(response, feeAmount);
     } else if (
       event.type === 'charge.dispute.created' ||
       event.type === 'charge.refunded'
@@ -140,11 +148,13 @@ export class PaymentsController {
 
   private async syncDonationFromPaymentIntent(
     paymentIntent: PaymentIntentResponse,
+    feeAmount?: number,
   ): Promise<void> {
     await this.donationsService.syncPaymentIntentStatus({
       donationId: this.extractDonationId(paymentIntent.metadata),
       transactionId: paymentIntent.id,
       status: paymentIntent.status,
+      feeAmount,
     });
   }
 

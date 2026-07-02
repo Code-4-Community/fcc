@@ -124,6 +124,7 @@ const validDonation1: Donation = {
 
   updatedAt: new Date(2026, 7, 1),
   recurringInterval: null,
+  feeAmount: null,
 };
 
 const validDonation2: Donation = {
@@ -153,6 +154,7 @@ const validDonation2: Donation = {
   recurringInterval: null,
 
   dedicationMessage: 'I love fcc!',
+  feeAmount: null,
 };
 
 const validDonation3: Donation = {
@@ -182,6 +184,7 @@ const validDonation3: Donation = {
   recurringInterval: null,
 
   dedicationMessage: 'I love fcc!',
+  feeAmount: null,
 };
 
 const allDonations: Donation[] = [

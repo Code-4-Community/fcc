@@ -19,6 +19,7 @@ interface PaymentIntentSyncPayload {
   donationId?: number;
   transactionId?: string;
   status: DonationStatus;
+  feeAmount?: number;
 }
 
 interface DonationStats {
@@ -128,6 +129,7 @@ export class DonationsService {
       createdAt: finalDonation.createdAt,
       updatedAt: finalDonation.updatedAt,
       transactionId: finalDonation.transactionId ?? undefined,
+      feeAmount: finalDonation.feeAmount ?? undefined,
     };
   }
 
@@ -149,6 +151,7 @@ export class DonationsService {
           showDedicationPublicly: donation.showDedicationPublicly,
           status: donation.status,
           transactionId: donation.transactionId ?? undefined,
+          feeAmount: donation.feeAmount ?? undefined,
           createdAt: donation.createdAt,
           updatedAt: donation.updatedAt,
         };
@@ -220,6 +223,7 @@ export class DonationsService {
       showDedicationPublicly: donation.showDedicationPublicly,
       status: donation.status,
       transactionId: donation.transactionId ?? undefined,
+      feeAmount: donation.feeAmount ?? undefined,
       createdAt: donation.createdAt,
       updatedAt: donation.updatedAt,
     };
@@ -252,7 +256,7 @@ export class DonationsService {
   async syncPaymentIntentStatus(
     payload: PaymentIntentSyncPayload,
   ): Promise<void> {
-    const { donationId, transactionId, status } = payload;
+    const { donationId, transactionId, status, feeAmount } = payload;
 
     if (!donationId && !transactionId) {
       this.logger.warn('Unable to sync donation without identifiers');
@@ -284,6 +288,9 @@ export class DonationsService {
     donation.status = status;
     if (transactionId) {
       donation.transactionId = transactionId;
+    }
+    if (feeAmount !== undefined) {
+      donation.feeAmount = feeAmount;
     }
 
     await this.donationRepository.save(donation);
