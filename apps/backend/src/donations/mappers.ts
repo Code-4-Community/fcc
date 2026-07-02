@@ -23,6 +23,8 @@ export interface CreateDonationRequest {
   dedicationMessage?: string;
   showDedicationPublicly: boolean;
   paymentIntentId?: string;
+  stripeSubscriptionId?: string;
+  stripeCustomerId?: string;
 }
 
 export interface Donation {
@@ -69,6 +71,8 @@ export class DonationMappers {
       dedicationMessage: dto.dedicationMessage,
       showDedicationPublicly: dto.showDedicationPublicly ?? false,
       paymentIntentId: dto.paymentIntentId,
+      stripeSubscriptionId: dto.stripeSubscriptionId,
+      stripeCustomerId: dto.stripeCustomerId,
     };
   }
 

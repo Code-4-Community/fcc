@@ -100,4 +100,23 @@ export class CreateDonationDto {
   @IsString()
   @IsOptional()
   paymentIntentId?: string;
+
+  @ApiProperty({
+    description:
+      'optional Stripe subscription id (set for recurring donations to link renewals)',
+    example: 'sub_1J2aBcD3eF4GhIjKlmnoPqr',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  stripeSubscriptionId?: string;
+
+  @ApiProperty({
+    description: 'optional Stripe customer id (set for recurring donations)',
+    example: 'cus_ABC123',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  stripeCustomerId?: string;
 }
