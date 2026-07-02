@@ -17,6 +17,7 @@ const AppDataSource = new DataSource({
   database: process.env.NX_DB_DATABASE,
   entities: [User, Donation, Goal, EmailTemplate, EmailSubscriber],
   migrations: ['apps/backend/src/migrations/*.ts'],
+  migrationsRun: true,
   synchronize: false,
   ssl: process.env.NX_DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });
