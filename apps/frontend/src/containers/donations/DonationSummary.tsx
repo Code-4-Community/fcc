@@ -1,40 +1,66 @@
-import { useState } from 'react';
-
 type DonationSummaryProps = {
-  setCurrentAmount?: React.Dispatch<React.SetStateAction<number>>;
   baseAmount: number;
+  coverFees: boolean;
+  onCoverFeesChange: (value: boolean) => void;
   feeRate?: number;
   fixedFee?: number;
 };
 
-export const DONATION_FEE_RATE = 2.9;
-export const DONATION_FIXED_FEE = 0.3;
+export const DONATION_FEE_RATE = 2.9; // percent
+export const DONATION_FIXED_FEE = 0.3; // dollars
+
+/**
+ * The processing fee a donor covers so the org nets the full base amount.
+ * Uses the gross-up formula (fee is charged on the total, not just the base):
+ *   charged = (base + fixed) / (1 - rate)   ->   feeTotal = charged - base
+ * Returns 0 for non-positive amounts.
+ */
+export const calculateFeeTotal = (
+  baseAmount: number,
+  feeRate: number = DONATION_FEE_RATE,
+  fixedFee: number = DONATION_FIXED_FEE,
+): number => {
+  if (baseAmount <= 0) return 0;
+  const charged = (baseAmount + fixedFee) / (1 - feeRate / 100);
+  return charged - baseAmount;
+};
+
+/**
+ * The amount actually charged: base plus the covered fee (rounded to cents)
+ * when fee coverage is on, otherwise the base. Single source of truth for the
+ * donation summary display, the Stripe charge, and the recorded donation.
+ */
+export const calculateChargeAmount = (
+  baseAmount: number,
+  coverFees: boolean,
+  feeRate: number = DONATION_FEE_RATE,
+  fixedFee: number = DONATION_FIXED_FEE,
+): number => {
+  if (!coverFees || baseAmount <= 0) return baseAmount;
+  const charge = baseAmount + calculateFeeTotal(baseAmount, feeRate, fixedFee);
+  return Math.round(charge * 100) / 100;
+};
 
 export const DonationSummary = ({
-  setCurrentAmount,
   baseAmount,
+  coverFees,
+  onCoverFeesChange,
   feeRate,
   fixedFee,
 }: DonationSummaryProps) => {
-  const [feeApplied, setFeeApplied] = useState(false);
-
-  const rate = feeRate ?? DONATION_FEE_RATE;
-  const fee = fixedFee ?? DONATION_FIXED_FEE;
-  const feeTotal = (baseAmount * rate) / 100 + fee;
+  const feeTotal = calculateFeeTotal(baseAmount, feeRate, fixedFee);
 
   const handleToggle = () => {
-    const next = !feeApplied;
-    setFeeApplied(next);
-    setCurrentAmount?.(next ? baseAmount + feeTotal : baseAmount);
+    onCoverFeesChange(!coverFees);
   };
 
   const feeText = `Add $${feeTotal.toFixed(2)} to cover transaction fees and help keep it `;
 
-  const toggleClass = feeApplied
+  const toggleClass = coverFees
     ? 'border-2 border-[#2C8974] bg-[#F0F0F0]'
     : 'bg-gray-300';
 
-  const circleClass = feeApplied
+  const circleClass = coverFees
     ? 'bg-[#2C8974] left-[50%]'
     : 'bg-white left-[10%]';
 

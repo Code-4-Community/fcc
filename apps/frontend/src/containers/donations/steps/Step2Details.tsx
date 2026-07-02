@@ -2,7 +2,7 @@ import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import { Input } from '@components/ui/input';
 import { FormField } from './FormField';
-import { DonationSummary } from '../DonationSummary';
+import { DonationSummary, calculateChargeAmount } from '../DonationSummary';
 import type { DonationFormData, FormErrors } from '../donation-form.types';
 
 export interface Step2DetailsRef {
@@ -18,6 +18,7 @@ type Step2DetailsProps = {
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >,
   ) => void;
+  onCoverFeesChange: (value: boolean) => void;
 };
 
 const cardElementOptions = {
@@ -37,11 +38,14 @@ const cardElementOptions = {
 };
 
 export const Step2Details = forwardRef<Step2DetailsRef, Step2DetailsProps>(
-  function Step2Details({ formData, errors, isSubmitting, onChange }, ref) {
+  function Step2Details(
+    { formData, errors, isSubmitting, onChange, onCoverFeesChange },
+    ref,
+  ) {
     const stripe = useStripe();
     const elements = useElements();
     const baseAmount = parseFloat(formData.amount) || 0;
-    const [currentAmount, setCurrentAmount] = useState<number>(baseAmount);
+    const currentAmount = calculateChargeAmount(baseAmount, formData.coverFees);
     const [cardError, setCardError] = useState<string | null>(null);
 
     useImperativeHandle(ref, () => ({
@@ -168,8 +172,9 @@ export const Step2Details = forwardRef<Step2DetailsRef, Step2DetailsProps>(
         </div>
 
         <DonationSummary
-          setCurrentAmount={setCurrentAmount}
           baseAmount={baseAmount}
+          coverFees={formData.coverFees}
+          onCoverFeesChange={onCoverFeesChange}
         />
       </div>
     );

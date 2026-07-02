@@ -1,97 +1,93 @@
 /** @vitest-environment jsdom */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
-import { DonationSummary } from './DonationSummary';
-import { DONATION_FEE_RATE, DONATION_FIXED_FEE } from './DonationSummary';
+import {
+  DonationSummary,
+  calculateFeeTotal,
+  calculateChargeAmount,
+  DONATION_FEE_RATE,
+  DONATION_FIXED_FEE,
+} from './DonationSummary';
 
-describe('DonationSummary Component', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+describe('fee calculations', () => {
+  it('grosses up so the org nets the base after Stripe takes its cut', () => {
+    const base = 50;
+    const charged = base + calculateFeeTotal(base);
+    const net =
+      charged - (charged * DONATION_FEE_RATE) / 100 - DONATION_FIXED_FEE;
+    expect(net).toBeCloseTo(base, 5);
   });
 
+  it('supports custom rate/fixed fee', () => {
+    const base = 40;
+    const charged = base + calculateFeeTotal(base, 5, 1);
+    const net = charged - (charged * 5) / 100 - 1;
+    expect(net).toBeCloseTo(base, 5);
+  });
+
+  it('returns a zero fee for non-positive base amounts', () => {
+    expect(calculateFeeTotal(0)).toBe(0);
+    expect(calculateFeeTotal(-5)).toBe(0);
+  });
+
+  it('calculateChargeAmount returns the base when coverFees is off', () => {
+    expect(calculateChargeAmount(50, false)).toBe(50);
+    expect(calculateChargeAmount(0, true)).toBe(0);
+  });
+
+  it('calculateChargeAmount adds the fee (rounded to cents) when coverFees is on', () => {
+    const expected = Math.round((50 + calculateFeeTotal(50)) * 100) / 100;
+    const charge = calculateChargeAmount(50, true);
+    expect(charge).toBe(expected);
+    expect(charge).toBeGreaterThan(50);
+    // rounded to whole cents
+    expect(Math.round(charge * 100)).toBe(charge * 100);
+  });
+});
+
+describe('DonationSummary Component', () => {
   afterEach(() => {
     cleanup();
   });
 
-  // unit tests for fee calculation
-
-  // fee calculation with default values
-  it('calculates the fee with default values', () => {
-    const baseAmount = Math.random() * 10;
-    const feeTotal = (
-      (baseAmount * DONATION_FEE_RATE) / 100 +
-      DONATION_FIXED_FEE
-    ).toFixed(2);
-    render(<DonationSummary baseAmount={baseAmount} />);
-    expect(
-      screen.queryByText(
-        new RegExp(
-          `Add \\$${feeTotal} to cover transaction fees and tip the fundraising platform to help keep it`,
-        ),
-      ),
-    ).not.toBeNull();
-  });
-
-  // fee calculation with custom values
-  it('calculates the fee with default values', () => {
-    const baseAmount = Math.random() * 10;
-    const feeRate = Math.random() * 10;
-    const fixedFee = Math.random() * 10;
-    const feeTotal = ((baseAmount * feeRate) / 100 + fixedFee).toFixed(2);
+  it('renders the gross-up fee amount in the prompt', () => {
+    const base = 50;
+    const feeTotal = calculateFeeTotal(base).toFixed(2);
     render(
       <DonationSummary
-        baseAmount={baseAmount}
-        feeRate={feeRate}
-        fixedFee={fixedFee}
+        baseAmount={base}
+        coverFees={false}
+        onCoverFeesChange={vi.fn()}
       />,
     );
     expect(
       screen.queryByText(
-        new RegExp(
-          `Add \\$${feeTotal} to cover transaction fees and tip the fundraising platform to help keep it`,
-        ),
+        new RegExp(`Add \\$${feeTotal} to cover transaction fees`),
       ),
     ).not.toBeNull();
   });
 
-  // donation total calculation does not include fee when initially rendered
-  it('calculates total donation amount without fee when initially rendered', async () => {
-    const baseAmount = Math.random() * 10;
+  it('is controlled: toggling emits the negated coverFees value', () => {
+    const onCoverFeesChange = vi.fn();
 
-    // initial rendering does not include fee in total donation calculation
-    render(<DonationSummary baseAmount={baseAmount} />);
-    expect(
-      screen
-        .getByTestId('donation-total')
-        .textContent?.includes(baseAmount.toFixed(2)),
-    ).toBeTruthy();
-  });
+    const { rerender } = render(
+      <DonationSummary
+        baseAmount={50}
+        coverFees={false}
+        onCoverFeesChange={onCoverFeesChange}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('fee-toggle'));
+    expect(onCoverFeesChange).toHaveBeenCalledWith(true);
 
-  // donation total calculation includes fee when toggle activated
-  it('calculates total donation amount with fee when toggle activated', async () => {
-    const baseAmount = Math.random() * 10;
-    const feeTotal =
-      (baseAmount * DONATION_FEE_RATE) / 100 + DONATION_FIXED_FEE;
-    render(<DonationSummary baseAmount={baseAmount} />);
-
-    // activate fee toggle
-    const feeToggle = screen.getAllByTestId('fee-toggle');
-    fireEvent.click(feeToggle[0]);
-
-    // donation total calculation should include fee
-    expect(
-      screen
-        .getByTestId('donation-total')
-        .textContent?.includes((baseAmount + feeTotal).toFixed(2)),
-    ).toBeTruthy();
-
-    fireEvent.click(feeToggle[0]);
-
-    // donation total calculation should not include fee
-    expect(
-      screen
-        .getByTestId('donation-total')
-        .textContent?.includes(baseAmount.toFixed(2)),
-    ).toBeTruthy();
+    rerender(
+      <DonationSummary
+        baseAmount={50}
+        coverFees={true}
+        onCoverFeesChange={onCoverFeesChange}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('fee-toggle'));
+    expect(onCoverFeesChange).toHaveBeenCalledWith(false);
   });
 });

@@ -17,6 +17,7 @@ import { Step2Details } from './steps/Step2Details';
 import { Step3Confirm } from './steps/Step3Confirm';
 import { Step4Receipt } from './steps/Step4Receipt';
 import { StripeProvider } from './StripeProvider';
+import { calculateChargeAmount } from './DonationSummary';
 import { Button } from '@components/ui/button';
 
 export const DonationForm: React.FC<DonationFormProps> = ({
@@ -219,6 +220,10 @@ export const DonationForm: React.FC<DonationFormProps> = ({
     setCurrentStep(1);
   };
 
+  const handleCoverFeesChange = (value: boolean) => {
+    setFormData((prev) => ({ ...prev, coverFees: value }));
+  };
+
   const handleBeforePayment = async (
     paymentIntentId: string,
     subscriptionInfo?: {
@@ -230,7 +235,10 @@ export const DonationForm: React.FC<DonationFormProps> = ({
       firstName: formData.firstName.trim(),
       lastName: formData.lastName.trim(),
       email: formData.email.trim(),
-      amount: parseFloat(formData.amount),
+      amount: calculateChargeAmount(
+        parseFloat(formData.amount) || 0,
+        formData.coverFees,
+      ),
       isAnonymous: formData.isAnonymous,
       donationType: formData.donationType,
       dedicationMessage: formData.dedicationMessage,
@@ -278,6 +286,7 @@ export const DonationForm: React.FC<DonationFormProps> = ({
               errors={errors}
               isSubmitting={isSubmitting}
               onChange={handleInputChange}
+              onCoverFeesChange={handleCoverFeesChange}
             />
           </StripeProvider>
         );

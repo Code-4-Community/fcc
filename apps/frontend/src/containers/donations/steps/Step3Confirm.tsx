@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useStripe } from '@stripe/react-stripe-js';
 import type { DonationFormData } from '../donation-form.types';
 import apiClient from '../../../api/apiClient';
+import { calculateChargeAmount } from '../DonationSummary';
 import { Card } from '@components/ui/card';
 
 export interface SubscriptionInfo {
@@ -36,7 +37,10 @@ export const Step3Confirm: React.FC<Step3ConfirmProps> = ({
   const stripe = useStripe();
   const [error, setError] = useState<string | null>(null);
 
-  const amount = parseFloat(formData.amount) || 0;
+  const amount = calculateChargeAmount(
+    parseFloat(formData.amount) || 0,
+    formData.coverFees,
+  );
 
   const handleConfirmPayment = useCallback(async () => {
     if (!stripe) {
