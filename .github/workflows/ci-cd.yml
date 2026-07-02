@@ -88,27 +88,4 @@ jobs:
         env:
           C4C_OPS_WEBHOOK_DEPLOY: ${{ secrets.C4C_OPS_WEBHOOK_DEPLOY }}
 
-  deploy-backend:
-    needs: pre-deploy
-    if: (contains(github.event.inputs.manual-deploy, 'backend') || contains(needs.pre-deploy.outputs.affected, 'backend')) && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js 16
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20.x
-          cache: 'yarn'
 
-      - name: Install Dependencies
-        run: yarn install
-
-      - run: npx nx build backend --configuration production
-      - name: default deploy
-        uses: appleboy/lambda-action@master
-        with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_region: ${{ secrets.AWS_REGION }}
-          function_name: c4c-ops-monolith-lambda
-          source: dist/apps/backend/main.js
