@@ -15,6 +15,7 @@ import { AddEmailSubscribers1778800000002 } from './migrations/1778800000002-add
 import { AddGoals1780531200000 } from './migrations/1780531200000-add_goals';
 import { UserRefactoringId1780931163251 } from './migrations/1780931163251-user-refactoring-id';
 import { RenameGoalColumns1781161660000 } from './migrations/1781161660-rename-goal-columns';
+import { AddStripeSubscriptionFields1781200000000 } from './migrations/1781200000000-add-stripe-subscription-fields';
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ const AppDataSource = new DataSource({
     AddGoals1780531200000,
     UserRefactoringId1780931163251,
     RenameGoalColumns1781161660000,
+    AddStripeSubscriptionFields1781200000000,
   ],
   migrationsRun: true,
   synchronize: false,
