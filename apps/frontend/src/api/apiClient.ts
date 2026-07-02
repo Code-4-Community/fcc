@@ -13,6 +13,8 @@ export type DonationCreateRequest = {
   showDedicationPublicly: boolean;
   recurringInterval?: 'weekly' | 'monthly' | 'annually';
   paymentIntentId?: string;
+  stripeSubscriptionId?: string;
+  stripeCustomerId?: string;
 };
 
 export type CreateDonationResponse = { id: string };
@@ -135,6 +137,25 @@ export type PaymentIntentResponse = {
   status: string;
 };
 
+export type CreateSubscriptionRequest = {
+  amount: number; // in cents
+  currency: string;
+  interval: 'weekly' | 'monthly' | 'bimonthly' | 'quarterly' | 'annually';
+  email: string;
+  name: string;
+  metadata?: Record<string, string>;
+};
+
+export type SubscriptionResponse = {
+  id: string; // first PaymentIntent id (used as the donation transactionId)
+  clientSecret: string;
+  subscriptionId: string;
+  customerId: string;
+  status: string;
+  amount: number;
+  currency: string;
+};
+
 export type SignInRequest = { email: string; password: string };
 
 export type SignUpRequest = {
@@ -188,6 +209,29 @@ export class ApiClient {
         throw new Error(msg);
       }
       throw new Error('Failed to create payment intent');
+    }
+  }
+
+  public async createSubscription(
+    body: CreateSubscriptionRequest,
+  ): Promise<SubscriptionResponse> {
+    try {
+      const res = await this.axiosInstance.post(
+        '/api/payments/subscription',
+        body,
+      );
+      return res.data as SubscriptionResponse;
+    } catch (err: unknown) {
+      if (axios.isAxiosError<ApiError>(err)) {
+        const data = err.response?.data;
+        const msg =
+          data?.error ??
+          data?.message ??
+          err.message ??
+          'Failed to create subscription';
+        throw new Error(msg);
+      }
+      throw new Error('Failed to create subscription');
     }
   }
 

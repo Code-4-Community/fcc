@@ -221,6 +221,10 @@ export const DonationForm: React.FC<DonationFormProps> = ({
 
   const handleBeforePayment = async (
     paymentIntentId: string,
+    subscriptionInfo?: {
+      stripeSubscriptionId: string;
+      stripeCustomerId: string;
+    },
   ): Promise<string> => {
     const payload: CreateDonationRequest = {
       firstName: formData.firstName.trim(),
@@ -234,6 +238,10 @@ export const DonationForm: React.FC<DonationFormProps> = ({
       paymentIntentId,
       ...(formData.donationType === 'recurring' && {
         recurringInterval: formData.recurringInterval,
+      }),
+      ...(subscriptionInfo && {
+        stripeSubscriptionId: subscriptionInfo.stripeSubscriptionId,
+        stripeCustomerId: subscriptionInfo.stripeCustomerId,
       }),
     };
 
