@@ -254,4 +254,51 @@ export class EmailsService {
       throw error;
     }
   }
+
+  /**
+   * Syncs the mailing list subscribers with a provided exact list of emails.
+   */
+  public async syncSubscribers(emails: string[]): Promise<void> {
+    const trimmedEmails = [
+      ...new Set(emails.map((e) => e.trim().toLowerCase()).filter((e) => e)),
+    ];
+
+    if (trimmedEmails.length > 0) {
+      await this.emailSubscriberRepository
+        .createQueryBuilder()
+        .update(EmailSubscriber)
+        .set({ isSubscribed: false, unsubscribedAt: new Date() })
+        .where('email NOT IN (:...emails)', { emails: trimmedEmails })
+        .andWhere('isSubscribed = true')
+        .execute();
+    } else {
+      await this.emailSubscriberRepository
+        .createQueryBuilder()
+        .update(EmailSubscriber)
+        .set({ isSubscribed: false, unsubscribedAt: new Date() })
+        .where('isSubscribed = true')
+        .execute();
+    }
+
+    for (const email of trimmedEmails) {
+      let subscriber = await this.emailSubscriberRepository.findOne({
+        where: { email },
+      });
+      if (!subscriber) {
+        subscriber = this.emailSubscriberRepository.create({
+          email,
+          isSubscribed: true,
+          unsubscribedAt: null,
+        });
+      } else {
+        subscriber.isSubscribed = true;
+        subscriber.unsubscribedAt = null;
+      }
+      await this.emailSubscriberRepository.save(subscriber);
+    }
+
+    this.logger.log(
+      `Synced subscribers, total active now: ${trimmedEmails.length}`,
+    );
+  }
 }

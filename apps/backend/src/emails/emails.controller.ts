@@ -2,6 +2,8 @@ import {
   Controller,
   Post,
   Get,
+  Delete,
+  Param,
   Body,
   UseGuards,
   BadRequestException,
@@ -43,6 +45,25 @@ export class EmailsController {
   async getSubscribers() {
     const emails = await this.emailService.getSubscribers();
     return { emails, count: emails.length };
+  }
+
+  @Post('subscribers/sync')
+  @UseGuards(AuthGuard('jwt'))
+  async syncSubscribers(@Body() body: { emails: string[] }) {
+    await this.emailService.syncSubscribers(body.emails || []);
+    return { message: 'Subscribers synced successfully' };
+  }
+
+  @Delete('subscribers/:email')
+  @UseGuards(AuthGuard('jwt'))
+  async removeSubscriber(@Param('email') email: string) {
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
+    // Using unsubscribe logic to mark as unsubscribed instead of hard delete
+    // so they are properly filtered out of relapsed emails too.
+    await this.emailService.unsubscribe(email);
+    return { message: 'Subscriber removed successfully' };
   }
 
   @Post('template')

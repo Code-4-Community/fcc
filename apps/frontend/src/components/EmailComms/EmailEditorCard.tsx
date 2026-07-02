@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import SignatureEditorCard from './SignatureEditorCard';
 import { Label } from '../ui/label';
+import MailingListManager from './MailingListManager';
 
 type EmailEditorCardProps = {
   activeTab: TabId;
@@ -86,18 +87,22 @@ export default function EmailEditorCard({
       <div className="flex items-center gap-3 pt-1">
         <Button
           onClick={onSave}
-          className={`px-6 py-2 h-[38px] rounded-md text-white bg-[#007B64] font-medium text-sm transition-all`}
+          className="px-6 py-2 h-[38px] rounded-md text-white bg-[#007B64] font-medium text-sm transition-all"
         >
           {saved ? 'Saved' : 'Save Changes'}
         </Button>
 
-        <Button
-          onClick={onSend}
-          className="px-6 py-2 h-[38px] rounded-md font-medium text-sm bg-[#737373] text-white transition-all"
-        >
-          {sent ? 'Sent!' : 'Send Email'}
-        </Button>
+        {activeTab !== 'donation' && (
+          <Button
+            onClick={onSend}
+            className="px-6 py-2 h-[38px] rounded-md font-medium text-sm bg-[#737373] text-white transition-all"
+          >
+            {sent ? 'Sent!' : 'Send Email'}
+          </Button>
+        )}
       </div>
+
+      <MailingListManager activeTab={activeTab} />
     </div>
   );
 }

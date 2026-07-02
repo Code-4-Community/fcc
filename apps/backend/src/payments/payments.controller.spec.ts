@@ -62,6 +62,7 @@ describe('PaymentsControler', () => {
     retrievePaymentIntent: jest.fn(),
     constructWebhookEvent: jest.fn(),
     mapPaymentIntentToResponse: jest.fn(),
+    getExactFeeForPaymentIntent: jest.fn(),
   };
   const mockDonationsService = {
     syncPaymentIntentStatus: jest.fn(),
@@ -194,6 +195,7 @@ describe('PaymentsControler', () => {
       mockService.mapPaymentIntentToResponse.mockReturnValue(
         paymentIntentResponse,
       );
+      mockService.getExactFeeForPaymentIntent.mockResolvedValue(150);
 
       const req = {
         rawBody: Buffer.from('payload'),
@@ -211,6 +213,7 @@ describe('PaymentsControler', () => {
           donationId: undefined,
           transactionId: 'pi_webhook_123',
           status: DonationStatus.SUCCEEDED,
+          feeAmount: 150,
         },
       );
     });

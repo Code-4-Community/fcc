@@ -41,11 +41,6 @@ export default function SignatureEditor({
           'https://www.facebook.com/fenwaycommunitycenter',
         )}
       </div>
-      {field(
-        'Image Upload (CDN URL placeholder)',
-        'imageUrl',
-        'https://example.com/image.png',
-      )}
     </div>
   );
 }

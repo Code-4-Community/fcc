@@ -1,5 +1,6 @@
 import { useAuth } from '../../../components/AuthProvider';
 import { getDisplayName } from '../../../utils/user';
+import fccLogo from '../../../assets/fcc-logo.png';
 
 type HeaderProps = {
   title?: string;
@@ -38,7 +39,11 @@ export default function Header({
       </h1>
 
       <div className="flex items-center rounded-md border border-neutral-200 bg-neutral-50 px-3 py-[7.5px]">
-        <div className="h-11 w-11 shrink-0 rounded-full bg-emerald-700" />
+        <img
+          src={fccLogo}
+          alt="FCC Logo"
+          className="h-11 w-11 shrink-0 object-contain"
+        />
 
         <div className="ml-3 flex flex-col">
           <span className="font-['Source_Sans_Pro'] text-[16px] font-semibold leading-7 text-neutral-900">

@@ -60,9 +60,9 @@ describe('Donations (e2e) - expanded stubs', () => {
           // Prefer running migrations in tests for parity; set migrationsRun to true
           // if you keep migrations up-to-date. If you want schema auto-sync for
           // a test DB, set `synchronize: true` manually here.
-          synchronize: false,
+          synchronize: true,
           dropSchema: true,
-          migrationsRun: true,
+          migrationsRun: false,
           migrations: [__dirname + '/../src/migrations/*{.ts,.js}'],
           logging: false,
         }),

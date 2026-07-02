@@ -10,6 +10,7 @@ import {
   buildSignatureHTML,
 } from './types';
 import apiClient from '../../api/apiClient';
+import { ConfirmationModal } from '../ConfirmationModal';
 
 export function EmailEditor() {
   const [activeTab, setActiveTab] = useState<TabId>('donation');
@@ -35,6 +36,8 @@ export function EmailEditor() {
   });
   const [saved, setSaved] = useState(false);
   const [sent, setSent] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     const loadTemplates = async () => {
@@ -110,14 +113,106 @@ export function EmailEditor() {
     const email = emails[activeTab];
     const m = meta[activeTab];
     const metadata = { sig: m.sig, ctaText: m.ctaText, ctaLink: m.ctaLink };
-    return `<!-- FCC_META:${JSON.stringify(metadata)} -->
-<html><body>
-  <!-- FCC_BODY_START -->
-  ${email.body}
-  <!-- FCC_BODY_END -->
-  ${buildSignatureHTML(m.sig)}
-  ${m.ctaText ? `<div style="text-align:center;margin:28px 0"><a href="${m.ctaLink}" style="background:#059669;color:white;padding:14px 32px;border-radius:8px;font-weight:700;text-decoration:none;font-size:14px;letter-spacing:0.05em">${m.ctaText}</a></div>` : ''}
-</body></html>`;
+    const origin =
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : 'https://fenwaycommunitycenter.org';
+    const isLocal =
+      origin.includes('localhost') || origin.includes('127.0.0.1');
+    const headerUrl = isLocal
+      ? 'https://files.catbox.moe/008bok.png'
+      : `${origin}/FCCEmailHeader.png`;
+    const bgUrl = isLocal
+      ? 'https://files.catbox.moe/11ird9.png'
+      : `${origin}/FCCEmailBg.png`;
+
+    return `<!DOCTYPE html>
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <!-- FCC_META:${JSON.stringify(metadata)} -->
+  <style>
+    .email-body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif; color: #334155; line-height: 1.75; font-size: 14px; }
+    .email-body p { margin-top: 1.25em; margin-bottom: 1.25em; }
+    .email-body h1 { font-size: 2.25em; margin-top: 0; margin-bottom: 0.8888889em; line-height: 1.1111111; font-weight: 800; color: #111827; }
+    .email-body h2 { font-size: 1.5em; margin-top: 2em; margin-bottom: 1em; line-height: 1.3333333; font-weight: 700; color: #111827; }
+    .email-body h3 { font-size: 1.25em; margin-top: 1.6em; margin-bottom: 0.6em; line-height: 1.6; font-weight: 600; color: #111827; }
+    .email-body ul { margin-top: 1.25em; margin-bottom: 1.25em; padding-left: 1.625em; list-style-type: disc; }
+    .email-body ol { margin-top: 1.25em; margin-bottom: 1.25em; padding-left: 1.625em; list-style-type: decimal; }
+    .email-body li { margin-top: 0.5em; margin-bottom: 0.5em; }
+    .email-body a { color: #2A9D90; text-decoration: underline; font-weight: 500; }
+    .email-body strong { font-weight: 600; color: #111827; }
+    .email-body blockquote { font-weight: 500; font-style: italic; color: #111827; border-left-width: 0.25rem; border-left-color: #e2e8f0; margin-top: 1.6em; margin-bottom: 1.6em; padding-left: 1em; }
+    .email-body mark { background-color: #fef08a; color: inherit; }
+  </style>
+  <!--[if mso]>
+  <style type="text/css">
+    table {border-collapse:collapse;}
+    .email-body {font-family: Arial, sans-serif;}
+  </style>
+  <![endif]-->
+</head>
+<body style="margin: 0; padding: 0; background-color: #f3f4f6; -webkit-font-smoothing: antialiased;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f3f4f6; width: 100%;">
+    <tr>
+      <td align="center" style="padding: 24px 0;">
+        <table class="main-container" width="600" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; margin: 0 auto;">
+          <!-- Header -->
+          <tr>
+            <td>
+              <img src="${headerUrl}" alt="Header" width="600" style="width: 100%; max-width: 600px; display: block; border: 0;" />
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding: 24px 32px; min-height: 300px;">
+              <div class="email-body">
+                <!-- FCC_BODY_START -->
+                ${email.body}
+                <!-- FCC_BODY_END -->
+              </div>
+            </td>
+          </tr>
+          <!-- CTA -->
+          ${
+            m.ctaText
+              ? `
+          <tr>
+            <td align="center" style="padding-bottom: 48px;">
+              <a href="${m.ctaLink}" style="display: inline-block; background-color: #2A9D90; color: #ffffff; padding: 16px 24px; border-radius: 6px; font-weight: bold; text-decoration: none; font-size: 14px; font-family: Arial, sans-serif;">
+                ${m.ctaText}
+              </a>
+            </td>
+          </tr>`
+              : ''
+          }
+          <!-- Footer with Background -->
+          <tr>
+            <td background="${bgUrl}" bgcolor="#e2e8f0" valign="middle" style="background: url('${bgUrl}') no-repeat center center / cover; background-size: cover; height: 180px;">
+              <!--[if gte mso 9]>
+              <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:600px;height:180px;">
+                <v:fill type="tile" src="${bgUrl}" color="#e2e8f0" />
+                <v:textbox inset="0,0,0,0">
+              <![endif]-->
+              <div style="padding: 0 32px; width: 100%; box-sizing: border-box;">
+                ${buildSignatureHTML(m.sig)}
+              </div>
+              <!--[if gte mso 9]>
+                </v:textbox>
+              </v:rect>
+              <![endif]-->
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
   };
 
   const handleSave = async () => {
@@ -152,7 +247,16 @@ export function EmailEditor() {
     }
   };
 
-  const handleSend = async () => {
+  const handleSendClick = () => {
+    if (activeTab === 'donation') {
+      alert('Use "Save Changes" for Donation Response emails');
+      return;
+    }
+    setShowConfirmModal(true);
+  };
+
+  const executeSend = async () => {
+    setIsSending(true);
     try {
       const email = emails[activeTab];
       const fullHTML = buildFullHTML();
@@ -163,7 +267,7 @@ export function EmailEditor() {
       } else if (activeTab === 'mass') {
         targetGroup = 'email_subscribers';
       } else {
-        alert('Use "Save Changes" for Donation Response emails');
+        setIsSending(false);
         return;
       }
 
@@ -174,6 +278,7 @@ export function EmailEditor() {
       });
 
       console.log('[EmailEditorOverviewPage] Bulk email sent:', result);
+      setShowConfirmModal(false);
       alert(`Successfully sent ${result.sent} emails to ${result.targetGroup}`);
 
       setSent(true);
@@ -183,6 +288,8 @@ export function EmailEditor() {
       alert(
         `Failed to send: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -234,7 +341,7 @@ export function EmailEditor() {
             saved={saved}
             sent={sent}
             onSave={handleSave}
-            onSend={handleSend}
+            onSend={handleSendClick}
           />
         </div>
 
@@ -248,6 +355,19 @@ export function EmailEditor() {
           />
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={executeSend}
+        title="Confirm Send"
+        heading={`Send ${activeTab === 'relapsed' ? 'Relapsed Donor' : 'Mass'} Email?`}
+        description={`Are you sure you want to send this email to the ${activeTab === 'relapsed' ? 'Relapsed Donors' : 'Mass Email Subscribers'} list? This action cannot be undone.`}
+        confirmText="Send Email"
+        cancelText="Cancel"
+        confirmVariant="success"
+        isConfirming={isSending}
+      />
     </div>
   );
 }

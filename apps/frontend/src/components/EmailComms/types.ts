@@ -10,7 +10,6 @@ export type Signature = {
   linkedin: string;
   X: string;
   facebook: string;
-  imageUrl: string;
 };
 
 export type EmailData = {
@@ -67,7 +66,6 @@ export const DEFAULT_SIGNATURE: Signature = {
   linkedin: 'https://www.linkedin.com/company/fenwaycommunitycenter',
   X: '',
   facebook: 'https://www.facebook.com/fenwaycommunitycenter',
-  imageUrl: '',
 };
 
 export const TAB_CONFIG: { id: TabId; label: string }[] = [
@@ -77,42 +75,42 @@ export const TAB_CONFIG: { id: TabId; label: string }[] = [
 ];
 
 export function buildSignatureHTML(sig: Signature): string {
+  const origin =
+    typeof window !== 'undefined'
+      ? window.location.origin
+      : 'https://fenwaycommunitycenter.org';
+  const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1');
+  const fbUrl = isLocal
+    ? 'https://files.catbox.moe/fuxnuq.png'
+    : `${origin}/facebook.png`;
+  const xUrl = isLocal
+    ? 'https://files.catbox.moe/yljj1o.png'
+    : `${origin}/x.png`;
+  const linkedinUrl = isLocal
+    ? 'https://files.catbox.moe/gmuylj.png'
+    : `${origin}/linkedin.png`;
+
   const socialHTML = [
     sig.facebook
-      ? `<a href="${sig.facebook}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;justify-content:center;width:clamp(14px, 2vw, 20px);height:clamp(14px, 2vw, 20px);border-radius:50%;background:#1877F2;margin-right:4px;text-decoration:none;">
-          <svg style="width:clamp(9px, 1.4vw, 14px);height:clamp(9px, 1.4vw, 14px);" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+      ? `<a href="${sig.facebook}" target="_blank" rel="noreferrer" style="display:inline-block;margin-right:4px;text-decoration:none;">
+          <img src="${fbUrl}" width="20" height="20" alt="Facebook" style="display:block;border:0;border-radius:50%;">
          </a>`
       : '',
     sig.X
-      ? `<a href="${sig.X}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;justify-content:center;width:clamp(14px, 2vw, 20px);height:clamp(14px, 2vw, 20px);border-radius:50%;background:#000;margin-right:4px;text-decoration:none;">
-          <svg style="width:clamp(8px, 1.3vw, 12px);height:clamp(8px, 1.3vw, 12px);" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      ? `<a href="${sig.X}" target="_blank" rel="noreferrer" style="display:inline-block;margin-right:4px;text-decoration:none;">
+          <img src="${xUrl}" width="20" height="20" alt="X" style="display:block;border:0;border-radius:50%;">
          </a>`
       : '',
     sig.linkedin
-      ? `<a href="${sig.linkedin}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;justify-content:center;width:clamp(14px, 2vw, 20px);height:clamp(14px, 2vw, 20px);border-radius:50%;background:#0A66C2;text-decoration:none;">
-          <svg style="width:clamp(9px, 1.4vw, 14px);height:clamp(9px, 1.4vw, 14px);" viewBox="0 0 24 24" fill="white"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+      ? `<a href="${sig.linkedin}" target="_blank" rel="noreferrer" style="display:inline-block;text-decoration:none;">
+          <img src="${linkedinUrl}" width="20" height="20" alt="LinkedIn" style="display:block;border:0;border-radius:50%;">
          </a>`
       : '',
   ].join('');
 
-  // Only render the photo when an https-hosted image is provided. Local/bundled
-  // assets won't load in a recipient's inbox, so the signature must reference a
-  // remote URL (CDN/S3); otherwise the photo cell is omitted entirely.
-  const hasImage = /^https:\/\//i.test(sig.imageUrl);
-
   return `
     <table cellpadding="0" cellspacing="0" border="0" style="width:100%;font-family:Arial,sans-serif;max-width:100%;table-layout:fixed;">
       <tr>
-        ${
-          hasImage
-            ? `<!-- Photo -->
-        <td style="vertical-align:middle;width:clamp(45px, 6vw, 65px);padding-right:clamp(6px, 1vw, 12px);">
-          <img src="${sig.imageUrl}" alt="${sig.name}"
-            style="width:clamp(40px, 5vw, 60px);height:clamp(40px, 5vw, 60px);border-radius:50%;object-fit:cover;object-position:top;border:2px solid white;display:block;" />
-        </td>`
-            : ''
-        }
-
         <!-- Name / Title / Pronouns -->
         <td style="vertical-align:middle;overflow:hidden;">
           <p style="margin:0 0 1px;font-size:clamp(12px, 2vw, 16px);font-weight:800;color:#1a1a1a;letter-spacing:-0.2px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sig.name}</p>

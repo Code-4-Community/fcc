@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   DonationType,
   RecurringInterval,
@@ -95,4 +95,9 @@ export class DonationResponseDto {
     required: false,
   })
   transactionId?: string;
+  @ApiPropertyOptional({
+    description: 'The exact processing fee from Stripe in cents, if known',
+    example: 110,
+  })
+  feeAmount?: number;
 }

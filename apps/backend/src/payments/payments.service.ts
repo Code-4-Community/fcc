@@ -360,6 +360,39 @@ export class PaymentsService {
   }
 
   /**
+   * Retrieves the exact processing fee for a successful payment intent
+   * by expanding the balance transaction from its latest charge.
+   *
+   * @param paymentIntentId the payment intent ID
+   * @returns the fee amount in cents, or undefined if not found
+   */
+  async getExactFeeForPaymentIntent(
+    paymentIntentId: string,
+  ): Promise<number | undefined> {
+    try {
+      const intent = await this.stripe.paymentIntents.retrieve(
+        paymentIntentId,
+        {
+          expand: ['latest_charge.balance_transaction'],
+        },
+      );
+
+      const charge = intent.latest_charge as Stripe.Charge;
+      if (charge && charge.balance_transaction) {
+        const balanceTx =
+          charge.balance_transaction as Stripe.BalanceTransaction;
+        return balanceTx.fee;
+      }
+      return undefined;
+    } catch (err) {
+      this.logger.error(
+        `Error retrieving exact fee for payment intent ${paymentIntentId}: ${err.message}`,
+      );
+      return undefined;
+    }
+  }
+
+  /**
    * Maps Stripe API payment Intent to response returned by service methods for a payment intent
    *
    * @param paymentIntent the payment intent object returned directly by the stripe api
