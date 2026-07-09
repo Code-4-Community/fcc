@@ -22,7 +22,13 @@ import DashboardOverview from '@containers/dashboard/sidebar/DashboardOverview';
 import DonationTrackerPage from '@containers/dashboard/donations/DonationTrackerPage';
 import { EmailEditor } from './components/EmailComms/EmailEditorOverviewPage';
 import { AdminGrowingGoalTester } from '@containers/dashboard/AdminGrowingGoalTester';
+import ExportModalTester from '@components/DonationModals/ExportModalTester';
+import { DonationInformationModalTester } from '@components/DonationModals/DonationInformationModalTester';
+import { NewDonationModalTester } from '@components/DonationModals/NewDonationModalTester';
+import { SortingModalTester } from '@components/DonationModals/SortingModalTester';
 import OverviewPage from '@containers/dashboard/OverviewPage';
+import EditDonationGoalTester from '@components/DonationGoal/EditDonationGoalTester';
+import Sidebar from '@containers/dashboard/sidebar/Sidebar';
 import { UserManagement } from '@containers/dashboard/UserManagement';
 import Settings from '@containers/dashboard/Settings';
 import Root from './containers/root';
@@ -86,6 +92,22 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: '/sidebar-test',
+    element: <Sidebar />,
+  },
+  {
+    path: '/export-modal-test',
+    element: <ExportModalTester />,
+  },
+  {
+    path: '/donation-information-modal-test',
+    element: <DonationInformationModalTester />,
+  },
+  {
+    path: '/edit-donation-goal-test',
+    element: <EditDonationGoalTester />,
+  },
+  {
     path: '/test',
     element: <TestimonialTester />,
   },
@@ -96,6 +118,14 @@ const router = createBrowserRouter([
   {
     path: '/admin-growing-goal-test',
     element: <AdminGrowingGoalTester />,
+  },
+  {
+    path: '/new-donation-modal-test',
+    element: <NewDonationModalTester />,
+  },
+  {
+    path: '/sorting-modal-test',
+    element: <SortingModalTester />,
   },
   {
     path: '/chart',
